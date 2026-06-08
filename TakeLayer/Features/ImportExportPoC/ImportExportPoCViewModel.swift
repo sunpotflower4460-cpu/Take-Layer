@@ -67,6 +67,19 @@ final class ImportExportPoCViewModel: ObservableObject {
         }
     }
 
+    func useRecordedTake(_ take: RecordedTake) {
+        errorMessage = nil
+        guard let video = take.importedVideo else {
+            errorMessage = "録画動画のdurationを読み取れませんでした。"
+            return
+        }
+        project.importedVideo = video
+        videoPreviewTimeSec = 0
+        project.songStartRawSec = nil
+        project.selectedRawStartSec = nil
+        project.selectedRawEndSec = nil
+    }
+
     func importMasterAudio(from pickedURL: URL) {
         isImportingAudio = true
         errorMessage = nil

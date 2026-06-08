@@ -50,6 +50,21 @@ enum MediaInfoReader {
         )
     }
 
+    static func readRecordedTake(from url: URL, createdAt: Date = Date()) async throws -> RecordedTake {
+        let video = try await readVideo(from: url)
+        return RecordedTake(
+            url: url,
+            createdAt: createdAt,
+            durationSec: video.durationSec,
+            width: video.width,
+            height: video.height,
+            orientation: video.orientation,
+            fileType: video.fileType,
+            hasAudio: video.hasAudio,
+            fileSizeBytes: video.fileSizeBytes
+        )
+    }
+
     static func readMasterAudio(from url: URL) async throws -> ImportedMasterAudio {
         let asset = AVURLAsset(url: url)
         let duration = try await asset.load(.duration)
