@@ -6,6 +6,7 @@ struct ImportExportPoCView: View {
     @StateObject private var viewModel = ImportExportPoCViewModel()
     @State private var isVideoImporterPresented = false
     @State private var isAudioImporterPresented = false
+    @State private var isRecordingPresented = false
 
     private let wavType = UTType(filenameExtension: "wav") ?? .audio
 
@@ -17,7 +18,8 @@ struct ImportExportPoCView: View {
                     VideoImportView(
                         video: viewModel.project.importedVideo,
                         isImporting: viewModel.isImportingVideo,
-                        onImport: { isVideoImporterPresented = true }
+                        onImport: { isVideoImporterPresented = true },
+                        onRecord: { isRecordingPresented = true }
                     )
                     AudioImportView(
                         audio: viewModel.project.importedMasterAudio,
@@ -81,6 +83,9 @@ struct ImportExportPoCView: View {
             ) { result in
                 handleFileImport(result, importAction: viewModel.importMasterAudio)
             }
+            .sheet(isPresented: $isRecordingPresented) {
+                RecordingView(onUseTake: viewModel.useRecordedTake)
+            }
         }
     }
 
@@ -112,14 +117,26 @@ struct VideoImportView: View {
     let video: ImportedVideo?
     let isImporting: Bool
     let onImport: () -> Void
+    let onRecord: () -> Void
 
     var body: some View {
-        SectionCard(title: "1. Import Video") {
-            Button(isImporting ? "Importing..." : "動画をインポート") {
-                onImport()
+        SectionCard(title: "1. Video Source") {
+            HStack {
+                Button(isImporting ? "Importing..." : "Import Video") {
+                    onImport()
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(isImporting)
+
+                Button("Record New Take") {
+                    onRecord()
+                }
+                .buttonStyle(.bordered)
             }
-            .buttonStyle(.borderedProminent)
-            .disabled(isImporting)
+
+            Text("カメラロールから選ぶか、TakeLayer内で新規録画します。どちらも後から songStartRawSec を手動指定します。")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
 
             if let video {
                 MediaInfoGrid(rows: [
