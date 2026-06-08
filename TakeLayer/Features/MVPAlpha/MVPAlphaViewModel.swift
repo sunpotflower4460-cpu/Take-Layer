@@ -3,8 +3,8 @@ import Combine
 import Foundation
 
 @MainActor
-final class ImportExportPoCViewModel: ObservableObject {
-    @Published var project = ProjectDraft()
+final class MVPAlphaViewModel: ObservableObject {
+    @Published var project = ProjectDraft(title: "New TakeLayer Project")
     @Published var videoPreviewTimeSec: Double = 0
     @Published var audioPreviewTimeSec: Double = 0
     @Published var isImportingVideo = false
@@ -13,14 +13,12 @@ final class ImportExportPoCViewModel: ObservableObject {
     @Published var exportResult: ExportResult?
     @Published var errorMessage: String?
 
+    var validationResult: ExportValidationResult {
+        ExportValidationService.validate(project: project)
+    }
+
     var canExport: Bool {
-        project.activeVideo != nil &&
-        project.importedMasterAudio != nil &&
-        project.songStartRawSec != nil &&
-        project.songStartAudioSec != nil &&
-        project.selectedRawStartSec != nil &&
-        project.selectedRawEndSec != nil &&
-        !isExporting
+        validationResult.isReady && !isExporting
     }
 
     var masterAudioEffectiveDuration: Double? {
@@ -40,6 +38,10 @@ final class ImportExportPoCViewModel: ObservableObject {
         return end - start
     }
 
+    var outputDuration: Double {
+        ExportValidationService.outputDuration(project: project)
+    }
+
     var durationDifferenceFromProject: Double? {
         guard let selectedDuration,
               let masterAudioEffectiveDuration else {
@@ -48,20 +50,20 @@ final class ImportExportPoCViewModel: ObservableObject {
         return selectedDuration - masterAudioEffectiveDuration
     }
 
+    func updateTitle(_ title: String) {
+        project.title = title
+        project.updatedAt = Date()
+    }
+
     func importVideo(from pickedURL: URL) {
         isImportingVideo = true
         errorMessage = nil
         Task {
             do {
                 let storedURL = try MediaImportStore.copyIntoImports(pickedURL)
-                let video = try await MediaInfoReader.readVideo(from: storedURL)
-                project.importedVideo = video
+                project.importedVideo = try await MediaInfoReader.readVideo(from: storedURL)
                 project.recordedTake = nil
-                project.updatedAt = Date()
-                videoPreviewTimeSec = 0
-                project.songStartRawSec = nil
-                project.selectedRawStartSec = nil
-                project.selectedRawEndSec = nil
+                resetVideoDependentState()
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -77,11 +79,7 @@ final class ImportExportPoCViewModel: ObservableObject {
         }
         project.recordedTake = take
         project.importedVideo = nil
-        project.updatedAt = Date()
-        videoPreviewTimeSec = 0
-        project.songStartRawSec = nil
-        project.selectedRawStartSec = nil
-        project.selectedRawEndSec = nil
+        resetVideoDependentState()
     }
 
     func importMasterAudio(from pickedURL: URL) {
@@ -90,11 +88,10 @@ final class ImportExportPoCViewModel: ObservableObject {
         Task {
             do {
                 let storedURL = try MediaImportStore.copyIntoImports(pickedURL)
-                let audio = try await MediaInfoReader.readMasterAudio(from: storedURL)
-                project.importedMasterAudio = audio
-                project.updatedAt = Date()
+                project.importedMasterAudio = try await MediaInfoReader.readMasterAudio(from: storedURL)
                 audioPreviewTimeSec = 0
                 project.songStartAudioSec = nil
+                project.updatedAt = Date()
                 updateDefaultTrimIfPossible()
             } catch {
                 errorMessage = error.localizedDescription
@@ -105,16 +102,14 @@ final class ImportExportPoCViewModel: ObservableObject {
 
     func setVideoSongStart() {
         guard let video = project.activeVideo else { return }
-        let value = min(max(videoPreviewTimeSec, 0), max(0, video.durationSec - 0.01))
-        project.songStartRawSec = value
+        project.songStartRawSec = min(max(videoPreviewTimeSec, 0), max(0, video.durationSec - 0.01))
         project.updatedAt = Date()
         updateDefaultTrimIfPossible()
     }
 
     func setAudioSongStart() {
         guard let audio = project.importedMasterAudio else { return }
-        let value = min(max(audioPreviewTimeSec, 0), max(0, audio.durationSec - 0.01))
-        project.songStartAudioSec = value
+        project.songStartAudioSec = min(max(audioPreviewTimeSec, 0), max(0, audio.durationSec - 0.01))
         project.updatedAt = Date()
         updateDefaultTrimIfPossible()
     }
@@ -123,15 +118,25 @@ final class ImportExportPoCViewModel: ObservableObject {
         guard let video = project.activeVideo else { return }
         let clamped = min(max(value, 0), video.durationSec)
         project.selectedRawStartSec = clamped
-        project.updatedAt = Date()
         if let end = project.selectedRawEndSec, end <= clamped {
             project.selectedRawEndSec = min(video.durationSec, clamped + 0.1)
         }
+        project.updatedAt = Date()
     }
 
     func updateSelectedRawEnd(_ value: Double) {
         guard let video = project.activeVideo else { return }
         project.selectedRawEndSec = min(max(value, 0), video.durationSec)
+        project.updatedAt = Date()
+    }
+
+    func adjustOffset(ms delta: Double) {
+        project.offsetMs += delta
+        project.updatedAt = Date()
+    }
+
+    func resetOffset() {
+        project.offsetMs = 0
         project.updatedAt = Date()
     }
 
@@ -150,6 +155,14 @@ final class ImportExportPoCViewModel: ObservableObject {
         }
     }
 
+    private func resetVideoDependentState() {
+        videoPreviewTimeSec = 0
+        project.songStartRawSec = nil
+        project.selectedRawStartSec = nil
+        project.selectedRawEndSec = nil
+        project.updatedAt = Date()
+    }
+
     private func updateDefaultTrimIfPossible() {
         guard let video = project.activeVideo,
               let songStartRawSec = project.songStartRawSec else {
@@ -158,5 +171,6 @@ final class ImportExportPoCViewModel: ObservableObject {
         let effectiveDuration = masterAudioEffectiveDuration ?? max(0, video.durationSec - songStartRawSec)
         project.selectedRawStartSec = songStartRawSec
         project.selectedRawEndSec = min(video.durationSec, songStartRawSec + effectiveDuration)
+        project.updatedAt = Date()
     }
 }

@@ -47,7 +47,7 @@ struct ExportResult {
 
 enum VideoExportService {
     static func export(project: ProjectDraft) async throws -> ExportResult {
-        guard let importedVideo = project.importedVideo else { throw VideoExportServiceError.missingVideo }
+        guard let importedVideo = project.activeVideo else { throw VideoExportServiceError.missingVideo }
         guard let importedMasterAudio = project.importedMasterAudio else { throw VideoExportServiceError.missingMasterAudio }
         guard let songStartRawSec = project.songStartRawSec,
               songStartRawSec >= 0,
@@ -186,7 +186,7 @@ enum VideoExportService {
     private static func makeOutputURL(fileExtension: String) throws -> URL {
         let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
         guard let directory else { throw VideoExportServiceError.cannotSaveOutput }
-        let fileName = "TakeLayer-PoC-\(UUID().uuidString).\(fileExtension)"
+        let fileName = "TakeLayer-MVPAlpha-\(UUID().uuidString).\(fileExtension)"
         let outputURL = directory.appendingPathComponent(fileName)
         if FileManager.default.fileExists(atPath: outputURL.path) {
             try FileManager.default.removeItem(at: outputURL)

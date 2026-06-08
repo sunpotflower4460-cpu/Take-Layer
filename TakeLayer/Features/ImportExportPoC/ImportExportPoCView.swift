@@ -16,7 +16,7 @@ struct ImportExportPoCView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     header
                     VideoImportView(
-                        video: viewModel.project.importedVideo,
+                        video: viewModel.project.activeVideo,
                         isImporting: viewModel.isImportingVideo,
                         onImport: { isVideoImporterPresented = true },
                         onRecord: { isRecordingPresented = true }
@@ -26,7 +26,7 @@ struct ImportExportPoCView: View {
                         isImporting: viewModel.isImportingAudio,
                         onImport: { isAudioImporterPresented = true }
                     )
-                    if let video = viewModel.project.importedVideo {
+                    if let video = viewModel.project.activeVideo {
                         VideoSongStartEditorView(
                             video: video,
                             currentTimeSec: $viewModel.videoPreviewTimeSec,
@@ -42,7 +42,7 @@ struct ImportExportPoCView: View {
                             onSetSongStart: viewModel.setAudioSongStart
                         )
                     }
-                    if let video = viewModel.project.importedVideo {
+                    if let video = viewModel.project.activeVideo {
                         TrimRangeEditorView(
                             videoDurationSec: video.durationSec,
                             selectedRawStartSec: Binding(
