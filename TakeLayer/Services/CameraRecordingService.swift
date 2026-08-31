@@ -51,7 +51,7 @@ final class CameraRecordingService: NSObject, ObservableObject {
     private var finishHandler: ((Result<URL, Error>) -> Void)?
 
     func configureSession() async throws {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             sessionQueue.async { [weak self] in
                 guard let self else {
                     continuation.resume(throwing: CameraRecordingServiceError.sessionNotConfigured)
@@ -59,7 +59,7 @@ final class CameraRecordingService: NSObject, ObservableObject {
                 }
                 do {
                     try self.configureSessionOnQueue()
-                    continuation.resume()
+                    continuation.resume(returning: ())
                 } catch {
                     continuation.resume(throwing: error)
                 }
@@ -130,8 +130,10 @@ final class CameraRecordingService: NSObject, ObservableObject {
             throw CameraRecordingServiceError.cannotAddMovieOutput
         }
         session.addOutput(movieFileOutput)
-        if let connection = movieFileOutput.connection(with: .video), connection.isVideoOrientationSupported {
-            connection.videoOrientation = .portrait
+
+        if let connection = movieFileOutput.connection(with: .video),
+           connection.isVideoRotationAngleSupported(90) {
+            connection.videoRotationAngle = 90
         }
 
         isConfigured = true
