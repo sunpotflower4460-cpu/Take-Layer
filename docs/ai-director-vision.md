@@ -277,10 +277,12 @@ Part Salience
 
 ギターソロ、ドラムフィル、ボーカル開始など、音楽的イベントを考慮する。
 
-## 13. Non-goal boundary
+## 13. Implementation boundary
 
-この文書は**将来設計**であり、現在のPhase 0 / 0.5Aの実装範囲を拡大しない。
+この文書は**将来設計**であり、現在`main`にあるPhase 1 (MVP-α)の実装ベースラインを勝手に次フェーズへ進めるものではない。
 
-現在のTakeLayer Coreの検証を先に成功させ、その上にAI Directorを積む。
+AI Directorは、Phase 1までに確立されたimport / recording / completed-WAV replacement / manual anchors / trim / offset / validation / exportの流れを土台として、その上に段階的に積む。
+
+次の実装フェーズは、その時点で明示的に指定されたscopeを正とする。
 
 同期の正確さと非破壊性を犠牲にしてAI機能を先行実装しない。
