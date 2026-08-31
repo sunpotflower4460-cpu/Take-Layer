@@ -4,7 +4,7 @@ import Foundation
 
 @MainActor
 final class MVPAlphaViewModel: ObservableObject {
-    @Published var project = ProjectDraft(title: "New TakeLayer Project")
+    @Published var project: ProjectDraft
     @Published var videoPreviewTimeSec: Double = 0
     @Published var audioPreviewTimeSec: Double = 0
     @Published var isImportingVideo = false
@@ -12,6 +12,16 @@ final class MVPAlphaViewModel: ObservableObject {
     @Published var isExporting = false
     @Published var exportResult: ExportResult?
     @Published var errorMessage: String?
+
+    init() {
+        do {
+            self.project = try ProjectStore.loadMostRecent() ?? ProjectDraft(title: "New TakeLayer Project")
+            self.errorMessage = nil
+        } catch {
+            self.project = ProjectDraft(title: "New TakeLayer Project")
+            self.errorMessage = error.localizedDescription
+        }
+    }
 
     var validationResult: ExportValidationResult {
         ExportValidationService.validate(project: project)
@@ -52,7 +62,7 @@ final class MVPAlphaViewModel: ObservableObject {
 
     func updateTitle(_ title: String) {
         project.title = title
-        project.updatedAt = Date()
+        touchAndPersist()
     }
 
     func importVideo(from pickedURL: URL) {
@@ -64,6 +74,7 @@ final class MVPAlphaViewModel: ObservableObject {
                 project.importedVideo = try await MediaInfoReader.readVideo(from: storedURL)
                 project.recordedTake = nil
                 resetVideoDependentState()
+                touchAndPersist()
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -80,6 +91,7 @@ final class MVPAlphaViewModel: ObservableObject {
         project.recordedTake = take
         project.importedVideo = nil
         resetVideoDependentState()
+        touchAndPersist()
     }
 
     func importMasterAudio(from pickedURL: URL) {
@@ -91,8 +103,8 @@ final class MVPAlphaViewModel: ObservableObject {
                 project.importedMasterAudio = try await MediaInfoReader.readMasterAudio(from: storedURL)
                 audioPreviewTimeSec = 0
                 project.songStartAudioSec = nil
-                project.updatedAt = Date()
                 updateDefaultTrimIfPossible()
+                touchAndPersist()
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -103,15 +115,15 @@ final class MVPAlphaViewModel: ObservableObject {
     func setVideoSongStart() {
         guard let video = project.activeVideo else { return }
         project.songStartRawSec = min(max(videoPreviewTimeSec, 0), max(0, video.durationSec - 0.01))
-        project.updatedAt = Date()
         updateDefaultTrimIfPossible()
+        touchAndPersist()
     }
 
     func setAudioSongStart() {
         guard let audio = project.importedMasterAudio else { return }
         project.songStartAudioSec = min(max(audioPreviewTimeSec, 0), max(0, audio.durationSec - 0.01))
-        project.updatedAt = Date()
         updateDefaultTrimIfPossible()
+        touchAndPersist()
     }
 
     func updateSelectedRawStart(_ value: Double) {
@@ -121,23 +133,23 @@ final class MVPAlphaViewModel: ObservableObject {
         if let end = project.selectedRawEndSec, end <= clamped {
             project.selectedRawEndSec = min(video.durationSec, clamped + 0.1)
         }
-        project.updatedAt = Date()
+        touchAndPersist()
     }
 
     func updateSelectedRawEnd(_ value: Double) {
         guard let video = project.activeVideo else { return }
         project.selectedRawEndSec = min(max(value, 0), video.durationSec)
-        project.updatedAt = Date()
+        touchAndPersist()
     }
 
     func adjustOffset(ms delta: Double) {
         project.offsetMs += delta
-        project.updatedAt = Date()
+        touchAndPersist()
     }
 
     func resetOffset() {
         project.offsetMs = 0
-        project.updatedAt = Date()
+        touchAndPersist()
     }
 
     func export() {
@@ -160,7 +172,6 @@ final class MVPAlphaViewModel: ObservableObject {
         project.songStartRawSec = nil
         project.selectedRawStartSec = nil
         project.selectedRawEndSec = nil
-        project.updatedAt = Date()
     }
 
     private func updateDefaultTrimIfPossible() {
@@ -171,6 +182,14 @@ final class MVPAlphaViewModel: ObservableObject {
         let effectiveDuration = masterAudioEffectiveDuration ?? max(0, video.durationSec - songStartRawSec)
         project.selectedRawStartSec = songStartRawSec
         project.selectedRawEndSec = min(video.durationSec, songStartRawSec + effectiveDuration)
+    }
+
+    private func touchAndPersist() {
         project.updatedAt = Date()
+        do {
+            try ProjectStore.save(project)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 }
