@@ -1,6 +1,6 @@
 import Foundation
 
-struct ImportedVideo: Identifiable {
+struct ImportedVideo: Identifiable, Codable {
     var id = UUID()
     var url: URL
     var durationSec: Double
@@ -12,7 +12,7 @@ struct ImportedVideo: Identifiable {
     var fileSizeBytes: Int64?
 }
 
-enum MediaOrientation: String {
+enum MediaOrientation: String, Codable {
     case portrait = "Portrait"
     case landscape = "Landscape"
     case square = "Square"
