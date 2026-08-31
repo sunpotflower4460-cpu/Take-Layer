@@ -75,3 +75,103 @@ This phase validates the core idea before adding recording.
 - Mac Companion.
 - 4K.
 - Advanced proxy editing.
+
+---
+
+# Future AI Director Track
+
+The phases below describe the long-term AI Music Video Director direction. They are **not active implementation phases** until explicitly promoted. Phase 0 through Phase 6 remain the core delivery path.
+
+## Phase 7: Song Intelligence Foundation
+
+Goal: TakeLayer begins to understand and remember the musical work itself.
+
+- `SongIdentity` and `SongProfile`.
+- Song / Arrangement separation.
+- Same-song recognition using multiple evidence sources.
+- Song Memory.
+- User-confirmed metadata precedence.
+- Metadata Provider Adapter layer.
+- Formal lyrics storage for user-owned / permitted lyrics.
+- Lyrics alignment to known text.
+- Song sections and highlight candidates.
+- Confidence-based confirmation UI.
+
+Success criterion:
+
+A previously imported song can be recognized with confidence, and TakeLayer can propose the existing profile without silently overwriting user-confirmed information.
+
+## Phase 8: AI Short Director
+
+Goal: one performance video can become multiple high-quality short-video proposals.
+
+- 9:16 short-video workflow.
+- Highlight / hook candidate generation.
+- Performer-aware crop proposals.
+- Title / artist text proposals.
+- Lyric caption plans.
+- Restrained zoom / pan / effect plans.
+- Natural / Cinematic / Lyric Focus / Social Hook / Minimal variants.
+- `EditingPlan` intermediate representation.
+- Deterministic rendering from EditingPlan.
+- Quality Gate before proposals are shown.
+- Proposal comparison UI.
+- Human micro-adjustment before approval.
+
+Success criterion:
+
+The user can drop in a performance video, review 3–5 meaningfully different proposals, make small final adjustments, and approve/export one without reconstructing the edit manually.
+
+## Phase 9: Feedback & Preference Learning
+
+Goal: TakeLayer learns what the user considers good editing.
+
+- Approved / rejected proposal history.
+- Explicit ratings / notes.
+- Edit-delta capture between AI proposal and approved final plan.
+- Song-specific preferences.
+- Arrangement / artist / user-wide preference scopes.
+- Context-aware preference application.
+- Evidence count and confidence.
+- Do-not-overlearn safeguards.
+- Explainable preference application.
+- Memory inspection / reset / forget controls.
+- Ranking approved-style proposals higher over time.
+
+Initial implementation should prefer structured rules and weighted history before attempting model fine-tuning.
+
+Success criterion:
+
+Repeated user corrections measurably reduce the amount of manual adjustment needed on later proposals.
+
+## Phase 10: Multi-part AI Director
+
+Goal: extend the same Director logic to multiple synchronized performance videos.
+
+- Part activity analysis.
+- Part Salience estimation.
+- Section-aware camera / layout selection.
+- Vocal entry detection.
+- Solo / fill / phrase-event emphasis.
+- Automatic front-layer / split-layout proposals.
+- Multi-part lyric / title composition.
+- EditingPlan support for camera switching and layout events.
+- Preference learning for multi-camera choices.
+
+Part Salience must not be based on frequency alone. It should combine musical activity, novelty, section context, role, and visual information.
+
+Success criterion:
+
+Multiple synchronized performance videos can be turned into musically sensible edit proposals while preserving TakeLayer Core synchronization accuracy.
+
+## Roadmap invariant
+
+No future AI phase may weaken these core guarantees:
+
+- Completed WAV remains a valid Reference Performance Anchor.
+- `songStartRawSec` and `songStartAudioSec` remain explicit concepts.
+- Project timeline 0:00 remains song start.
+- Raw media editing remains non-destructive by default.
+- AI proposals remain inspectable and reversible.
+- Low-confidence identity, lyrics, sync, or metadata decisions return to user confirmation.
+- Generative AI must not become the source of truth for synchronization.
