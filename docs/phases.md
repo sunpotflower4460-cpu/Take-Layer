@@ -1,10 +1,18 @@
 # TakeLayer Phases
 
+## Repository status
+
+As of 2026-08-31, `main` already contains the merged **Phase 1 (MVP-α)** integrated flow from PR #5. Phase 0.5A and Phase 0.5B are also merged.
+
+This file is a roadmap. A later phase is not active merely because it appears here. Implement only the phase or scope explicitly requested.
+
 ## Phase 0: 設計固定・リポジトリ土台
 
-Current phase. Do not build real media processing yet. Fix the design, vocabulary, documentation, and repository structure so later phases do not reinterpret the core concepts.
+Historical foundation phase. Design, vocabulary, documentation, and repository structure were fixed so later phases would not reinterpret the core concepts.
 
 ## Phase 0.5A: Import-first Export PoC
+
+Status: merged.
 
 - Video import.
 - Completed WAV import.
@@ -14,9 +22,11 @@ Current phase. Do not build real media processing yet. Fix the design, vocabular
 - Single-screen export.
 - If possible, 2-split / 4-split verification.
 
-This phase validates the core idea before adding recording.
+This phase validated the core idea before adding recording.
 
 ## Phase 0.5B: Recording PoC
+
+Status: merged.
 
 - In-app recording.
 - Zen mode.
@@ -26,6 +36,8 @@ This phase validates the core idea before adding recording.
 - End-point drift check.
 
 ## Phase 1: MVP-α
+
+Status: merged baseline on `main`.
 
 - One video + completed WAV replacement.
 - Video import / recording.
@@ -80,7 +92,7 @@ This phase validates the core idea before adding recording.
 
 # Future AI Director Track
 
-The phases below describe the long-term AI Music Video Director direction. They are **not active implementation phases** until explicitly promoted. Phase 0 through Phase 6 remain the core delivery path.
+The phases below describe the long-term AI Music Video Director direction. They are **not active implementation phases** until explicitly promoted. They extend the TakeLayer Core delivery path rather than replacing it.
 
 ## Phase 7: Song Intelligence Foundation
 
