@@ -8,6 +8,12 @@ Short definition: スマホで撮った演奏を、DAW完成音源つきの動�
 
 Long-term direction: TakeLayer Core may later support an AI Music Video Director that remembers songs and editing preferences, proposes multiple short-video edits, and learns from user approval and corrections. This future direction must extend—not replace—the deterministic synchronization core.
 
+## Repository implementation baseline
+
+`main` already contains the merged **Phase 1 (MVP-α)** integrated flow from PR #5, building on the merged Phase 0.5A import/export PoC and Phase 0.5B recording PoC.
+
+This status note is a baseline, not permission to advance phases automatically. For every task, implement only the phase or scope explicitly requested and preserve already-merged behavior.
+
 ## Core principles
 
 - Do not replace the DAW.
@@ -37,8 +43,9 @@ Long-term direction: TakeLayer Core may later support an AI Music Video Director
 
 - Implement only the requested phase.
 - Do not implement multiple phases in one pass.
-- Phase 0 is for design, documentation, and repository structure only.
-- Phase 0.5A starts with Import-first Export PoC.
+- Historical Phase 0 was for design, documentation, and repository structure only.
+- Phase 0.5A, Phase 0.5B, and Phase 1 have already been merged into `main`.
+- Do not infer that Phase 2 or any later phase is active unless explicitly requested.
 - `docs/ai-director-vision.md`, `docs/song-memory-feedback.md`, and `docs/ai-director-data-model.md` are future architecture documents only.
 - Do not implement Song Memory, lyric captions, AI crop, AI Director, preference learning, external metadata adapters, or automatic short-video generation until their future phase is explicitly activated.
 
@@ -46,15 +53,11 @@ Long-term direction: TakeLayer Core may later support an AI Music Video Director
 
 Do not add these unless the active phase explicitly requests them:
 
-- Video import implementation.
-- WAV import implementation.
-- AVFoundation export implementation.
-- Recording feature.
-- Automatic sync.
-- Automatic trim.
-- Split-screen layout rendering.
-- Waveform display.
-- Full SwiftData implementation.
+- Automatic sync beyond the requested phase.
+- Automatic trim beyond the requested phase.
+- Split-screen layout rendering beyond the requested phase.
+- Waveform display beyond the requested phase.
+- Full SwiftData implementation beyond the requested phase.
 - Billing.
 - Cloud sync.
 - Android support.
@@ -68,6 +71,8 @@ Do not add these unless the active phase explicitly requests them:
 - AI performer crop / tracking.
 - AI Music Video Director.
 - Preference learning / edit-delta learning.
+
+Do not remove or regress already-merged Phase 1 functionality such as import/record flow, WAV import, manual song-start markers, trim, manual offset, validation, and single-screen export unless explicitly requested.
 
 ## Future AI Director references
 
