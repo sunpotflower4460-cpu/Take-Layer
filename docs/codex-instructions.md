@@ -1,5 +1,11 @@
 # Codex Instructions for TakeLayer
 
+## Repository baseline
+
+`main` already contains the merged Phase 1 (MVP-α) integrated flow, building on Phase 0.5A and 0.5B. Preserve that behavior unless a task explicitly changes it.
+
+Do not infer that Phase 2 or later is active. The requested task scope is authoritative.
+
 ## Mandatory rules
 
 - Do not implement multiple phases at once.
@@ -16,11 +22,9 @@
 - Generative AI must never be the source of truth for synchronization.
 - User-confirmed song metadata and lyrics must not be silently overwritten by AI or external metadata.
 
-## Phase 0 rules
+## Historical Phase 0 rules
 
-Phase 0 is for design fixation and repository scaffolding only. Do not implement video import, WAV import, AVFoundation export, recording, automatic sync, automatic trim, split-screen rendering, waveform display, SwiftData persistence, billing, cloud, Android, or Mac Companion.
-
-The AI Director documents are future design references. During Phase 0, do not implement Song Memory, Song Resolver, external metadata lookup, lyric captions, AI crop, automatic short-video generation, preference learning, or edit-delta learning.
+Phase 0 was for design fixation and repository scaffolding only. Those restrictions describe the historical Phase 0 scope; they are not a statement that the repository is still in Phase 0.
 
 ## Design reminders
 
@@ -34,6 +38,8 @@ The AI Director documents are future design references. During Phase 0, do not i
 - Raw videos remain intact unless the user confirms deletion.
 
 ## Future AI Director architecture
+
+The AI Director documents are future design references. Do not implement Song Memory, Song Resolver, external metadata lookup, lyric captions, AI crop, automatic short-video generation, preference learning, or edit-delta learning until the corresponding future phase is explicitly activated.
 
 When a future AI phase is explicitly activated, read these before coding:
 
