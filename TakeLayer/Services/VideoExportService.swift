@@ -11,6 +11,7 @@ enum VideoExportServiceError: LocalizedError {
     case invalidSongStartAudioSec
     case invalidTrimRange
     case cannotCreateExportSession
+    case unsupportedOutputType
     case exportFailed(String)
     case cannotSaveOutput
 
@@ -32,6 +33,8 @@ enum VideoExportServiceError: LocalizedError {
             return "selectedRawEndSecはselectedRawStartSecより大きくしてください。"
         case .cannotCreateExportSession:
             return "AVAssetExportSessionを作成できませんでした。"
+        case .unsupportedOutputType:
+            return "この素材ではMP4として書き出せません。"
         case .exportFailed(let message):
             return "書き出しに失敗しました: \(message)"
         case .cannotSaveOutput:
@@ -49,30 +52,19 @@ enum VideoExportService {
     static func export(project: ProjectDraft) async throws -> ExportResult {
         guard let importedVideo = project.activeVideo else { throw VideoExportServiceError.missingVideo }
         guard let importedMasterAudio = project.importedMasterAudio else { throw VideoExportServiceError.missingMasterAudio }
-        guard let songStartRawSec = project.songStartRawSec,
-              songStartRawSec >= 0,
-              songStartRawSec < importedVideo.durationSec else {
-            throw VideoExportServiceError.invalidSongStartRawSec
-        }
-        guard let songStartAudioSec = project.songStartAudioSec,
-              songStartAudioSec >= 0,
-              songStartAudioSec < importedMasterAudio.durationSec else {
-            throw VideoExportServiceError.invalidSongStartAudioSec
-        }
-        guard let selectedRawStartSec = project.selectedRawStartSec,
-              let selectedRawEndSec = project.selectedRawEndSec,
-              selectedRawEndSec > selectedRawStartSec else {
-            throw VideoExportServiceError.invalidTrimRange
-        }
-        guard selectedRawStartSec >= 0,
-              selectedRawEndSec <= importedVideo.durationSec else {
-            throw VideoExportServiceError.invalidTrimRange
-        }
 
-        let selectedVideoDuration = selectedRawEndSec - selectedRawStartSec
-        let remainingAudioDuration = importedMasterAudio.durationSec - songStartAudioSec
-        let outputDurationSec = min(selectedVideoDuration, remainingAudioDuration)
-        guard outputDurationSec > 0 else { throw VideoExportServiceError.invalidTrimRange }
+        let mapping: TimelineMapping
+        do {
+            mapping = try TimelineMapper.makeMapping(project: project)
+        } catch TimelineMapperError.invalidVideoSongStart {
+            throw VideoExportServiceError.invalidSongStartRawSec
+        } catch TimelineMapperError.invalidAudioSongStart {
+            throw VideoExportServiceError.invalidSongStartAudioSec
+        } catch TimelineMapperError.invalidTrimRange {
+            throw VideoExportServiceError.invalidTrimRange
+        } catch {
+            throw VideoExportServiceError.exportFailed(error.localizedDescription)
+        }
 
         let videoAsset = AVURLAsset(url: importedVideo.url)
         let audioAsset = AVURLAsset(url: importedMasterAudio.url)
@@ -95,52 +87,57 @@ enum VideoExportService {
             throw VideoExportServiceError.missingAudioTrack
         }
 
-        let outputDuration = CMTime(seconds: outputDurationSec, preferredTimescale: 600)
+        let outputDuration = CMTime(seconds: mapping.outputDurationSec, preferredTimescale: 600)
         try compositionVideoTrack.insertTimeRange(
             CMTimeRange(
-                start: CMTime(seconds: selectedRawStartSec, preferredTimescale: 600),
+                start: CMTime(seconds: mapping.videoSourceStartSec, preferredTimescale: 600),
                 duration: outputDuration
             ),
             of: sourceVideoTrack,
             at: .zero
         )
+
+        let audioInsertDuration = CMTime(seconds: mapping.audioInsertDurationSec, preferredTimescale: 600)
         try compositionAudioTrack.insertTimeRange(
             CMTimeRange(
-                start: CMTime(seconds: songStartAudioSec, preferredTimescale: 600),
-                duration: outputDuration
+                start: CMTime(seconds: mapping.audioSourceStartSec, preferredTimescale: 600),
+                duration: audioInsertDuration
             ),
             of: sourceAudioTrack,
-            at: .zero
+            at: CMTime(seconds: mapping.audioInsertionTimeSec, preferredTimescale: 600)
         )
 
-        let videoComposition = try await makeVideoComposition(for: compositionVideoTrack, sourceVideoTrack: sourceVideoTrack, duration: outputDuration)
+        let videoComposition = try await makeVideoComposition(
+            for: compositionVideoTrack,
+            sourceVideoTrack: sourceVideoTrack,
+            duration: outputDuration
+        )
         let outputURL = try makeOutputURL(fileExtension: project.exportSettings.outputFileType.fileExtension)
         guard let exportSession = AVAssetExportSession(asset: composition, presetName: AVAssetExportPreset1920x1080) else {
             throw VideoExportServiceError.cannotCreateExportSession
         }
-        exportSession.outputURL = outputURL
-        exportSession.outputFileType = .mp4
+        guard exportSession.supportedFileTypes.contains(.mp4) else {
+            throw VideoExportServiceError.unsupportedOutputType
+        }
+
         exportSession.videoComposition = videoComposition
         exportSession.shouldOptimizeForNetworkUse = true
         exportSession.timeRange = CMTimeRange(start: .zero, duration: outputDuration)
 
-        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-            exportSession.exportAsynchronously {
-                continuation.resume()
-            }
+        do {
+            try await exportSession.export(to: outputURL, as: .mp4)
+        } catch {
+            throw VideoExportServiceError.exportFailed(error.localizedDescription)
         }
 
-        switch exportSession.status {
-        case .completed:
-            return ExportResult(outputURL: outputURL, durationSec: outputDurationSec)
-        case .failed, .cancelled:
-            throw VideoExportServiceError.exportFailed(exportSession.error?.localizedDescription ?? "Unknown error")
-        default:
-            throw VideoExportServiceError.exportFailed("Unexpected export status: \(exportSession.status.rawValue)")
-        }
+        return ExportResult(outputURL: outputURL, durationSec: mapping.outputDurationSec)
     }
 
-    private static func makeVideoComposition(for compositionVideoTrack: AVCompositionTrack, sourceVideoTrack: AVAssetTrack, duration: CMTime) async throws -> AVMutableVideoComposition {
+    private static func makeVideoComposition(
+        for compositionVideoTrack: AVCompositionTrack,
+        sourceVideoTrack: AVAssetTrack,
+        duration: CMTime
+    ) async throws -> AVMutableVideoComposition {
         let naturalSize = try await sourceVideoTrack.load(.naturalSize)
         let preferredTransform = try await sourceVideoTrack.load(.preferredTransform)
         let transformedRect = CGRect(origin: .zero, size: naturalSize).applying(preferredTransform)
