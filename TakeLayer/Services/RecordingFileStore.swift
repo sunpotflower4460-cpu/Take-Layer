@@ -34,7 +34,7 @@ enum RecordingFileStore {
               let values = try? documentsDirectory.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]) else {
             return nil
         }
-        return values.volumeAvailableCapacityForImportantUsage.map(Int64.init)
+        return values.volumeAvailableCapacityForImportantUsage.map { Int64($0) }
     }
 
     private static func recordingsDirectory() throws -> URL {
