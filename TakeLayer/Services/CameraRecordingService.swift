@@ -50,45 +50,21 @@ final class CameraRecordingService: NSObject, ObservableObject {
     private var isConfigured = false
     private var finishHandler: ((Result<URL, Error>) -> Void)?
 
-    func configureSession() throws {
-        guard !isConfigured else { return }
-
-        session.beginConfiguration()
-        defer { session.commitConfiguration() }
-
-        if session.canSetSessionPreset(.hd1920x1080) {
-            session.sessionPreset = .hd1920x1080
-        } else if session.canSetSessionPreset(.high) {
-            session.sessionPreset = .high
+    func configureSession() async throws {
+        try await withCheckedThrowingContinuation { continuation in
+            sessionQueue.async { [weak self] in
+                guard let self else {
+                    continuation.resume(throwing: CameraRecordingServiceError.sessionNotConfigured)
+                    return
+                }
+                do {
+                    try self.configureSessionOnQueue()
+                    continuation.resume()
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
         }
-
-        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) ?? AVCaptureDevice.default(for: .video) else {
-            throw CameraRecordingServiceError.cameraUnavailable
-        }
-        let cameraInput = try AVCaptureDeviceInput(device: camera)
-        guard session.canAddInput(cameraInput) else {
-            throw CameraRecordingServiceError.cannotAddCameraInput
-        }
-        session.addInput(cameraInput)
-
-        guard let microphone = AVCaptureDevice.default(for: .audio) else {
-            throw CameraRecordingServiceError.microphoneUnavailable
-        }
-        let microphoneInput = try AVCaptureDeviceInput(device: microphone)
-        guard session.canAddInput(microphoneInput) else {
-            throw CameraRecordingServiceError.cannotAddMicrophoneInput
-        }
-        session.addInput(microphoneInput)
-
-        guard session.canAddOutput(movieFileOutput) else {
-            throw CameraRecordingServiceError.cannotAddMovieOutput
-        }
-        session.addOutput(movieFileOutput)
-        if let connection = movieFileOutput.connection(with: .video), connection.isVideoOrientationSupported {
-            connection.videoOrientation = .portrait
-        }
-
-        isConfigured = true
     }
 
     func startPreview() {
@@ -117,6 +93,48 @@ final class CameraRecordingService: NSObject, ObservableObject {
     func stopRecording() throws {
         guard movieFileOutput.isRecording else { throw CameraRecordingServiceError.recordingNotInProgress }
         movieFileOutput.stopRecording()
+    }
+
+    private func configureSessionOnQueue() throws {
+        guard !isConfigured else { return }
+
+        session.beginConfiguration()
+        defer { session.commitConfiguration() }
+
+        if session.canSetSessionPreset(.hd1920x1080) {
+            session.sessionPreset = .hd1920x1080
+        } else if session.canSetSessionPreset(.high) {
+            session.sessionPreset = .high
+        }
+
+        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)
+            ?? AVCaptureDevice.default(for: .video) else {
+            throw CameraRecordingServiceError.cameraUnavailable
+        }
+        let cameraInput = try AVCaptureDeviceInput(device: camera)
+        guard session.canAddInput(cameraInput) else {
+            throw CameraRecordingServiceError.cannotAddCameraInput
+        }
+        session.addInput(cameraInput)
+
+        guard let microphone = AVCaptureDevice.default(for: .audio) else {
+            throw CameraRecordingServiceError.microphoneUnavailable
+        }
+        let microphoneInput = try AVCaptureDeviceInput(device: microphone)
+        guard session.canAddInput(microphoneInput) else {
+            throw CameraRecordingServiceError.cannotAddMicrophoneInput
+        }
+        session.addInput(microphoneInput)
+
+        guard session.canAddOutput(movieFileOutput) else {
+            throw CameraRecordingServiceError.cannotAddMovieOutput
+        }
+        session.addOutput(movieFileOutput)
+        if let connection = movieFileOutput.connection(with: .video), connection.isVideoOrientationSupported {
+            connection.videoOrientation = .portrait
+        }
+
+        isConfigured = true
     }
 }
 
