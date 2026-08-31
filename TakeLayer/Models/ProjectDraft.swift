@@ -1,6 +1,6 @@
 import Foundation
 
-struct ProjectDraft: Identifiable {
+struct ProjectDraft: Identifiable, Codable {
     var id = UUID()
     var title: String
     var importedVideo: ImportedVideo?
