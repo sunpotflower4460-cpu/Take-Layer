@@ -32,7 +32,7 @@ final class RecordingViewModel: ObservableObject {
         }
 
         do {
-            try cameraService.configureSession()
+            try await cameraService.configureSession()
             cameraService.startPreview()
         } catch {
             errorMessage = error.localizedDescription
