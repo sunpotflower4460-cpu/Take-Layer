@@ -1,6 +1,6 @@
 import Foundation
 
-struct RecordedTake: Identifiable {
+struct RecordedTake: Identifiable, Codable {
     var id = UUID()
     var url: URL
     var createdAt: Date
