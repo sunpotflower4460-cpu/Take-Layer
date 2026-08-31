@@ -10,9 +10,11 @@ Long-term direction: TakeLayer Core may later support an AI Music Video Director
 
 ## Repository implementation baseline
 
-`main` already contains the merged **Phase 1 (MVP-α)** integrated flow from PR #5, building on the merged Phase 0.5A import/export PoC and Phase 0.5B recording PoC.
+`main` contains the merged **Phase 1 (MVP-α)** integrated flow from PR #5, building on Phase 0.5A and Phase 0.5B.
 
-This status note is a baseline, not permission to advance phases automatically. For every task, implement only the phase or scope explicitly requested and preserve already-merged behavior.
+`phase-1.1-core-stabilization` is the stabilization branch. It exists to make the Phase 1 core buildable, persistent, testable, and synchronization-correct before feature expansion.
+
+For every task, implement only the explicitly requested phase or scope and preserve already-merged behavior.
 
 ## Core principles
 
@@ -29,13 +31,37 @@ This status note is a baseline, not permission to advance phases automatically. 
 - Generative AI must never become the source of truth for synchronization.
 - User-confirmed song metadata and lyrics must not be silently overwritten by external metadata or AI estimates.
 
+## Timeline authority
+
+`TakeLayer/Services/TimelineMapper.swift` is the authoritative mapping boundary for:
+
+```text
+raw video time
+    ↓
+Project Timeline
+    ↓
+completed-WAV time
+```
+
+Do not duplicate this arithmetic inside renderers, UI code, AI code, short extraction, or future multi-part code.
+
+Manual offset convention:
+
+```text
+offsetMs > 0  = completed WAV is delayed relative to video
+offsetMs < 0  = completed WAV is advanced relative to video
+```
+
+Any sync defect must first be expressed as a TimelineMapper regression test before changing the mapping implementation when practical.
+
 ## Tech direction
 
 - iOS MVP first.
 - Swift / SwiftUI.
 - AVFoundation.
 - Accelerate / vDSP.
-- SwiftData.
+- SwiftData is a future persistence target; Phase 1.1 uses a small ProjectStore boundary first.
+- Xcode project generation is defined by `project.yml` using XcodeGen.
 - Do not make FFmpegKit a core dependency.
 - Android and Mac Companion are future phases.
 
@@ -45,9 +71,24 @@ This status note is a baseline, not permission to advance phases automatically. 
 - Do not implement multiple phases in one pass.
 - Historical Phase 0 was for design, documentation, and repository structure only.
 - Phase 0.5A, Phase 0.5B, and Phase 1 have already been merged into `main`.
-- Do not infer that Phase 2 or any later phase is active unless explicitly requested.
+- Phase 1.1 is stabilization, not permission to add later creative automation.
+- Do not infer that Phase 1.5, Phase 2, or any later phase is active unless explicitly requested.
 - `docs/ai-director-vision.md`, `docs/song-memory-feedback.md`, and `docs/ai-director-data-model.md` are future architecture documents only.
 - Do not implement Song Memory, lyric captions, AI crop, AI Director, preference learning, external metadata adapters, or automatic short-video generation until their future phase is explicitly activated.
+
+## Phase 1.1 gates
+
+Before calling Phase 1.1 complete:
+
+- XcodeGen must generate the project.
+- iOS Simulator build must pass.
+- TimelineMapper tests must pass.
+- `offsetMs` must affect real export mapping.
+- trim start changes must preserve Project Timeline synchronization.
+- Project state must survive restart.
+- camera session startup/configuration must not block the main UI thread.
+
+See `docs/phase-1.1-core-stabilization.md`.
 
 ## Do not implement list
 
