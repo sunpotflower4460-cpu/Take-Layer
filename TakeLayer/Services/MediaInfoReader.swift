@@ -105,6 +105,6 @@ enum MediaInfoReader {
 
     private static func fileSize(for url: URL) -> Int64? {
         guard let values = try? url.resourceValues(forKeys: [.fileSizeKey]) else { return nil }
-        return values.fileSize.map(Int64.init)
+        return values.fileSize.map { Int64($0) }
     }
 }

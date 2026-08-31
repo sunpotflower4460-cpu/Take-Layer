@@ -2,7 +2,9 @@
 
 ## Repository status
 
-As of 2026-08-31, `main` already contains the merged **Phase 1 (MVP-α)** integrated flow from PR #5. Phase 0.5A and Phase 0.5B are also merged.
+As of 2026-08-31, `main` contains the merged **Phase 1 (MVP-α)** integrated flow from PR #5. Phase 0.5A and Phase 0.5B are also merged.
+
+**Phase 1.1 Core Stabilization** is the next gate before feature expansion. It fixes timeline/export correctness and adds reproducible build, tests, and project persistence.
 
 This file is a roadmap. A later phase is not active merely because it appears here. Implement only the phase or scope explicitly requested.
 
@@ -47,13 +49,53 @@ Status: merged baseline on `main`.
 - Single-screen export.
 - Storage management.
 
-## Phase 2: MVP-β
+## Phase 1.1: Core Stabilization
+
+Status: implementation branch / merge gate.
+
+Primary purpose: make Phase 1 deterministic and testable before later features depend on it.
+
+- Authoritative `TimelineMapper`.
+- Apply `offsetMs` during real export.
+- Preserve synchronization when trim start differs from song start.
+- Handle pre-roll without silently clamping audio time.
+- Use the same timeline mapping for validation and rendering.
+- Reproducible Xcode project generation.
+- macOS CI build and XCTest.
+- Timeline regression tests.
+- Local Project persistence.
+- Serialized AVCaptureSession configuration/start/stop.
+- Modern async AVAssetExportSession export path.
+
+See `phase-1.1-core-stabilization.md`.
+
+Phase 1.1 must be green before Phase 1.5 / Phase 2 / AI work proceeds.
+
+## Phase 1.5: Short Foundation
+
+Goal: prove the one-video short-form editing substrate before multi-part complexity.
+
+- One performance video.
+- 9:16 output canvas.
+- Manual short-range extraction.
+- Deterministic title layer.
+- User-supplied lyric text layer.
+- Subtitle renderer.
+- Deterministic crop / zoom / pan plan.
+- Preview → micro-adjustment → export.
+- No generative decision-making required yet.
+
+This phase creates the renderer primitives that the later AI Short Director will control through an EditingPlan.
+
+## Phase 2: MVP-β / Multi-part Core
 
 - Multiple parts.
 - 2-split / 4-split.
 - Place each Take onto the Project timeline.
 - Timeline display.
 - Per-part offset correction.
+
+Multi-part work may proceed after Phase 1.1, but product priority should be evaluated against Phase 1.5 because the primary near-term value is high-quality one-video shorts.
 
 ## Phase 3: 自動候補化
 
@@ -76,7 +118,7 @@ Status: merged baseline on `main`.
 - Production-process style.
 - Parts appear in `recordedAt` order.
 - Section-specific layouts.
-- Shorts extraction.
+- Shorts extraction for legacy roadmap compatibility; new one-video short primitives should originate in Phase 1.5.
 - Momentary camera-audio mix.
 
 ## Phase 6: Pro拡張
@@ -178,11 +220,12 @@ Multiple synchronized performance videos can be turned into musically sensible e
 
 ## Roadmap invariant
 
-No future AI phase may weaken these core guarantees:
+No future phase may weaken these core guarantees:
 
 - Completed WAV remains a valid Reference Performance Anchor.
 - `songStartRawSec` and `songStartAudioSec` remain explicit concepts.
 - Project timeline 0:00 remains song start.
+- `TimelineMapper` remains the authoritative raw-video ↔ Project Timeline ↔ master-audio mapping boundary.
 - Raw media editing remains non-destructive by default.
 - AI proposals remain inspectable and reversible.
 - Low-confidence identity, lyrics, sync, or metadata decisions return to user confirmation.

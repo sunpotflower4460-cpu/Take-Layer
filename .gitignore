@@ -1,0 +1,10 @@
+# XcodeGen output
+TakeLayer.xcodeproj/
+
+# Xcode local state
+DerivedData/
+*.xcuserstate
+xcuserdata/
+
+# macOS
+.DS_Store

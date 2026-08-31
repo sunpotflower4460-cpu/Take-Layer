@@ -21,7 +21,23 @@ enum ExportValidationService {
         let audio = project.importedMasterAudio
         let selectedRawStartSec = project.selectedRawStartSec
         let selectedRawEndSec = project.selectedRawEndSec
-        let outputDurationSec = outputDuration(project: project)
+        let mappingResult = Result<TimelineMapping, Error> {
+            try TimelineMapper.makeMapping(project: project)
+        }
+
+        let mappingMessage: String
+        let mappingIsValid: Bool
+        let outputDurationSec: Double
+        switch mappingResult {
+        case .success(let mapping):
+            mappingMessage = "OK"
+            mappingIsValid = true
+            outputDurationSec = mapping.outputDurationSec
+        case .failure(let error):
+            mappingMessage = error.localizedDescription
+            mappingIsValid = false
+            outputDurationSec = 0
+        }
 
         let items = [
             ExportValidationItem(
@@ -65,6 +81,11 @@ enum ExportValidationService {
                 isValid: validateTrim(start: selectedRawStartSec, end: selectedRawEndSec, videoDurationSec: activeVideo?.durationSec)
             ),
             ExportValidationItem(
+                title: "Timeline mapping",
+                message: mappingMessage,
+                isValid: mappingIsValid
+            ),
+            ExportValidationItem(
                 title: "Output duration",
                 message: outputDurationSec > 0 ? TimeFormatting.seconds(outputDurationSec) : "書き出しdurationが0以下です。",
                 isValid: outputDurationSec > 0
@@ -75,24 +96,16 @@ enum ExportValidationService {
     }
 
     static func outputDuration(project: ProjectDraft) -> Double {
-        guard let selectedRawStartSec = project.selectedRawStartSec,
-              let selectedRawEndSec = project.selectedRawEndSec,
-              let audio = project.importedMasterAudio,
-              let songStartAudioSec = project.songStartAudioSec,
-              selectedRawEndSec > selectedRawStartSec,
-              audio.durationSec > songStartAudioSec else {
-            return 0
-        }
-        return min(selectedRawEndSec - selectedRawStartSec, audio.durationSec - songStartAudioSec)
+        (try? TimelineMapper.makeMapping(project: project).outputDurationSec) ?? 0
     }
 
     private static func validateTime(_ value: Double?, duration: Double?) -> Bool {
         guard let value, let duration else { return false }
-        return value >= 0 && value < duration
+        return value.isFinite && value >= 0 && value < duration
     }
 
     private static func validateTrim(start: Double?, end: Double?, videoDurationSec: Double?) -> Bool {
         guard let start, let end, let videoDurationSec else { return false }
-        return start >= 0 && end <= videoDurationSec && start < end
+        return start.isFinite && end.isFinite && start >= 0 && end <= videoDurationSec && start < end
     }
 }

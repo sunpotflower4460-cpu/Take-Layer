@@ -1,6 +1,6 @@
 import Foundation
 
-struct ImportedMasterAudio: Identifiable {
+struct ImportedMasterAudio: Identifiable, Codable {
     var id = UUID()
     var url: URL
     var durationSec: Double
