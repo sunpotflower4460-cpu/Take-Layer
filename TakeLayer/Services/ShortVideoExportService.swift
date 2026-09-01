@@ -5,6 +5,7 @@ import UIKit
 
 enum ShortVideoExportError: LocalizedError {
     case invalidDraft
+    case overlappingLyrics
     case missingVideo
     case missingMasterAudio
     case missingVideoTrack
@@ -18,6 +19,8 @@ enum ShortVideoExportError: LocalizedError {
         switch self {
         case .invalidDraft:
             return "Shortの範囲または編集Planが不正です。"
+        case .overlappingLyrics:
+            return "歌詞字幕の時間が重なっています。各Cueの時間を重ならないように調整してください。"
         case .missingVideo:
             return "動画が読み込まれていません。"
         case .missingMasterAudio:
@@ -42,6 +45,9 @@ enum ShortVideoExportService {
     static func export(project: ProjectDraft, draft: ShortEditDraft) async throws -> ExportResult {
         guard draft.durationSec > 0, draft.durationSec.isFinite else {
             throw ShortVideoExportError.invalidDraft
+        }
+        guard !draft.hasOverlappingValidLyricCues else {
+            throw ShortVideoExportError.overlappingLyrics
         }
         guard let video = project.activeVideo else { throw ShortVideoExportError.missingVideo }
         guard let audio = project.importedMasterAudio else { throw ShortVideoExportError.missingMasterAudio }
@@ -195,7 +201,7 @@ enum ShortVideoExportService {
         }
 
         let shortEnd = projectRangeStartSec + durationSec
-        for cue in draft.lyricCues where cue.isValid {
+        for cue in draft.validLyricCues {
             let overlapStart = max(cue.startProjectSec, projectRangeStartSec)
             let overlapEnd = min(cue.endProjectSec, shortEnd)
             guard overlapEnd > overlapStart else { continue }
