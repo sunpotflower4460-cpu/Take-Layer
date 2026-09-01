@@ -37,6 +37,24 @@ struct ShortEditDraft: Codable, Equatable {
         max(0, rangeEndProjectSec - rangeStartProjectSec)
     }
 
+    var validLyricCues: [ShortLyricCue] {
+        lyricCues.filter(\.isValid).sorted {
+            if $0.startProjectSec == $1.startProjectSec {
+                return $0.endProjectSec < $1.endProjectSec
+            }
+            return $0.startProjectSec < $1.startProjectSec
+        }
+    }
+
+    var hasOverlappingValidLyricCues: Bool {
+        let cues = validLyricCues
+        guard cues.count > 1 else { return false }
+        for index in 1..<cues.count where cues[index].startProjectSec < cues[index - 1].endProjectSec {
+            return true
+        }
+        return false
+    }
+
     init(
         rangeStartProjectSec: Double = 0,
         rangeEndProjectSec: Double = 15,
@@ -53,8 +71,18 @@ struct ShortEditDraft: Codable, Equatable {
 
     mutating func normalize(availableRange: ClosedRange<Double>) {
         crop.normalize()
-        rangeStartProjectSec = min(max(rangeStartProjectSec, availableRange.lowerBound), availableRange.upperBound)
-        rangeEndProjectSec = min(max(rangeEndProjectSec, rangeStartProjectSec + 0.1), availableRange.upperBound)
-        lyricCues = lyricCues.filter(\.isValid)
+
+        let availableDuration = max(0, availableRange.upperBound - availableRange.lowerBound)
+        let minimumDuration = min(0.1, availableDuration)
+        let latestStart = max(availableRange.lowerBound, availableRange.upperBound - minimumDuration)
+
+        rangeStartProjectSec = min(max(rangeStartProjectSec, availableRange.lowerBound), latestStart)
+        rangeEndProjectSec = min(
+            max(rangeEndProjectSec, rangeStartProjectSec + minimumDuration),
+            availableRange.upperBound
+        )
+
+        // Keep incomplete/temporarily invalid lyric cues so the editor never
+        // destroys user-entered lyrics while normalizing unrelated fields.
     }
 }
