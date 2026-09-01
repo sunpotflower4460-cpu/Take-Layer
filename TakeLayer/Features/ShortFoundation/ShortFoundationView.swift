@@ -130,7 +130,7 @@ struct ShortFoundationView: View {
                 ),
                 in: draft.rangeStartProjectSec...max(draft.rangeEndProjectSec, draft.rangeStartProjectSec + 0.001)
             )
-            Text("preview: \(TimeFormatting.seconds(previewProjectSec)) on Project Timeline")
+            Text("preview: \(TimeFormatting.signedSeconds(previewProjectSec)) on Project Timeline")
                 .font(.caption.monospacedDigit())
                 .foregroundStyle(.secondary)
         }
@@ -139,7 +139,7 @@ struct ShortFoundationView: View {
     private var rangeEditor: some View {
         GroupBox("1. Short Range") {
             VStack(alignment: .leading, spacing: 12) {
-                Text("\(TimeFormatting.seconds(draft.rangeStartProjectSec)) → \(TimeFormatting.seconds(draft.rangeEndProjectSec))  (\(TimeFormatting.seconds(draft.durationSec)))")
+                Text("\(TimeFormatting.signedSeconds(draft.rangeStartProjectSec)) → \(TimeFormatting.signedSeconds(draft.rangeEndProjectSec))  (\(TimeFormatting.seconds(draft.durationSec)))")
                     .font(.headline.monospacedDigit())
 
                 Text("Start")
@@ -206,6 +206,12 @@ struct ShortFoundationView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
+                if draft.hasInvalidLyricCues {
+                    Label("未完成の字幕Cueがあります。テキストと開始・終了時刻を修正するか、不要なCueを削除すると書き出せます。", systemImage: "exclamationmark.triangle.fill")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                }
+
                 if draft.hasOverlappingValidLyricCues {
                     Label("字幕Cueの時間が重なっています。Previewは先頭Cueだけを表示し、重なりを直すまで書き出しを停止します。", systemImage: "exclamationmark.triangle.fill")
                         .font(.caption)
@@ -219,10 +225,10 @@ struct ShortFoundationView: View {
                         HStack {
                             TextField("start", value: $cue.startProjectSec, format: .number.precision(.fractionLength(2)))
                                 .textFieldStyle(.roundedBorder)
-                                .keyboardType(.decimalPad)
+                                .keyboardType(.numbersAndPunctuation)
                             TextField("end", value: $cue.endProjectSec, format: .number.precision(.fractionLength(2)))
                                 .textFieldStyle(.roundedBorder)
-                                .keyboardType(.decimalPad)
+                                .keyboardType(.numbersAndPunctuation)
                             Button(role: .destructive) {
                                 draft.lyricCues.removeAll { $0.id == cue.id }
                             } label: {
@@ -262,7 +268,12 @@ struct ShortFoundationView: View {
                     exportShort()
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(isExporting || draft.durationSec <= 0 || draft.hasOverlappingValidLyricCues)
+                .disabled(
+                    isExporting ||
+                    draft.durationSec <= 0 ||
+                    draft.hasInvalidLyricCues ||
+                    draft.hasOverlappingValidLyricCues
+                )
 
                 if isExporting {
                     ProgressView()
