@@ -2,9 +2,9 @@
 
 ## Repository status
 
-As of 2026-08-31, `main` contains the merged **Phase 1 (MVP-α)** integrated flow from PR #5. Phase 0.5A and Phase 0.5B are also merged.
+As of 2026-09-01, `main` contains the merged **Phase 1 (MVP-α)** and **Phase 1.1 Core Stabilization** foundations. Phase 0.5A and Phase 0.5B are also merged.
 
-**Phase 1.1 Core Stabilization** is the next gate before feature expansion. It fixes timeline/export correctness and adds reproducible build, tests, and project persistence.
+**Phase 1.5 Short Foundation** is the active implementation gate. It builds deterministic one-video 9:16 editing primitives before AI Director or multi-part complexity depends on them.
 
 This file is a roadmap. A later phase is not active merely because it appears here. Implement only the phase or scope explicitly requested.
 
@@ -51,7 +51,7 @@ Status: merged baseline on `main`.
 
 ## Phase 1.1: Core Stabilization
 
-Status: implementation branch / merge gate.
+Status: merged on `main`.
 
 Primary purpose: make Phase 1 deterministic and testable before later features depend on it.
 
@@ -69,23 +69,26 @@ Primary purpose: make Phase 1 deterministic and testable before later features d
 
 See `phase-1.1-core-stabilization.md`.
 
-Phase 1.1 must be green before Phase 1.5 / Phase 2 / AI work proceeds.
-
 ## Phase 1.5: Short Foundation
+
+Status: active implementation branch / merge gate.
 
 Goal: prove the one-video short-form editing substrate before multi-part complexity.
 
 - One performance video.
-- 9:16 output canvas.
-- Manual short-range extraction.
+- 9:16 output canvas at 1080 × 1920.
+- Manual short-range extraction in Project Timeline coordinates.
 - Deterministic title layer.
 - User-supplied lyric text layer.
-- Subtitle renderer.
-- Deterministic crop / zoom / pan plan.
+- Timed subtitle renderer.
+- Deterministic crop / zoom / normalized pan plan.
 - Preview → micro-adjustment → export.
+- Persisted `ShortEditDraft` as an EditingPlan precursor.
 - No generative decision-making required yet.
 
-This phase creates the renderer primitives that the later AI Short Director will control through an EditingPlan.
+`TimelineMapper` remains the only synchronization authority. Future AI Short Director work may propose `ShortEditDraft` values but must not bypass the deterministic renderer.
+
+See `phase-1.5-short-foundation.md`.
 
 ## Phase 2: MVP-β / Multi-part Core
 
@@ -95,7 +98,7 @@ This phase creates the renderer primitives that the later AI Short Director will
 - Timeline display.
 - Per-part offset correction.
 
-Multi-part work may proceed after Phase 1.1, but product priority should be evaluated against Phase 1.5 because the primary near-term value is high-quality one-video shorts.
+Multi-part work may proceed after the one-video renderer foundation is reliable, but product priority should remain high-quality one-video shorts first.
 
 ## Phase 3: 自動候補化
 
@@ -166,7 +169,7 @@ Goal: one performance video can become multiple high-quality short-video proposa
 - Lyric caption plans.
 - Restrained zoom / pan / effect plans.
 - Natural / Cinematic / Lyric Focus / Social Hook / Minimal variants.
-- `EditingPlan` intermediate representation.
+- `EditingPlan` intermediate representation evolved from Phase 1.5 `ShortEditDraft`.
 - Deterministic rendering from EditingPlan.
 - Quality Gate before proposals are shown.
 - Proposal comparison UI.
