@@ -12,6 +12,7 @@ struct ProjectDraft: Identifiable, Codable {
     var selectedRawEndSec: Double?
     var offsetMs: Double
     var exportSettings: ExportSettings
+    var shortEditDraft: ShortEditDraft?
     var createdAt: Date
     var updatedAt: Date
 
@@ -28,6 +29,7 @@ struct ProjectDraft: Identifiable, Codable {
         self.title = title
         self.offsetMs = 0
         self.exportSettings = ExportSettings()
+        self.shortEditDraft = nil
         self.createdAt = now
         self.updatedAt = now
     }
