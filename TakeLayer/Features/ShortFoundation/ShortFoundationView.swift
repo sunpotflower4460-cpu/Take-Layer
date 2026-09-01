@@ -14,6 +14,7 @@ struct ShortFoundationView: View {
     @State private var errorMessage: String?
 
     private let availableRange: ClosedRange<Double>
+    private let minimumRangeDuration: Double
 
     init(project: ProjectDraft, onPersistDraft: @escaping (ShortEditDraft) -> Void) {
         self.project = project
@@ -21,12 +22,14 @@ struct ShortFoundationView: View {
 
         let mapping = try? TimelineMapper.makeMapping(project: project)
         let start = mapping?.projectTimelineStartSec ?? 0
-        let end = start + max(0.1, mapping?.outputDurationSec ?? 15)
+        let mappedDuration = max(0.001, mapping?.outputDurationSec ?? 15)
+        let end = start + mappedDuration
         self.availableRange = start...end
+        self.minimumRangeDuration = min(0.1, mappedDuration)
 
         var initial = project.shortEditDraft ?? ShortEditDraft(
-            rangeStartProjectSec: max(0, start),
-            rangeEndProjectSec: min(end, max(0, start) + min(15, max(0.1, end - max(0, start)))),
+            rangeStartProjectSec: start,
+            rangeEndProjectSec: min(end, start + min(15, mappedDuration)),
             titleText: project.title
         )
         initial.normalize(availableRange: start...end)
@@ -55,7 +58,14 @@ struct ShortFoundationView: View {
         }
         .onChange(of: draft) { _, newValue in
             onPersistDraft(newValue)
-            previewProjectSec = min(max(previewProjectSec, newValue.rangeStartProjectSec), newValue.rangeEndProjectSec)
+            let clampedPreview = min(
+                max(previewProjectSec, newValue.rangeStartProjectSec),
+                newValue.rangeEndProjectSec
+            )
+            if clampedPreview != previewProjectSec {
+                previewProjectSec = clampedPreview
+                seekPreview(to: clampedPreview)
+            }
         }
     }
 
@@ -76,12 +86,14 @@ struct ShortFoundationView: View {
 
             ZStack {
                 Color.black
-                ShortPlayerLayerView(player: player)
-                    .scaleEffect(draft.crop.zoom)
-                    .offset(
-                        x: CGFloat((0.5 - draft.crop.focusX) * 220 * draft.crop.zoom),
-                        y: CGFloat((draft.crop.focusY - 0.5) * 220 * draft.crop.zoom)
-                    )
+                ShortCropPreviewView(
+                    player: player,
+                    displaySize: CGSize(
+                        width: project.activeVideo?.width ?? 1080,
+                        height: project.activeVideo?.height ?? 1920
+                    ),
+                    crop: draft.crop
+                )
 
                 VStack {
                     if !draft.titleText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -116,7 +128,7 @@ struct ShortFoundationView: View {
                         seekPreview(to: $0)
                     }
                 ),
-                in: draft.rangeStartProjectSec...max(draft.rangeEndProjectSec, draft.rangeStartProjectSec + 0.1)
+                in: draft.rangeStartProjectSec...max(draft.rangeEndProjectSec, draft.rangeStartProjectSec + 0.001)
             )
             Text("preview: \(TimeFormatting.seconds(previewProjectSec)) on Project Timeline")
                 .font(.caption.monospacedDigit())
@@ -136,7 +148,10 @@ struct ShortFoundationView: View {
                     value: Binding(
                         get: { draft.rangeStartProjectSec },
                         set: { newValue in
-                            draft.rangeStartProjectSec = min(newValue, draft.rangeEndProjectSec - 0.1)
+                            draft.rangeStartProjectSec = min(
+                                newValue,
+                                draft.rangeEndProjectSec - minimumRangeDuration
+                            )
                         }
                     ),
                     in: availableRange
@@ -148,7 +163,10 @@ struct ShortFoundationView: View {
                     value: Binding(
                         get: { draft.rangeEndProjectSec },
                         set: { newValue in
-                            draft.rangeEndProjectSec = max(newValue, draft.rangeStartProjectSec + 0.1)
+                            draft.rangeEndProjectSec = max(
+                                newValue,
+                                draft.rangeStartProjectSec + minimumRangeDuration
+                            )
                         }
                     ),
                     in: availableRange
@@ -187,6 +205,12 @@ struct ShortFoundationView: View {
                 Text("歌詞は生成せず、ユーザーが入力した正式テキストだけを字幕として使います。時刻はProject Timeline基準です。")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+
+                if draft.hasOverlappingValidLyricCues {
+                    Label("字幕Cueの時間が重なっています。Previewは先頭Cueだけを表示し、重なりを直すまで書き出しを停止します。", systemImage: "exclamationmark.triangle.fill")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                }
 
                 ForEach($draft.lyricCues) { $cue in
                     VStack(alignment: .leading, spacing: 8) {
@@ -238,7 +262,7 @@ struct ShortFoundationView: View {
                     exportShort()
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(isExporting || draft.durationSec <= 0)
+                .disabled(isExporting || draft.durationSec <= 0 || draft.hasOverlappingValidLyricCues)
 
                 if isExporting {
                     ProgressView()
@@ -258,7 +282,7 @@ struct ShortFoundationView: View {
     }
 
     private var activeLyricText: String? {
-        draft.lyricCues.first {
+        draft.validLyricCues.first {
             $0.startProjectSec <= previewProjectSec && previewProjectSec < $0.endProjectSec
         }?.text
     }
@@ -282,7 +306,11 @@ struct ShortFoundationView: View {
             projectTimelineSec: projectSec,
             songStartRawSec: songStartRawSec
         )
-        player.seek(to: CMTime(seconds: max(0, rawSec), preferredTimescale: 600), toleranceBefore: .zero, toleranceAfter: .zero)
+        player.seek(
+            to: CMTime(seconds: max(0, rawSec), preferredTimescale: 600),
+            toleranceBefore: .zero,
+            toleranceAfter: .zero
+        )
     }
 
     private func exportShort() {
@@ -297,6 +325,34 @@ struct ShortFoundationView: View {
                 errorMessage = error.localizedDescription
             }
             isExporting = false
+        }
+    }
+}
+
+private struct ShortCropPreviewView: View {
+    let player: AVPlayer
+    let displaySize: CGSize
+    let crop: ShortCropPlan
+
+    var body: some View {
+        GeometryReader { proxy in
+            let geometry = ShortRenderGeometryBuilder.make(displaySize: displaySize, crop: crop)
+            let previewScale = proxy.size.width / geometry.renderSize.width
+
+            ZStack(alignment: .topLeading) {
+                Color.black
+                ShortPlayerLayerView(player: player)
+                    .frame(
+                        width: geometry.scaledDisplaySize.width * previewScale,
+                        height: geometry.scaledDisplaySize.height * previewScale
+                    )
+                    .offset(
+                        x: -geometry.cropOffset.x * previewScale,
+                        y: -geometry.cropOffset.y * previewScale
+                    )
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)
+            .clipped()
         }
     }
 }
@@ -324,11 +380,11 @@ private final class PlayerLayerHostView: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        playerLayer.videoGravity = .resizeAspectFill
+        playerLayer.videoGravity = .resizeAspect
     }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        playerLayer.videoGravity = .resizeAspectFill
+        playerLayer.videoGravity = .resizeAspect
     }
 }
