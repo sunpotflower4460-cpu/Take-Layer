@@ -115,17 +115,35 @@ final class MVPAlphaViewModel: ObservableObject {
 
     func setVideoSongStart() {
         guard let video = project.activeVideo else { return }
-        project.songStartRawSec = min(max(videoPreviewTimeSec, 0), max(0, video.durationSec - 0.01))
-        project.shortEditDraft = nil
-        updateDefaultTrimIfPossible()
+        let newSongStartRawSec = min(max(videoPreviewTimeSec, 0), max(0, video.durationSec - 0.01))
+        let shouldPreserveShortTrim = project.shortEditDraft != nil &&
+            project.selectedRawStartSec != nil &&
+            project.selectedRawEndSec != nil
+
+        if let oldSongStartRawSec = project.songStartRawSec,
+           oldSongStartRawSec != newSongStartRawSec {
+            remapShortDraftForVideoSongStartChange(
+                from: oldSongStartRawSec,
+                to: newSongStartRawSec
+            )
+        }
+
+        project.songStartRawSec = newSongStartRawSec
+        if !shouldPreserveShortTrim {
+            updateDefaultTrimIfPossible()
+        }
         touchAndPersist()
     }
 
     func setAudioSongStart() {
         guard let audio = project.importedMasterAudio else { return }
+        let shouldPreserveShortTrim = project.shortEditDraft != nil &&
+            project.selectedRawStartSec != nil &&
+            project.selectedRawEndSec != nil
         project.songStartAudioSec = min(max(audioPreviewTimeSec, 0), max(0, audio.durationSec - 0.01))
-        project.shortEditDraft = nil
-        updateDefaultTrimIfPossible()
+        if !shouldPreserveShortTrim {
+            updateDefaultTrimIfPossible()
+        }
         touchAndPersist()
     }
 
@@ -173,6 +191,36 @@ final class MVPAlphaViewModel: ObservableObject {
             }
             isExporting = false
         }
+    }
+
+    private func remapShortDraftForVideoSongStartChange(from oldSongStartRawSec: Double, to newSongStartRawSec: Double) {
+        guard var draft = project.shortEditDraft else { return }
+
+        draft.rangeStartProjectSec = TimelineMapper.remapProjectTimelineSec(
+            draft.rangeStartProjectSec,
+            fromSongStartRawSec: oldSongStartRawSec,
+            toSongStartRawSec: newSongStartRawSec
+        )
+        draft.rangeEndProjectSec = TimelineMapper.remapProjectTimelineSec(
+            draft.rangeEndProjectSec,
+            fromSongStartRawSec: oldSongStartRawSec,
+            toSongStartRawSec: newSongStartRawSec
+        )
+
+        for index in draft.lyricCues.indices {
+            draft.lyricCues[index].startProjectSec = TimelineMapper.remapProjectTimelineSec(
+                draft.lyricCues[index].startProjectSec,
+                fromSongStartRawSec: oldSongStartRawSec,
+                toSongStartRawSec: newSongStartRawSec
+            )
+            draft.lyricCues[index].endProjectSec = TimelineMapper.remapProjectTimelineSec(
+                draft.lyricCues[index].endProjectSec,
+                fromSongStartRawSec: oldSongStartRawSec,
+                toSongStartRawSec: newSongStartRawSec
+            )
+        }
+
+        project.shortEditDraft = draft
     }
 
     private func resetVideoDependentState() {

@@ -52,6 +52,21 @@ enum TimelineMapper {
         songStartRawSec + projectTimelineSec
     }
 
+    static func remapProjectTimelineSec(
+        _ projectTimelineSec: Double,
+        fromSongStartRawSec oldSongStartRawSec: Double,
+        toSongStartRawSec newSongStartRawSec: Double
+    ) -> Double {
+        let rawSec = videoRawSec(
+            projectTimelineSec: projectTimelineSec,
+            songStartRawSec: oldSongStartRawSec
+        )
+        return TimelineMapper.projectTimelineSec(
+            videoRawSec: rawSec,
+            songStartRawSec: newSongStartRawSec
+        )
+    }
+
     static func masterAudioSec(
         projectTimelineSec: Double,
         songStartAudioSec: Double,

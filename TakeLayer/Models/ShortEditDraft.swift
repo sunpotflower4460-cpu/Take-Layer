@@ -38,20 +38,19 @@ struct ShortEditDraft: Codable, Equatable {
     }
 
     var validLyricCues: [ShortLyricCue] {
-        lyricCues.filter(\.isValid).sorted {
-            if $0.startProjectSec == $1.startProjectSec {
-                return $0.endProjectSec < $1.endProjectSec
-            }
-            return $0.startProjectSec < $1.startProjectSec
-        }
+        lyricCues.filter(\.isValid).sorted(by: lyricSort)
+    }
+
+    var lyricCuesIntersectingSelectedRange: [ShortLyricCue] {
+        lyricCues.filter { cueIntersectsSelectedRange($0) }
     }
 
     var hasInvalidLyricCues: Bool {
-        lyricCues.contains { !$0.isValid }
+        lyricCuesIntersectingSelectedRange.contains { !$0.isValid }
     }
 
     var hasOverlappingValidLyricCues: Bool {
-        let cues = validLyricCues
+        let cues = lyricCuesIntersectingSelectedRange.filter(\.isValid).sorted(by: lyricSort)
         guard cues.count > 1 else { return false }
         for index in 1..<cues.count where cues[index].startProjectSec < cues[index - 1].endProjectSec {
             return true
@@ -88,5 +87,30 @@ struct ShortEditDraft: Codable, Equatable {
 
         // Keep incomplete/temporarily invalid lyric cues so the editor never
         // destroys user-entered lyrics while normalizing unrelated fields.
+    }
+
+    private func cueIntersectsSelectedRange(_ cue: ShortLyricCue) -> Bool {
+        guard cue.startProjectSec.isFinite, cue.endProjectSec.isFinite else {
+            // An unlocatable cue cannot safely be proven outside the selected
+            // range, so keep it visible to validation until the user repairs it.
+            return true
+        }
+
+        let selectionStart = min(rangeStartProjectSec, rangeEndProjectSec)
+        let selectionEnd = max(rangeStartProjectSec, rangeEndProjectSec)
+        let cueStart = min(cue.startProjectSec, cue.endProjectSec)
+        let cueEnd = max(cue.startProjectSec, cue.endProjectSec)
+
+        if cueStart == cueEnd {
+            return cueStart >= selectionStart && cueStart < selectionEnd
+        }
+        return cueEnd > selectionStart && cueStart < selectionEnd
+    }
+
+    private func lyricSort(_ lhs: ShortLyricCue, _ rhs: ShortLyricCue) -> Bool {
+        if lhs.startProjectSec == rhs.startProjectSec {
+            return lhs.endProjectSec < rhs.endProjectSec
+        }
+        return lhs.startProjectSec < rhs.startProjectSec
     }
 }

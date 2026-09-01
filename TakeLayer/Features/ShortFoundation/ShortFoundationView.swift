@@ -58,6 +58,9 @@ struct ShortFoundationView: View {
         }
         .onChange(of: draft) { _, newValue in
             onPersistDraft(newValue)
+            exportResult = nil
+            errorMessage = nil
+
             let clampedPreview = min(
                 max(previewProjectSec, newValue.rangeStartProjectSec),
                 newValue.rangeEndProjectSec
@@ -207,13 +210,13 @@ struct ShortFoundationView: View {
                     .foregroundStyle(.secondary)
 
                 if draft.hasInvalidLyricCues {
-                    Label("未完成の字幕Cueがあります。テキストと開始・終了時刻を修正するか、不要なCueを削除すると書き出せます。", systemImage: "exclamationmark.triangle.fill")
+                    Label("選択範囲内に未完成の字幕Cueがあります。テキストと開始・終了時刻を修正するか、不要なCueを削除すると書き出せます。", systemImage: "exclamationmark.triangle.fill")
                         .font(.caption)
                         .foregroundStyle(.orange)
                 }
 
                 if draft.hasOverlappingValidLyricCues {
-                    Label("字幕Cueの時間が重なっています。Previewは先頭Cueだけを表示し、重なりを直すまで書き出しを停止します。", systemImage: "exclamationmark.triangle.fill")
+                    Label("選択範囲内で字幕Cueの時間が重なっています。Previewは先頭Cueだけを表示し、重なりを直すまで書き出しを停止します。", systemImage: "exclamationmark.triangle.fill")
                         .font(.caption)
                         .foregroundStyle(.orange)
                 }
@@ -325,15 +328,22 @@ struct ShortFoundationView: View {
     }
 
     private func exportShort() {
+        let requestedDraft = draft
         isExporting = true
         exportResult = nil
         errorMessage = nil
-        onPersistDraft(draft)
+        onPersistDraft(requestedDraft)
+
         Task {
             do {
-                exportResult = try await ShortVideoExportService.export(project: project, draft: draft)
+                let result = try await ShortVideoExportService.export(project: project, draft: requestedDraft)
+                if draft == requestedDraft {
+                    exportResult = result
+                }
             } catch {
-                errorMessage = error.localizedDescription
+                if draft == requestedDraft {
+                    errorMessage = error.localizedDescription
+                }
             }
             isExporting = false
         }

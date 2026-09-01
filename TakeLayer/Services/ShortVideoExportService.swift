@@ -21,9 +21,9 @@ enum ShortVideoExportError: LocalizedError {
         case .invalidDraft:
             return "Shortの範囲または編集Planが不正です。"
         case .invalidLyrics:
-            return "未完成の歌詞字幕Cueがあります。各Cueのテキストと開始・終了時刻を修正するか、不要なCueを削除してください。"
+            return "選択範囲内に未完成の歌詞字幕Cueがあります。テキストと開始・終了時刻を修正するか、不要なCueを削除してください。"
         case .overlappingLyrics:
-            return "歌詞字幕の時間が重なっています。各Cueの時間を重ならないように調整してください。"
+            return "選択範囲内で歌詞字幕の時間が重なっています。各Cueの時間を重ならないように調整してください。"
         case .missingVideo:
             return "動画が読み込まれていません。"
         case .missingMasterAudio:
@@ -45,6 +45,8 @@ enum ShortVideoExportError: LocalizedError {
 }
 
 enum ShortVideoExportService {
+    static let mediaTimescale: CMTimeScale = 60_000
+
     static func export(project: ProjectDraft, draft: ShortEditDraft) async throws -> ExportResult {
         guard draft.durationSec > 0, draft.durationSec.isFinite else {
             throw ShortVideoExportError.invalidDraft
@@ -92,24 +94,24 @@ enum ShortVideoExportService {
             throw ShortVideoExportError.missingAudioTrack
         }
 
-        let outputDuration = CMTime(seconds: mapping.outputDurationSec, preferredTimescale: 600)
+        let outputDuration = mediaTime(mapping.outputDurationSec)
         try videoTrack.insertTimeRange(
             CMTimeRange(
-                start: CMTime(seconds: mapping.videoSourceStartSec, preferredTimescale: 600),
+                start: mediaTime(mapping.videoSourceStartSec),
                 duration: outputDuration
             ),
             of: sourceVideoTrack,
             at: .zero
         )
 
-        let audioDuration = CMTime(seconds: mapping.audioInsertDurationSec, preferredTimescale: 600)
+        let audioDuration = mediaTime(mapping.audioInsertDurationSec)
         try audioTrack.insertTimeRange(
             CMTimeRange(
-                start: CMTime(seconds: mapping.audioSourceStartSec, preferredTimescale: 600),
+                start: mediaTime(mapping.audioSourceStartSec),
                 duration: audioDuration
             ),
             of: sourceAudioTrack,
-            at: CMTime(seconds: mapping.audioInsertionTimeSec, preferredTimescale: 600)
+            at: mediaTime(mapping.audioInsertionTimeSec)
         )
 
         let videoComposition = try await makeVideoComposition(
@@ -138,6 +140,10 @@ enum ShortVideoExportService {
         }
 
         return ExportResult(outputURL: outputURL, durationSec: mapping.outputDurationSec)
+    }
+
+    static func mediaTime(_ seconds: Double) -> CMTime {
+        CMTime(seconds: seconds, preferredTimescale: mediaTimescale)
     }
 
     private static func makeVideoComposition(
