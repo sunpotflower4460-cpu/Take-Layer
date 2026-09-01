@@ -77,6 +77,12 @@ struct MVPAlphaFlowView: View {
                         errorMessage: viewModel.errorMessage,
                         onExport: viewModel.export
                     )
+                    if viewModel.validationResult.isReady {
+                        ShortFoundationEntryView(
+                            project: viewModel.project,
+                            onPersistDraft: viewModel.saveShortEditDraft
+                        )
+                    }
                 }
                 .padding()
             }
@@ -103,12 +109,12 @@ struct MVPAlphaFlowView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("TakeLayer Phase 1")
+            Text("TakeLayer Phase 1 + 1.5")
                 .font(.largeTitle)
                 .fontWeight(.bold)
-            Text("1本動画を、DAW完成WAVつきの演奏動画として書き出すMVP-α統合フローです。")
+            Text("まず完成WAVと動画の同期を確定し、その同じProject Timelineから9:16 Shortを切り出します。")
                 .foregroundStyle(.secondary)
-            Text("Project timeline 0:00 = 曲開始。songStartRawSec / songStartAudioSec / trim range / offsetMs は手動で保持します。")
+            Text("Project timeline 0:00 = 曲開始。同期はTimelineMapperだけが正本です。")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }
@@ -121,6 +127,27 @@ struct MVPAlphaFlowView: View {
             importAction(url)
         case .failure(let error):
             viewModel.errorMessage = error.localizedDescription
+        }
+    }
+}
+
+private struct ShortFoundationEntryView: View {
+    let project: ProjectDraft
+    let onPersistDraft: (ShortEditDraft) -> Void
+
+    var body: some View {
+        SectionCard(title: "8. Phase 1.5 Short Foundation") {
+            Text("同期済みの1本動画から、9:16・範囲・crop/zoom/pan・タイトル・正式歌詞字幕を編集します。")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+
+            NavigationLink {
+                ShortFoundationView(project: project, onPersistDraft: onPersistDraft)
+            } label: {
+                Label("Short Editorを開く", systemImage: "rectangle.portrait.and.arrow.forward")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
         }
     }
 }
