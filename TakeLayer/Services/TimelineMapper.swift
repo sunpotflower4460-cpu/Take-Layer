@@ -48,6 +48,10 @@ enum TimelineMapper {
         videoRawSec - songStartRawSec
     }
 
+    static func videoRawSec(projectTimelineSec: Double, songStartRawSec: Double) -> Double {
+        songStartRawSec + projectTimelineSec
+    }
+
     static func masterAudioSec(
         projectTimelineSec: Double,
         songStartAudioSec: Double,
@@ -56,6 +60,31 @@ enum TimelineMapper {
         // Positive offset delays program audio, therefore an earlier master
         // sample must be placed at the same output time.
         songStartAudioSec + projectTimelineSec - (offsetMs / 1_000.0)
+    }
+
+    /// Maps an arbitrary Project Timeline window through the same authoritative
+    /// synchronization path used by the normal renderer. Short-form editors and
+    /// future AI plans must call this instead of recreating sync math.
+    static func makeMapping(
+        project: ProjectDraft,
+        projectTimelineStartSec: Double,
+        durationSec: Double
+    ) throws -> TimelineMapping {
+        guard projectTimelineStartSec.isFinite,
+              durationSec.isFinite,
+              durationSec > 0,
+              let songStartRawSec = project.songStartRawSec else {
+            throw TimelineMapperError.invalidTrimRange
+        }
+
+        var scopedProject = project
+        let rawStartSec = videoRawSec(
+            projectTimelineSec: projectTimelineStartSec,
+            songStartRawSec: songStartRawSec
+        )
+        scopedProject.selectedRawStartSec = rawStartSec
+        scopedProject.selectedRawEndSec = rawStartSec + durationSec
+        return try makeMapping(project: scopedProject)
     }
 
     static func makeMapping(project: ProjectDraft) throws -> TimelineMapping {
