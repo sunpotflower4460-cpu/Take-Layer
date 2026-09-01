@@ -5,6 +5,7 @@ import UIKit
 
 enum ShortVideoExportError: LocalizedError {
     case invalidDraft
+    case invalidLyrics
     case overlappingLyrics
     case missingVideo
     case missingMasterAudio
@@ -19,6 +20,8 @@ enum ShortVideoExportError: LocalizedError {
         switch self {
         case .invalidDraft:
             return "Shortの範囲または編集Planが不正です。"
+        case .invalidLyrics:
+            return "未完成の歌詞字幕Cueがあります。各Cueのテキストと開始・終了時刻を修正するか、不要なCueを削除してください。"
         case .overlappingLyrics:
             return "歌詞字幕の時間が重なっています。各Cueの時間を重ならないように調整してください。"
         case .missingVideo:
@@ -45,6 +48,9 @@ enum ShortVideoExportService {
     static func export(project: ProjectDraft, draft: ShortEditDraft) async throws -> ExportResult {
         guard draft.durationSec > 0, draft.durationSec.isFinite else {
             throw ShortVideoExportError.invalidDraft
+        }
+        guard !draft.hasInvalidLyricCues else {
+            throw ShortVideoExportError.invalidLyrics
         }
         guard !draft.hasOverlappingValidLyricCues else {
             throw ShortVideoExportError.overlappingLyrics
@@ -216,7 +222,7 @@ enum ShortVideoExportService {
             let animation = CAKeyframeAnimation(keyPath: "opacity")
             animation.values = [0, 1, 1, 0]
             animation.keyTimes = [0, 0.02, 0.98, 1]
-            animation.duration = max(0.05, overlapEnd - overlapStart)
+            animation.duration = overlapEnd - overlapStart
             animation.beginTime = AVCoreAnimationBeginTimeAtZero + (overlapStart - projectRangeStartSec)
             animation.isRemovedOnCompletion = false
             animation.fillMode = .both
