@@ -46,6 +46,10 @@ struct ShortEditDraft: Codable, Equatable {
         }
     }
 
+    var hasInvalidLyricCues: Bool {
+        lyricCues.contains { !$0.isValid }
+    }
+
     var hasOverlappingValidLyricCues: Bool {
         let cues = validLyricCues
         guard cues.count > 1 else { return false }
