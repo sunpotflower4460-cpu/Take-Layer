@@ -45,7 +45,9 @@ enum ShortVideoExportError: LocalizedError {
 }
 
 enum ShortVideoExportService {
-    static let mediaTimescale: CMTimeScale = 60_000
+    // Microsecond ticks make millisecond user offsets exactly representable
+    // while leaving ample headroom for normal project durations.
+    static let mediaTimescale: CMTimeScale = 1_000_000
 
     static func export(project: ProjectDraft, draft: ShortEditDraft) async throws -> ExportResult {
         guard draft.durationSec > 0, draft.durationSec.isFinite else {
@@ -143,7 +145,10 @@ enum ShortVideoExportService {
     }
 
     static func mediaTime(_ seconds: Double) -> CMTime {
-        CMTime(seconds: seconds, preferredTimescale: mediaTimescale)
+        guard seconds.isFinite else { return .invalid }
+        let ticks = (seconds * Double(mediaTimescale)).rounded()
+        guard ticks >= Double(Int64.min), ticks <= Double(Int64.max) else { return .invalid }
+        return CMTime(value: Int64(ticks), timescale: mediaTimescale)
     }
 
     private static func makeVideoComposition(
