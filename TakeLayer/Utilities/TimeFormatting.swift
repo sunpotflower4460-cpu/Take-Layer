@@ -14,6 +14,15 @@ enum TimeFormatting {
         return String(format: "%02d:%05.2f", minutes, seconds)
     }
 
+    static func signedSeconds(_ value: Double) -> String {
+        guard value.isFinite else { return "--:--.--" }
+        let sign = value < 0 ? "-" : "+"
+        let absoluteValue = abs(value)
+        let minutes = Int(absoluteValue / 60)
+        let seconds = absoluteValue - Double(minutes * 60)
+        return String(format: "%@%02d:%05.2f", sign, minutes, seconds)
+    }
+
     static func fileSize(_ bytes: Int64?) -> String {
         guard let bytes else { return "Unknown" }
         let formatter = ByteCountFormatter()
