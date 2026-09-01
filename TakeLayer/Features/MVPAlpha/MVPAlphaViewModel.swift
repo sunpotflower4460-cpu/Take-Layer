@@ -103,6 +103,7 @@ final class MVPAlphaViewModel: ObservableObject {
                 project.importedMasterAudio = try await MediaInfoReader.readMasterAudio(from: storedURL)
                 audioPreviewTimeSec = 0
                 project.songStartAudioSec = nil
+                project.shortEditDraft = nil
                 updateDefaultTrimIfPossible()
                 touchAndPersist()
             } catch {
@@ -115,6 +116,7 @@ final class MVPAlphaViewModel: ObservableObject {
     func setVideoSongStart() {
         guard let video = project.activeVideo else { return }
         project.songStartRawSec = min(max(videoPreviewTimeSec, 0), max(0, video.durationSec - 0.01))
+        project.shortEditDraft = nil
         updateDefaultTrimIfPossible()
         touchAndPersist()
     }
@@ -122,6 +124,7 @@ final class MVPAlphaViewModel: ObservableObject {
     func setAudioSongStart() {
         guard let audio = project.importedMasterAudio else { return }
         project.songStartAudioSec = min(max(audioPreviewTimeSec, 0), max(0, audio.durationSec - 0.01))
+        project.shortEditDraft = nil
         updateDefaultTrimIfPossible()
         touchAndPersist()
     }
@@ -152,6 +155,11 @@ final class MVPAlphaViewModel: ObservableObject {
         touchAndPersist()
     }
 
+    func saveShortEditDraft(_ draft: ShortEditDraft) {
+        project.shortEditDraft = draft
+        touchAndPersist()
+    }
+
     func export() {
         guard canExport else { return }
         isExporting = true
@@ -172,6 +180,7 @@ final class MVPAlphaViewModel: ObservableObject {
         project.songStartRawSec = nil
         project.selectedRawStartSec = nil
         project.selectedRawEndSec = nil
+        project.shortEditDraft = nil
     }
 
     private func updateDefaultTrimIfPossible() {
