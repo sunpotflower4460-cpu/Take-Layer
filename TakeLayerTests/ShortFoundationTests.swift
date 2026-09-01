@@ -75,6 +75,66 @@ final class ShortFoundationTests: XCTestCase {
         XCTAssertEqual(crop.focusY, 1)
     }
 
+    func testDraftNormalizationPreservesNegativePreSongRange() {
+        var draft = ShortEditDraft(
+            rangeStartProjectSec: -10,
+            rangeEndProjectSec: -5
+        )
+        draft.normalize(availableRange: -10 ... -5)
+
+        XCTAssertEqual(draft.rangeStartProjectSec, -10, accuracy: 0.000_001)
+        XCTAssertEqual(draft.rangeEndProjectSec, -5, accuracy: 0.000_001)
+    }
+
+    func testDraftNormalizationDoesNotInventTimeForTinyMappedRange() {
+        var draft = ShortEditDraft(
+            rangeStartProjectSec: 4,
+            rangeEndProjectSec: 4.05
+        )
+        draft.normalize(availableRange: 4 ... 4.05)
+
+        XCTAssertEqual(draft.rangeStartProjectSec, 4, accuracy: 0.000_001)
+        XCTAssertEqual(draft.rangeEndProjectSec, 4.05, accuracy: 0.000_001)
+        XCTAssertEqual(draft.durationSec, 0.05, accuracy: 0.000_001)
+    }
+
+    func testDraftNormalizationPreservesIncompleteLyricForCorrection() {
+        let cue = ShortLyricCue(startProjectSec: 3, endProjectSec: 3, text: "unfinished")
+        var draft = ShortEditDraft(
+            rangeStartProjectSec: 0,
+            rangeEndProjectSec: 10,
+            lyricCues: [cue]
+        )
+        draft.normalize(availableRange: 0 ... 10)
+
+        XCTAssertEqual(draft.lyricCues, [cue])
+        XCTAssertFalse(draft.lyricCues[0].isValid)
+    }
+
+    func testOverlappingValidLyricsAreDetected() {
+        let first = ShortLyricCue(startProjectSec: 1, endProjectSec: 4, text: "first")
+        let second = ShortLyricCue(startProjectSec: 3.5, endProjectSec: 5, text: "second")
+        let draft = ShortEditDraft(
+            rangeStartProjectSec: 0,
+            rangeEndProjectSec: 10,
+            lyricCues: [first, second]
+        )
+
+        XCTAssertTrue(draft.hasOverlappingValidLyricCues)
+    }
+
+    func testAdjacentLyricsDoNotCountAsOverlap() {
+        let first = ShortLyricCue(startProjectSec: 1, endProjectSec: 4, text: "first")
+        let second = ShortLyricCue(startProjectSec: 4, endProjectSec: 5, text: "second")
+        let draft = ShortEditDraft(
+            rangeStartProjectSec: 0,
+            rangeEndProjectSec: 10,
+            lyricCues: [first, second]
+        )
+
+        XCTAssertFalse(draft.hasOverlappingValidLyricCues)
+    }
+
     private func makeProject() -> ProjectDraft {
         var project = ProjectDraft(title: "Short Test")
         project.importedVideo = ImportedVideo(
