@@ -86,6 +86,12 @@ final class ShortFoundationTests: XCTestCase {
         XCTAssertEqual(draft.rangeEndProjectSec, -5, accuracy: 0.000_001)
     }
 
+    func testSignedProjectTimelineFormattingPreservesNegativeTime() {
+        XCTAssertEqual(TimeFormatting.signedSeconds(-10), "-00:10.00")
+        XCTAssertEqual(TimeFormatting.signedSeconds(0), "+00:00.00")
+        XCTAssertEqual(TimeFormatting.signedSeconds(65.25), "+01:05.25")
+    }
+
     func testDraftNormalizationDoesNotInventTimeForTinyMappedRange() {
         var draft = ShortEditDraft(
             rangeStartProjectSec: 4,
@@ -109,6 +115,27 @@ final class ShortFoundationTests: XCTestCase {
 
         XCTAssertEqual(draft.lyricCues, [cue])
         XCTAssertFalse(draft.lyricCues[0].isValid)
+        XCTAssertTrue(draft.hasInvalidLyricCues)
+    }
+
+    func testExportRejectsIncompleteLyricsBeforeRendering() async {
+        let cue = ShortLyricCue(startProjectSec: 3, endProjectSec: 3, text: "unfinished")
+        let draft = ShortEditDraft(
+            rangeStartProjectSec: 0,
+            rangeEndProjectSec: 10,
+            lyricCues: [cue]
+        )
+
+        do {
+            _ = try await ShortVideoExportService.export(project: makeProject(), draft: draft)
+            XCTFail("Expected invalidLyrics")
+        } catch let error as ShortVideoExportError {
+            guard case .invalidLyrics = error else {
+                return XCTFail("Expected invalidLyrics, got \(error)")
+            }
+        } catch {
+            XCTFail("Expected ShortVideoExportError, got \(error)")
+        }
     }
 
     func testOverlappingValidLyricsAreDetected() {
@@ -126,6 +153,18 @@ final class ShortFoundationTests: XCTestCase {
     func testAdjacentLyricsDoNotCountAsOverlap() {
         let first = ShortLyricCue(startProjectSec: 1, endProjectSec: 4, text: "first")
         let second = ShortLyricCue(startProjectSec: 4, endProjectSec: 5, text: "second")
+        let draft = ShortEditDraft(
+            rangeStartProjectSec: 0,
+            rangeEndProjectSec: 10,
+            lyricCues: [first, second]
+        )
+
+        XCTAssertFalse(draft.hasOverlappingValidLyricCues)
+    }
+
+    func testAdjacentSubFiftyMillisecondLyricsDoNotCountAsOverlap() {
+        let first = ShortLyricCue(startProjectSec: 1, endProjectSec: 1.01, text: "first")
+        let second = ShortLyricCue(startProjectSec: 1.01, endProjectSec: 2, text: "second")
         let draft = ShortEditDraft(
             rangeStartProjectSec: 0,
             rangeEndProjectSec: 10,
