@@ -2,7 +2,7 @@ import XCTest
 @testable import TakeLayer
 
 final class SongMemoryFoundationTests: XCTestCase {
-    func testConfirmedSongCreatesIdentityProfileArrangementAndLyrics() {
+    func testConfirmedSongCreatesIdentityProfileArrangementAndLyrics() throws {
         var library = SongMemoryLibrary()
         let now = Date(timeIntervalSince1970: 1_000)
 
