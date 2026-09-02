@@ -7,20 +7,22 @@ Read these first when working on the active TakeLayer implementation.
 1. `../AGENTS.md`
 2. `phases.md`
 3. `phase-1.1-core-stabilization.md`
-4. `architecture.md`
-5. `mvp-scope.md`
-6. `data-model.md`
-7. `non-goals.md`
-8. `testing-cases.md`
-9. `codex-instructions.md`
-10. `glossary.md`
-11. `../README.md` — historical integrated v1.2 design; use `phases.md` for current implementation status.
+4. `phase-1.5-short-foundation.md`
+5. `phase-7-song-intelligence-foundation.md`
+6. `phase-7-song-resolver-evidence.md`
+7. `phase-7-tonal-evidence.md`
+8. `architecture.md`
+9. `mvp-scope.md`
+10. `data-model.md`
+11. `non-goals.md`
+12. `testing-cases.md`
+13. `codex-instructions.md`
+14. `glossary.md`
+15. `../README.md` — historical integrated v1.2 design; use `phases.md` for current implementation status.
 
-## Phase 1.1 Core Stabilization
+## Reliability and deterministic editing foundations
 
 ### `phase-1.1-core-stabilization.md`
-
-Current reliability gate between merged Phase 1 and later feature expansion:
 
 - authoritative TimelineMapper
 - real `offsetMs` application
@@ -31,6 +33,48 @@ Current reliability gate between merged Phase 1 and later feature expansion:
 - local Project persistence
 - capture-session serialization
 - modern async export path
+
+### `phase-1.5-short-foundation.md`
+
+- deterministic 9:16 Short editing
+- Project Timeline range extraction
+- crop / zoom / pan plan
+- title and timed lyric layers
+- preview → micro-adjustment → export
+
+## Phase 7 Song Intelligence
+
+### `phase-7-song-intelligence-foundation.md`
+
+Human-confirmed musical-work memory:
+
+- SongIdentity / SongProfile
+- Song / Arrangement separation
+- FormalLyrics
+- Project ↔ Song Memory linkage
+- user-confirmed information precedence
+
+### `phase-7-song-resolver-evidence.md`
+
+Merged deterministic candidate-evidence foundation:
+
+- completed-WAV evidence extraction
+- duration / energy / transient shape
+- Arrangement fingerprint registration
+- confidence-ranked candidates
+- explicit human confirmation
+
+### `phase-7-tonal-evidence.md`
+
+Active tonal matching gate:
+
+- 12 pitch classes
+- 32 normalized-time Chroma-like frames
+- global tonal distribution
+- transposition-aware comparison
+- tuning tolerance
+- backwards-compatible fingerprint enrichment
+- explainable tonal score and key-shift evidence
 
 ## Future AI Music Video Director
 
