@@ -139,6 +139,8 @@ final class MVPAlphaViewModel: ObservableObject {
                 let evidence = try await Task.detached(priority: .userInitiated) {
                     try AudioEvidenceExtractor.extract(from: url)
                 }.value
+
+                let originalSongMemory = songMemoryLibrary
                 var updatedEvidenceLibrary = songResolverEvidenceLibrary
                 let fingerprint = updatedEvidenceLibrary.register(
                     arrangementID: arrangementID,
@@ -149,8 +151,15 @@ final class MVPAlphaViewModel: ObservableObject {
                 var updatedSongMemory = songMemoryLibrary
                 updatedSongMemory.attachFingerprintID(fingerprint.id, to: arrangementID)
 
-                try SongResolverEvidenceStore.save(updatedEvidenceLibrary)
+                // Save the reference side first. If the evidence write fails, restore the
+                // previous Song Memory snapshot so a half-registered fingerprint is not kept.
                 try SongMemoryStore.save(updatedSongMemory)
+                do {
+                    try SongResolverEvidenceStore.save(updatedEvidenceLibrary)
+                } catch {
+                    try? SongMemoryStore.save(originalSongMemory)
+                    throw error
+                }
 
                 currentAudioEvidence = evidence
                 songResolverEvidenceLibrary = updatedEvidenceLibrary
