@@ -10,7 +10,8 @@ enum SongResolver {
         var bestByArrangement: [UUID: SongMatchCandidate] = [:]
 
         for fingerprint in evidenceLibrary.fingerprints {
-            guard let arrangement = songMemory.arrangement(for: fingerprint.arrangementID) else {
+            guard let arrangement = songMemory.arrangement(for: fingerprint.arrangementID),
+                  arrangement.fingerprintIDs.contains(fingerprint.id.uuidString) else {
                 continue
             }
 
