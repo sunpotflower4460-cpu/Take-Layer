@@ -13,6 +13,7 @@ struct ProjectDraft: Identifiable, Codable {
     var offsetMs: Double
     var exportSettings: ExportSettings
     var shortEditDraft: ShortEditDraft?
+    var songMemoryLink: ProjectSongMemoryLink?
     var createdAt: Date
     var updatedAt: Date
 
@@ -30,6 +31,7 @@ struct ProjectDraft: Identifiable, Codable {
         self.offsetMs = 0
         self.exportSettings = ExportSettings()
         self.shortEditDraft = nil
+        self.songMemoryLink = nil
         self.createdAt = now
         self.updatedAt = now
     }

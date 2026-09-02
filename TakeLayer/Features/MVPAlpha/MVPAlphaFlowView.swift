@@ -16,6 +16,13 @@ struct MVPAlphaFlowView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     header
                     ProjectSetupView(project: viewModel.project, onTitleChange: viewModel.updateTitle)
+                    SongMemoryEditorView(
+                        library: viewModel.songMemoryLibrary,
+                        linkedSongID: viewModel.project.songMemoryLink?.songID,
+                        linkedArrangementID: viewModel.project.songMemoryLink?.arrangementID,
+                        onSave: viewModel.saveConfirmedSongMemory,
+                        onDetach: viewModel.detachSongMemory
+                    )
                     MediaStatusView(project: viewModel.project, validationResult: viewModel.validationResult)
                     VideoImportView(
                         video: viewModel.project.activeVideo,
@@ -109,12 +116,12 @@ struct MVPAlphaFlowView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("TakeLayer Phase 1 + 1.5")
+            Text("TakeLayer Core + Song Intelligence")
                 .font(.largeTitle)
                 .fontWeight(.bold)
-            Text("まず完成WAVと動画の同期を確定し、その同じProject Timelineから9:16 Shortを切り出します。")
+            Text("完成WAV基準の同期を守りながら、曲名・Arrangement・正式歌詞をSong Memoryとして再利用できる土台を育てます。")
                 .foregroundStyle(.secondary)
-            Text("Project timeline 0:00 = 曲開始。同期はTimelineMapperだけが正本です。")
+            Text("Project timeline 0:00 = 曲開始。同期はTimelineMapper、人間確認済み曲情報はSong Memoryが正本です。")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }
@@ -136,7 +143,7 @@ private struct ShortFoundationEntryView: View {
     let onPersistDraft: (ShortEditDraft) -> Void
 
     var body: some View {
-        SectionCard(title: "8. Phase 1.5 Short Foundation") {
+        SectionCard(title: "9. Phase 1.5 Short Foundation") {
             Text("同期済みの1本動画から、9:16・範囲・crop/zoom/pan・タイトル・正式歌詞字幕を編集します。")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
@@ -183,6 +190,7 @@ struct MediaStatusView: View {
         SectionCard(title: "Flow Status") {
             MediaInfoGrid(rows: [
                 ("Project", status(!project.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)),
+                ("Song Memory", project.songMemoryLink == nil ? "Not linked" : "Linked"),
                 ("Video", project.activeVideo == nil ? "Missing" : videoSourceText),
                 ("Master WAV", status(project.importedMasterAudio != nil)),
                 ("Video Song Start", status(project.songStartRawSec != nil)),

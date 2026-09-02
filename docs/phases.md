@@ -2,9 +2,9 @@
 
 ## Repository status
 
-As of 2026-09-01, `main` contains the merged **Phase 1 (MVP-α)** and **Phase 1.1 Core Stabilization** foundations. Phase 0.5A and Phase 0.5B are also merged.
+As of 2026-09-02, `main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, and **Phase 1.5 Short Foundation**. Phase 0.5A and Phase 0.5B are also merged.
 
-**Phase 1.5 Short Foundation** is the active implementation gate. It builds deterministic one-video 9:16 editing primitives before AI Director or multi-part complexity depends on them.
+**Phase 7 Song Intelligence Foundation** is now the active implementation gate. The current sub-scope is deliberately limited to human-confirmed Song Memory, Song / Arrangement separation, formal lyrics persistence, and Project linkage. Automatic same-song recognition and AI Director generation remain later gates.
 
 This file is a roadmap. A later phase is not active merely because it appears here. Implement only the phase or scope explicitly requested.
 
@@ -71,7 +71,7 @@ See `phase-1.1-core-stabilization.md`.
 
 ## Phase 1.5: Short Foundation
 
-Status: active implementation branch / merge gate.
+Status: merged on `main` via PR #7.
 
 Goal: prove the one-video short-form editing substrate before multi-part complexity.
 
@@ -84,9 +84,9 @@ Goal: prove the one-video short-form editing substrate before multi-part complex
 - Deterministic crop / zoom / normalized pan plan.
 - Preview → micro-adjustment → export.
 - Persisted `ShortEditDraft` as an EditingPlan precursor.
-- No generative decision-making required yet.
+- No generative decision-making required.
 
-`TimelineMapper` remains the only synchronization authority. Future AI Short Director work may propose `ShortEditDraft` values but must not bypass the deterministic renderer.
+`TimelineMapper` remains the only synchronization authority. Future AI Short Director work may propose `ShortEditDraft` / EditingPlan values but must not bypass the deterministic renderer.
 
 See `phase-1.5-short-foundation.md`.
 
@@ -137,24 +137,35 @@ Multi-part work may proceed after the one-video renderer foundation is reliable,
 
 # Future AI Director Track
 
-The phases below describe the long-term AI Music Video Director direction. They are **not active implementation phases** until explicitly promoted. They extend the TakeLayer Core delivery path rather than replacing it.
+The phases below describe the long-term AI Music Video Director direction. They extend the TakeLayer Core delivery path rather than replacing it. Only the explicitly activated sub-scope may be implemented.
 
 ## Phase 7: Song Intelligence Foundation
 
+Status: active foundation.
+
 Goal: TakeLayer begins to understand and remember the musical work itself.
+
+### Active sub-scope
 
 - `SongIdentity` and `SongProfile`.
 - Song / Arrangement separation.
-- Same-song recognition using multiple evidence sources.
-- Song Memory.
+- Local Song Memory persistence.
 - User-confirmed metadata precedence.
-- Metadata Provider Adapter layer.
 - Formal lyrics storage for user-owned / permitted lyrics.
+- Project ↔ Song / Arrangement linkage.
+- Human confirmation UI.
+
+See `phase-7-song-intelligence-foundation.md`.
+
+### Later Phase 7 gates
+
+- Same-song recognition using multiple evidence sources.
+- Metadata Provider Adapter layer.
 - Lyrics alignment to known text.
 - Song sections and highlight candidates.
-- Confidence-based confirmation UI.
+- Confidence-based automatic candidate ranking.
 
-Success criterion:
+Success criterion for full Phase 7:
 
 A previously imported song can be recognized with confidence, and TakeLayer can propose the existing profile without silently overwriting user-confirmed information.
 
@@ -232,4 +243,5 @@ No future phase may weaken these core guarantees:
 - Raw media editing remains non-destructive by default.
 - AI proposals remain inspectable and reversible.
 - Low-confidence identity, lyrics, sync, or metadata decisions return to user confirmation.
+- User-confirmed Song Memory must not be silently overwritten by provider or AI estimates.
 - Generative AI must not become the source of truth for synchronization.
