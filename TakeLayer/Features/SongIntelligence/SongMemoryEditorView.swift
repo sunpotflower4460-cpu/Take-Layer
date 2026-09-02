@@ -18,6 +18,8 @@ struct SongMemoryEditorView: View {
     @State private var tuningHzText = ""
     @State private var arrangementName = ""
     @State private var arrangementType: SongArrangementType = .acousticSolo
+    @State private var arrangementTempoText = ""
+    @State private var arrangementKeyHint = ""
     @State private var formalLyricsText = ""
     @State private var lyricsLanguage = "ja"
     @State private var didLoadInitialState = false
@@ -48,11 +50,13 @@ struct SongMemoryEditorView: View {
 
             Toggle("オリジナル曲", isOn: $isOriginal)
 
+            Text("Song Profile")
+                .font(.subheadline.weight(.semibold))
             HStack {
-                TextField("BPM", text: $bpmText)
+                TextField("Canonical BPM", text: $bpmText)
                     .keyboardType(.decimalPad)
                     .textFieldStyle(.roundedBorder)
-                TextField("Key", text: $keySignature)
+                TextField("Canonical Key", text: $keySignature)
                     .textFieldStyle(.roundedBorder)
                 TextField("Tuning Hz", text: $tuningHzText)
                     .keyboardType(.decimalPad)
@@ -86,6 +90,18 @@ struct SongMemoryEditorView: View {
             TextField("Arrangement name", text: $arrangementName)
                 .textFieldStyle(.roundedBorder)
 
+            HStack {
+                TextField("Tempo hint", text: $arrangementTempoText)
+                    .keyboardType(.decimalPad)
+                    .textFieldStyle(.roundedBorder)
+                TextField("Key hint", text: $arrangementKeyHint)
+                    .textFieldStyle(.roundedBorder)
+            }
+
+            Text("Song Profileは曲そのもの、Tempo / Key hintはこのArrangement固有の情報です。別テンポ・移調版でも曲本体の値を壊しません。")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
             if selectedSongID != nil {
                 Text(existingArrangementID == nil
                     ? "この曲に新しいArrangementを追加してProjectへ接続します。"
@@ -114,7 +130,7 @@ struct SongMemoryEditorView: View {
                         .stroke(.secondary.opacity(0.25), lineWidth: 1)
                 }
 
-            Text("歌詞を空にして保存すると、この曲のユーザー確認済み正式歌詞を削除します。自動推定歌詞で上書きはしません。")
+            Text("歌詞を空にして保存すると、この曲のユーザー確認済み正式歌詞だけを削除します。将来のlicensed provider候補や推定値を破壊しません。")
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
@@ -156,6 +172,11 @@ struct SongMemoryEditorView: View {
         .onChange(of: linkedSongID) { _, newValue in
             selectedSongID = newValue
             loadSong(newValue)
+        }
+        .onChange(of: linkedArrangementID) { _, newValue in
+            guard selectedSongID == linkedSongID else { return }
+            existingArrangementID = newValue
+            loadArrangement(newValue)
         }
     }
 
@@ -204,6 +225,8 @@ struct SongMemoryEditorView: View {
             tuningHzText = ""
             arrangementName = ""
             arrangementType = .acousticSolo
+            arrangementTempoText = ""
+            arrangementKeyHint = ""
             formalLyricsText = ""
             lyricsLanguage = "ja"
             return
@@ -249,10 +272,14 @@ struct SongMemoryEditorView: View {
               arrangement.songID == selectedSongID else {
             arrangementName = ""
             arrangementType = .acousticSolo
+            arrangementTempoText = bpmText
+            arrangementKeyHint = keySignature
             return
         }
         arrangementName = arrangement.name
         arrangementType = arrangement.type
+        arrangementTempoText = arrangement.tempoHint.map { String(format: "%g", $0) } ?? bpmText
+        arrangementKeyHint = arrangement.keyHint ?? keySignature
     }
 
     private func makeInput() -> ConfirmedSongMemoryInput {
@@ -268,6 +295,8 @@ struct SongMemoryEditorView: View {
             tuningHz: Double(tuningHzText),
             arrangementName: arrangementName,
             arrangementType: arrangementType,
+            arrangementTempoHint: Double(arrangementTempoText),
+            arrangementKeyHint: arrangementKeyHint,
             formalLyricsText: formalLyricsText,
             lyricsLanguage: lyricsLanguage
         )
