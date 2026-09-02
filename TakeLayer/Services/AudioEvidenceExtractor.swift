@@ -116,6 +116,7 @@ enum AudioEvidenceExtractor {
             energyEnvelope: normalizedEnergy,
             transientEnvelope: normalizedTransient
         )
+        let tonalEvidence = try TonalEvidenceExtractor.extract(from: url)
 
         return AudioEvidenceVector(
             durationSec: durationSec,
@@ -123,7 +124,8 @@ enum AudioEvidenceExtractor {
             channelCount: channelCount,
             energyEnvelope: normalizedEnergy,
             transientEnvelope: normalizedTransient,
-            signature: signature
+            signature: signature,
+            tonalEvidence: tonalEvidence
         )
     }
 
