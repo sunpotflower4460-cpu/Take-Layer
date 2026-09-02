@@ -6,13 +6,13 @@ TakeLayer is an iOS-first app for turning smartphone performance footage into a 
 
 Short definition: スマホで撮った演奏を、DAW完成音源つきの動画に整える。
 
-Long-term direction: TakeLayer Core may later support an AI Music Video Director that remembers songs and editing preferences, proposes multiple short-video edits, and learns from user approval and corrections. This future direction must extend—not replace—the deterministic synchronization core.
+Long-term direction: TakeLayer Core may support an AI Music Video Director that remembers songs and editing preferences, proposes multiple short-video edits, and learns from user approval and corrections. This direction must extend—not replace—the deterministic synchronization core.
 
 ## Repository implementation baseline
 
-`main` contains the merged **Phase 1 (MVP-α)** integrated flow from PR #5, building on Phase 0.5A and Phase 0.5B.
+`main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, and **Phase 1.5 Short Foundation** foundations.
 
-`phase-1.1-core-stabilization` is the stabilization branch. It exists to make the Phase 1 core buildable, persistent, testable, and synchronization-correct before feature expansion.
+`phase-7-song-intelligence-foundation` is the active branch. Its current scope is human-confirmed Song Memory, Song / Arrangement separation, formal lyrics persistence, and Project linkage. Automatic resolver evidence, external metadata lookup, AI Director generation, and preference learning are not activated by this branch.
 
 For every task, implement only the explicitly requested phase or scope and preserve already-merged behavior.
 
@@ -43,7 +43,7 @@ Project Timeline
 completed-WAV time
 ```
 
-Do not duplicate this arithmetic inside renderers, UI code, AI code, short extraction, or future multi-part code.
+Do not duplicate this arithmetic inside renderers, UI code, AI code, short extraction, Song Memory, Song Resolver, or future multi-part code.
 
 Manual offset convention:
 
@@ -54,13 +54,27 @@ offsetMs < 0  = completed WAV is advanced relative to video
 
 Any sync defect must first be expressed as a TimelineMapper regression test before changing the mapping implementation when practical.
 
+## Song-information authority
+
+For song identity, arrangement metadata, and formal lyrics, use this precedence:
+
+```text
+1. User-confirmed value
+2. Previously confirmed Song Memory
+3. Trusted imported metadata candidate
+4. Analysis estimate
+5. Unknown
+```
+
+Song Memory is not a synchronization authority. It must not mutate `songStartRawSec`, `songStartAudioSec`, `offsetMs`, trim ranges, or renderer mapping.
+
 ## Tech direction
 
 - iOS MVP first.
 - Swift / SwiftUI.
 - AVFoundation.
 - Accelerate / vDSP.
-- SwiftData is a future persistence target; Phase 1.1 uses a small ProjectStore boundary first.
+- SwiftData is a future persistence target; current persistence uses small JSON store boundaries.
 - Xcode project generation is defined by `project.yml` using XcodeGen.
 - Do not make FFmpegKit a core dependency.
 - Android and Mac Companion are future phases.
@@ -69,26 +83,25 @@ Any sync defect must first be expressed as a TimelineMapper regression test befo
 
 - Implement only the requested phase.
 - Do not implement multiple phases in one pass.
-- Historical Phase 0 was for design, documentation, and repository structure only.
-- Phase 0.5A, Phase 0.5B, and Phase 1 have already been merged into `main`.
-- Phase 1.1 is stabilization, not permission to add later creative automation.
-- Do not infer that Phase 1.5, Phase 2, or any later phase is active unless explicitly requested.
-- `docs/ai-director-vision.md`, `docs/song-memory-feedback.md`, and `docs/ai-director-data-model.md` are future architecture documents only.
-- Do not implement Song Memory, lyric captions, AI crop, AI Director, preference learning, external metadata adapters, or automatic short-video generation until their future phase is explicitly activated.
+- Phase 0.5A, Phase 0.5B, Phase 1, Phase 1.1, and Phase 1.5 have already been merged into `main`.
+- Phase 7 Song Intelligence Foundation is explicitly activated only for the scope documented in `docs/phase-7-song-intelligence-foundation.md`.
+- `docs/ai-director-vision.md`, `docs/song-memory-feedback.md`, and `docs/ai-director-data-model.md` are architecture references; they do not automatically activate all described capabilities.
+- Do not infer that Phase 8, Phase 9, Phase 10, or unactivated Phase 7 sub-gates are active.
 
-## Phase 1.1 gates
+## Active Phase 7 gates
 
-Before calling Phase 1.1 complete:
+Before calling the current Song Intelligence foundation complete:
 
+- `SongIdentity`, `SongProfile`, `ArrangementProfile`, and `FormalLyrics` must be Codable and persistent.
+- A Project may link to a Song and Arrangement without changing synchronization.
+- User-confirmed values must remain explicit and highest-precedence.
+- Existing Song Memory entries must be selectable and editable.
+- Formal lyrics must be versioned when changed.
 - XcodeGen must generate the project.
-- iOS Simulator build must pass.
-- TimelineMapper tests must pass.
-- `offsetMs` must affect real export mapping.
-- trim start changes must preserve Project Timeline synchronization.
-- Project state must survive restart.
-- camera session startup/configuration must not block the main UI thread.
+- iOS Simulator build and XCTest must pass.
+- Existing TimelineMapper and Short Foundation tests must continue to pass.
 
-See `docs/phase-1.1-core-stabilization.md`.
+See `docs/phase-7-song-intelligence-foundation.md`.
 
 ## Do not implement list
 
@@ -106,18 +119,19 @@ Do not add these unless the active phase explicitly requests them:
 - DAW API integration.
 - Automatic take adoption.
 - Automatic deletion of raw videos.
-- Song Memory / Song Resolver.
+- Audio fingerprint generation / same-song auto matching beyond the active Song Memory foundation.
 - External music metadata lookup.
-- Automatic lyric captions.
+- Automatic lyric transcription or automatic lyric captions.
+- Lyrics forced-alignment beyond an explicitly activated gate.
 - AI performer crop / tracking.
-- AI Music Video Director.
+- AI Music Video Director proposal generation.
 - Preference learning / edit-delta learning.
 
-Do not remove or regress already-merged Phase 1 functionality such as import/record flow, WAV import, manual song-start markers, trim, manual offset, validation, and single-screen export unless explicitly requested.
+Do not remove or regress already-merged functionality such as import/record flow, WAV import, manual song-start markers, trim, manual offset, validation, deterministic Short editing, or single-screen export unless explicitly requested.
 
 ## Future AI Director references
 
-When a future AI phase is explicitly activated, read these before implementation:
+When an AI phase is explicitly activated, read these before implementation:
 
 - `docs/ai-director-vision.md`
 - `docs/song-memory-feedback.md`
