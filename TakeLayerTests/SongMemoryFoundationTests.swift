@@ -14,6 +14,8 @@ final class SongMemoryFoundationTests: XCTestCase {
                 bpm: 92,
                 keySignature: "C",
                 tuningHz: 432,
+                arrangementTempoHint: 90,
+                arrangementKeyHint: "D",
                 formalLyricsText: "旅の途中で"
             ),
             now: now
@@ -33,6 +35,8 @@ final class SongMemoryFoundationTests: XCTestCase {
         let arrangement = try XCTUnwrap(library.arrangement(for: link.arrangementID))
         XCTAssertEqual(arrangement.songID, link.songID)
         XCTAssertEqual(arrangement.type, .acousticSolo)
+        XCTAssertEqual(arrangement.tempoHint, 90)
+        XCTAssertEqual(arrangement.keyHint, "D")
 
         let lyrics = try XCTUnwrap(library.lyrics(for: link.songID))
         XCTAssertEqual(lyrics.text, "旅の途中で")
@@ -72,9 +76,17 @@ final class SongMemoryFoundationTests: XCTestCase {
 
     func testExistingSongCanCreateAdditionalArrangementWithoutDuplicatingIdentity() throws {
         var library = SongMemoryLibrary()
-        let first = library.upsertConfirmedSong(makeInput(canonicalTitle: "Re:trip"))
+        let first = library.upsertConfirmedSong(
+            makeInput(canonicalTitle: "Re:trip", bpm: 92, keySignature: "C")
+        )
 
-        var duoInput = makeInput(canonicalTitle: "Re:trip")
+        var duoInput = makeInput(
+            canonicalTitle: "Re:trip",
+            bpm: 92,
+            keySignature: "C",
+            arrangementTempoHint: 76,
+            arrangementKeyHint: "G"
+        )
         duoInput.existingSongID = first.songID
         duoInput.existingArrangementID = nil
         duoInput.arrangementName = "Duo"
@@ -86,8 +98,12 @@ final class SongMemoryFoundationTests: XCTestCase {
         XCTAssertNotEqual(first.arrangementID, second.arrangementID)
         XCTAssertEqual(library.identities.count, 1)
         XCTAssertEqual(library.arrangements(for: first.songID).count, 2)
+        XCTAssertEqual(library.profile(for: first.songID)?.bpm, 92)
+        XCTAssertEqual(library.profile(for: first.songID)?.keySignature, "C")
         XCTAssertEqual(library.arrangement(for: second.arrangementID)?.type, .duo)
         XCTAssertEqual(library.arrangement(for: second.arrangementID)?.name, "Duo")
+        XCTAssertEqual(library.arrangement(for: second.arrangementID)?.tempoHint, 76)
+        XCTAssertEqual(library.arrangement(for: second.arrangementID)?.keyHint, "G")
     }
 
     func testSavingEmptyFormalLyricsRemovesOnlyConfirmedLyrics() throws {
@@ -106,6 +122,40 @@ final class SongMemoryFoundationTests: XCTestCase {
         XCTAssertNil(library.profile(for: first.songID)?.formalLyricsID)
     }
 
+    func testConfirmedLyricsDoNotOverwriteProviderRecord() throws {
+        var library = SongMemoryLibrary()
+        let first = library.upsertConfirmedSong(makeInput(canonicalTitle: "Provider Test"))
+        let providerID = UUID()
+        let now = Date(timeIntervalSince1970: 1_500)
+        library.formalLyrics.append(
+            FormalLyrics(
+                id: providerID,
+                songID: first.songID,
+                text: "provider text",
+                source: .licensedProvider,
+                userConfirmed: false,
+                language: "ja",
+                version: 1,
+                createdAt: now,
+                updatedAt: now
+            )
+        )
+        let profileIndex = try XCTUnwrap(library.profiles.firstIndex { $0.songID == first.songID })
+        library.profiles[profileIndex].formalLyricsID = providerID
+
+        var update = makeInput(canonicalTitle: "Provider Test", formalLyricsText: "confirmed text")
+        update.existingSongID = first.songID
+        update.existingArrangementID = first.arrangementID
+        _ = library.upsertConfirmedSong(update, now: Date(timeIntervalSince1970: 1_600))
+
+        XCTAssertEqual(library.formalLyrics.first(where: { $0.id == providerID })?.text, "provider text")
+        XCTAssertEqual(library.formalLyrics.first(where: { $0.id == providerID })?.source, .licensedProvider)
+        XCTAssertEqual(library.formalLyrics.count, 2)
+        XCTAssertEqual(library.lyrics(for: first.songID)?.text, "confirmed text")
+        XCTAssertEqual(library.lyrics(for: first.songID)?.source, .userConfirmed)
+        XCTAssertNotEqual(library.profile(for: first.songID)?.formalLyricsID, providerID)
+    }
+
     func testAliasesAreTrimmedAndDeduplicatedCaseInsensitively() throws {
         var library = SongMemoryLibrary()
         let link = library.upsertConfirmedSong(
@@ -122,12 +172,19 @@ final class SongMemoryFoundationTests: XCTestCase {
     func testInvalidNumericHintsAreStoredAsUnknown() throws {
         var library = SongMemoryLibrary()
         let link = library.upsertConfirmedSong(
-            makeInput(canonicalTitle: "Unknown", bpm: -1, tuningHz: .infinity)
+            makeInput(
+                canonicalTitle: "Unknown",
+                bpm: -1,
+                tuningHz: .infinity,
+                arrangementTempoHint: -.infinity
+            )
         )
 
         let profile = try XCTUnwrap(library.profile(for: link.songID))
+        let arrangement = try XCTUnwrap(library.arrangement(for: link.arrangementID))
         XCTAssertNil(profile.bpm)
         XCTAssertNil(profile.tuningHz)
+        XCTAssertNil(arrangement.tempoHint)
     }
 
     func testSongMemoryLibraryCodableRoundTripPreservesConfirmedData() throws {
@@ -140,6 +197,8 @@ final class SongMemoryFoundationTests: XCTestCase {
                 bpm: 84,
                 keySignature: "D",
                 tuningHz: 432,
+                arrangementTempoHint: 82,
+                arrangementKeyHint: "C",
                 formalLyricsText: "水の中で"
             ),
             now: Date(timeIntervalSince1970: 2_000)
@@ -176,6 +235,8 @@ final class SongMemoryFoundationTests: XCTestCase {
         bpm: Double? = nil,
         keySignature: String = "",
         tuningHz: Double? = nil,
+        arrangementTempoHint: Double? = nil,
+        arrangementKeyHint: String = "",
         formalLyricsText: String = ""
     ) -> ConfirmedSongMemoryInput {
         ConfirmedSongMemoryInput(
@@ -190,6 +251,8 @@ final class SongMemoryFoundationTests: XCTestCase {
             tuningHz: tuningHz,
             arrangementName: "Acoustic Solo",
             arrangementType: .acousticSolo,
+            arrangementTempoHint: arrangementTempoHint,
+            arrangementKeyHint: arrangementKeyHint,
             formalLyricsText: formalLyricsText,
             lyricsLanguage: "ja"
         )
