@@ -2,9 +2,9 @@
 
 ## Repository status
 
-As of 2026-09-02, `main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, and **Phase 1.5 Short Foundation**. Phase 0.5A and Phase 0.5B are also merged.
+As of 2026-09-02, `main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, **Phase 1.5 Short Foundation**, and the first **Phase 7 Song Intelligence Foundation** with human-confirmed Song Memory. Phase 0.5A and Phase 0.5B are also merged.
 
-**Phase 7 Song Intelligence Foundation** is now the active implementation gate. The current sub-scope is deliberately limited to human-confirmed Song Memory, Song / Arrangement separation, formal lyrics persistence, and Project linkage. Automatic same-song recognition and AI Director generation remain later gates.
+**Phase 7 Song Resolver Evidence Foundation** is now the active implementation gate. The current sub-scope is deliberately limited to deterministic local audio evidence, per-Arrangement fingerprint registration, confidence-scored candidate ranking, and explicit human confirmation before Project linkage. External metadata, chroma / melody / lyrics matching, automatic identity adoption, and AI Director generation remain later gates.
 
 This file is a roadmap. A later phase is not active merely because it appears here. Implement only the phase or scope explicitly requested.
 
@@ -141,33 +141,50 @@ The phases below describe the long-term AI Music Video Director direction. They 
 
 ## Phase 7: Song Intelligence Foundation
 
-Status: active foundation.
+Status: active resolver-evidence gate. The first human-confirmed Song Memory foundation is merged on `main`.
 
 Goal: TakeLayer begins to understand and remember the musical work itself.
 
-### Active sub-scope
+### Merged Song Memory foundation
 
 - `SongIdentity` and `SongProfile`.
 - Song / Arrangement separation.
+- Multiple Arrangements per Song.
 - Local Song Memory persistence.
 - User-confirmed metadata precedence.
 - Formal lyrics storage for user-owned / permitted lyrics.
 - Project ↔ Song / Arrangement linkage.
 - Human confirmation UI.
+- WAV replacement detaches stale identity linkage.
 
 See `phase-7-song-intelligence-foundation.md`.
 
+### Active Song Resolver Evidence sub-scope
+
+- Deterministic completed-WAV evidence extraction.
+- Fixed-size energy and transient envelopes.
+- Local evidence signatures for exact deduplication.
+- Per-Arrangement evidence registration and persistence.
+- `ArrangementProfile.fingerprintIDs` references.
+- Deterministic candidate scores with component evidence.
+- Explicit human confirmation before creating a resolver-derived Project link.
+- No automatic adoption even for a perfect-confidence candidate.
+
+See `phase-7-song-resolver-evidence.md`.
+
 ### Later Phase 7 gates
 
-- Same-song recognition using multiple evidence sources.
+- Stronger audio landmark fingerprinting.
+- Chroma / tonal similarity.
+- Melody contour evidence.
+- Lyrics evidence and known-text alignment.
 - Metadata Provider Adapter layer.
-- Lyrics alignment to known text.
 - Song sections and highlight candidates.
-- Confidence-based automatic candidate ranking.
+- Confidence calibration against real same-song / different-arrangement recordings.
 
 Success criterion for full Phase 7:
 
-A previously imported song can be recognized with confidence, and TakeLayer can propose the existing profile without silently overwriting user-confirmed information.
+A previously imported song can be recognized with calibrated confidence from multiple evidence sources, and TakeLayer can propose the existing profile without silently overwriting user-confirmed information.
 
 ## Phase 8: AI Short Director
 
@@ -244,4 +261,5 @@ No future phase may weaken these core guarantees:
 - AI proposals remain inspectable and reversible.
 - Low-confidence identity, lyrics, sync, or metadata decisions return to user confirmation.
 - User-confirmed Song Memory must not be silently overwritten by provider or AI estimates.
+- Song Resolver confidence must not become an implicit synchronization or identity authority.
 - Generative AI must not become the source of truth for synchronization.
