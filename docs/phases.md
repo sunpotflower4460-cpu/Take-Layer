@@ -2,9 +2,9 @@
 
 ## Repository status
 
-As of 2026-09-02, `main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, **Phase 1.5 Short Foundation**, and the first **Phase 7 Song Intelligence Foundation** with human-confirmed Song Memory. Phase 0.5A and Phase 0.5B are also merged.
+As of 2026-09-02, `main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, **Phase 1.5 Short Foundation**, the first **Phase 7 Song Intelligence Foundation** with human-confirmed Song Memory, and **Phase 7 Song Resolver Evidence Foundation**. Phase 0.5A and Phase 0.5B are also merged.
 
-**Phase 7 Song Resolver Evidence Foundation** is now the active implementation gate. The current sub-scope is deliberately limited to deterministic local audio evidence, per-Arrangement fingerprint registration, confidence-scored candidate ranking, and explicit human confirmation before Project linkage. External metadata, chroma / melody / lyrics matching, automatic identity adoption, and AI Director generation remain later gates.
+**Phase 7 Tonal Evidence Foundation** is now the active implementation gate. The current sub-scope adds deterministic Chroma-like evidence and transposition-aware matching while retaining explicit human confirmation. Melody / lyrics evidence, elastic DTW, external metadata, automatic identity adoption, and AI Director generation remain later gates.
 
 This file is a roadmap. A later phase is not active merely because it appears here. Implement only the phase or scope explicitly requested.
 
@@ -141,7 +141,7 @@ The phases below describe the long-term AI Music Video Director direction. They 
 
 ## Phase 7: Song Intelligence Foundation
 
-Status: active resolver-evidence gate. The first human-confirmed Song Memory foundation is merged on `main`.
+Status: active tonal-evidence gate. The human-confirmed Song Memory foundation and deterministic Resolver Evidence foundation are merged on `main`.
 
 Goal: TakeLayer begins to understand and remember the musical work itself.
 
@@ -159,7 +159,7 @@ Goal: TakeLayer begins to understand and remember the musical work itself.
 
 See `phase-7-song-intelligence-foundation.md`.
 
-### Active Song Resolver Evidence sub-scope
+### Merged Song Resolver Evidence foundation
 
 - Deterministic completed-WAV evidence extraction.
 - Fixed-size energy and transient envelopes.
@@ -172,10 +172,25 @@ See `phase-7-song-intelligence-foundation.md`.
 
 See `phase-7-song-resolver-evidence.md`.
 
+### Active Tonal Evidence sub-scope
+
+- Optional backwards-compatible `TonalEvidenceVector`.
+- 12 octave-folded pitch classes.
+- 32 normalized-time tonal frames.
+- Global Chroma-like pitch-class distribution.
+- Robust sampling around semitone centers to tolerate modest tuning differences.
+- All-12 transposition search.
+- Small normalized-time offset tolerance.
+- Tonal / Chroma score and estimated semitone shift exposed in candidate evidence.
+- Existing same-signature fingerprints upgraded in place instead of duplicated.
+- Human confirmation remains mandatory.
+
+See `phase-7-tonal-evidence.md`.
+
 ### Later Phase 7 gates
 
 - Stronger audio landmark fingerprinting.
-- Chroma / tonal similarity.
+- Elastic tonal alignment / DTW for materially different section timing.
 - Melody contour evidence.
 - Lyrics evidence and known-text alignment.
 - Metadata Provider Adapter layer.
