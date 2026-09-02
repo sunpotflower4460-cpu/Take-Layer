@@ -54,20 +54,46 @@ enum SongResolver {
 
     static func compare(_ lhs: AudioEvidenceVector, _ rhs: AudioEvidenceVector) -> SongMatchEvidence {
         if lhs.signature == rhs.signature {
-            return SongMatchEvidence(duration: 1, energyEnvelope: 1, transientEnvelope: 1)
+            let hasTonalEvidence = lhs.tonalEvidence != nil && rhs.tonalEvidence != nil
+            return SongMatchEvidence(
+                duration: 1,
+                energyEnvelope: 1,
+                transientEnvelope: 1,
+                tonal: hasTonalEvidence ? 1 : nil,
+                transpositionSemitones: hasTonalEvidence ? 0 : nil
+            )
+        }
+
+        let tonalComparison: (score: Double, semitones: Int)?
+        if let lhsTonal = lhs.tonalEvidence,
+           let rhsTonal = rhs.tonalEvidence {
+            tonalComparison = compareTonal(lhsTonal, rhsTonal)
+        } else {
+            tonalComparison = nil
         }
 
         return SongMatchEvidence(
             duration: durationSimilarity(lhs.durationSec, rhs.durationSec),
             energyEnvelope: envelopeSimilarity(lhs.energyEnvelope, rhs.energyEnvelope),
-            transientEnvelope: envelopeSimilarity(lhs.transientEnvelope, rhs.transientEnvelope)
+            transientEnvelope: envelopeSimilarity(lhs.transientEnvelope, rhs.transientEnvelope),
+            tonal: tonalComparison?.score,
+            transpositionSemitones: tonalComparison?.semitones
         )
     }
 
     static func combinedConfidence(_ evidence: SongMatchEvidence) -> Double {
-        let weighted = evidence.duration * 0.25
-            + evidence.energyEnvelope * 0.45
-            + evidence.transientEnvelope * 0.30
+        let weighted: Double
+        if let tonal = evidence.tonal {
+            weighted = evidence.duration * 0.15
+                + evidence.energyEnvelope * 0.20
+                + evidence.transientEnvelope * 0.15
+                + tonal * 0.50
+        } else {
+            // Preserve Phase 7 Resolver Evidence behavior for legacy fingerprints.
+            weighted = evidence.duration * 0.25
+                + evidence.energyEnvelope * 0.45
+                + evidence.transientEnvelope * 0.30
+        }
         return min(1, max(0, weighted))
     }
 
@@ -97,6 +123,90 @@ enum SongResolver {
 
         let correlation = numerator / (lhsNorm * rhsNorm)
         return min(1, max(0, (correlation + 1) / 2))
+    }
+
+    /// Compares query tonal evidence (`lhs`) against a stored Arrangement (`rhs`).
+    /// The returned semitone value is the rotation that best maps the stored pattern to the query.
+    private static func compareTonal(
+        _ lhs: TonalEvidenceVector,
+        _ rhs: TonalEvidenceVector
+    ) -> (score: Double, semitones: Int) {
+        guard lhs.globalPitchClass.count == TonalEvidenceVector.pitchClassCount,
+              rhs.globalPitchClass.count == TonalEvidenceVector.pitchClassCount else {
+            return (0, 0)
+        }
+
+        var bestScore = -Double.infinity
+        var bestSemitones = 0
+
+        for rawShift in 0..<TonalEvidenceVector.pitchClassCount {
+            let shiftedGlobal = shiftedPitchClasses(rhs.globalPitchClass, by: rawShift)
+            let globalScore = cosineSimilarity(lhs.globalPitchClass, shiftedGlobal)
+            let sequenceScore = bestSequenceSimilarity(lhs, rhs, pitchShift: rawShift)
+            let score = globalScore * 0.35 + sequenceScore * 0.65
+            let normalizedShift = rawShift <= 6 ? rawShift : rawShift - 12
+
+            if score > bestScore + 0.000_000_1 ||
+                (abs(score - bestScore) <= 0.000_000_1 && abs(normalizedShift) < abs(bestSemitones)) {
+                bestScore = score
+                bestSemitones = normalizedShift
+            }
+        }
+
+        return (min(1, max(0, bestScore)), bestSemitones)
+    }
+
+    private static func bestSequenceSimilarity(
+        _ lhs: TonalEvidenceVector,
+        _ rhs: TonalEvidenceVector,
+        pitchShift: Int
+    ) -> Double {
+        var best = 0.0
+
+        // Small normalized-time offsets tolerate modest intro/outro differences without
+        // pretending this is full DTW. Full elastic alignment remains a later gate.
+        for frameOffset in -3...3 {
+            var total = 0.0
+            var count = 0
+
+            for queryFrame in 0..<TonalEvidenceVector.frameCount {
+                let storedFrame = queryFrame - frameOffset
+                guard storedFrame >= 0, storedFrame < TonalEvidenceVector.frameCount,
+                      let lhsSlice = lhs.frame(at: queryFrame),
+                      let rhsSlice = rhs.frame(at: storedFrame) else {
+                    continue
+                }
+
+                let lhsFrame = Array(lhsSlice)
+                let shiftedRHS = shiftedPitchClasses(Array(rhsSlice), by: pitchShift)
+                total += cosineSimilarity(lhsFrame, shiftedRHS)
+                count += 1
+            }
+
+            if count > 0 {
+                best = max(best, total / Double(count))
+            }
+        }
+
+        return best
+    }
+
+    private static func shiftedPitchClasses(_ values: [Double], by semitones: Int) -> [Double] {
+        guard values.count == TonalEvidenceVector.pitchClassCount else { return values }
+        let shift = ((semitones % 12) + 12) % 12
+        return (0..<TonalEvidenceVector.pitchClassCount).map { outputIndex in
+            let sourceIndex = (outputIndex - shift + 12) % 12
+            return values[sourceIndex]
+        }
+    }
+
+    private static func cosineSimilarity(_ lhs: [Double], _ rhs: [Double]) -> Double {
+        guard lhs.count == rhs.count, !lhs.isEmpty else { return 0 }
+        let dot = zip(lhs, rhs).reduce(0.0) { $0 + $1.0 * $1.1 }
+        let lhsNorm = sqrt(lhs.reduce(0.0) { $0 + $1 * $1 })
+        let rhsNorm = sqrt(rhs.reduce(0.0) { $0 + $1 * $1 })
+        guard lhsNorm > 0, rhsNorm > 0 else { return 0 }
+        return min(1, max(0, dot / (lhsNorm * rhsNorm)))
     }
 }
 

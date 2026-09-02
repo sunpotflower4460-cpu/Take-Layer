@@ -14,7 +14,7 @@ struct SongResolverEvidenceView: View {
 
     var body: some View {
         SectionCard(title: "Song Resolver Evidence") {
-            Text("完成WAVから決定論的な音響Evidenceを作り、既知Arrangementとの候補を提示します。Resolverは候補を出すだけで、自動でSong Memoryへ接続しません。")
+            Text("完成WAVから決定論的な音響Evidenceを作り、既知Arrangementとの候補を提示します。Tonal Evidenceは12音階の和声パターンと移調候補も比較しますが、Resolverは自動でSong Memoryへ接続しません。")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
 
@@ -22,7 +22,8 @@ struct SongResolverEvidenceView: View {
                 ("Master WAV", project.importedMasterAudio == nil ? "Missing" : "Ready"),
                 ("Known fingerprints", "\(evidenceLibrary.fingerprints.count)"),
                 ("Linked arrangement evidence", "\(linkedArrangementEvidenceCount)"),
-                ("Current signature", currentEvidence.map { String($0.signature.prefix(12)) } ?? "Not analyzed")
+                ("Current signature", currentEvidence.map { String($0.signature.prefix(12)) } ?? "Not analyzed"),
+                ("Tonal Evidence", currentEvidence?.tonalEvidence == nil ? "Not analyzed" : "Ready")
             ])
 
             HStack {
@@ -93,11 +94,7 @@ struct SongResolverEvidenceView: View {
                     .font(.headline.monospacedDigit())
             }
 
-            MediaInfoGrid(rows: [
-                ("duration", percent(candidate.evidence.duration)),
-                ("energy shape", percent(candidate.evidence.energyEnvelope)),
-                ("transient shape", percent(candidate.evidence.transientEnvelope))
-            ])
+            MediaInfoGrid(rows: evidenceRows(for: candidate.evidence))
 
             if isResolved {
                 Label("この候補へ確認済み接続", systemImage: "checkmark.circle.fill")
@@ -115,7 +112,27 @@ struct SongResolverEvidenceView: View {
         .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 
+    private func evidenceRows(for evidence: SongMatchEvidence) -> [(String, String)] {
+        var rows: [(String, String)] = [
+            ("duration", percent(evidence.duration)),
+            ("energy shape", percent(evidence.energyEnvelope)),
+            ("transient shape", percent(evidence.transientEnvelope))
+        ]
+        if let tonal = evidence.tonal {
+            rows.append(("tonal / chroma", percent(tonal)))
+        }
+        if let semitones = evidence.transpositionSemitones {
+            rows.append(("estimated key shift", semitoneText(semitones)))
+        }
+        return rows
+    }
+
     private func percent(_ value: Double) -> String {
         value.formatted(.percent.precision(.fractionLength(1)))
+    }
+
+    private func semitoneText(_ value: Int) -> String {
+        if value == 0 { return "same key" }
+        return value > 0 ? "+\(value) semitones" : "\(value) semitones"
     }
 }

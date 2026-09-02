@@ -80,6 +80,88 @@ final class SongResolverEvidenceTests: XCTestCase {
         XCTAssertGreaterThan(result.candidates[0].confidence, result.candidates[1].confidence)
     }
 
+    func testTonalComparisonRecognizesSamePatternTwoSemitonesHigher() throws {
+        let stored = makeVector(
+            signature: "stored-c",
+            tonal: makeTonalEvidence(baseKey: 0, progression: [0, 5, 7, 0])
+        )
+        let query = makeVector(
+            signature: "query-d",
+            tonal: makeTonalEvidence(baseKey: 2, progression: [0, 5, 7, 0])
+        )
+
+        let evidence = SongResolver.compare(query, stored)
+
+        XCTAssertEqual(try XCTUnwrap(evidence.tonal), 1, accuracy: 0.000_01)
+        XCTAssertEqual(evidence.transpositionSemitones, 2)
+    }
+
+    func testTonalComparisonRejectsDifferentProgressionMoreThanTransposedSameSong() throws {
+        let stored = makeVector(
+            signature: "stored",
+            tonal: makeTonalEvidence(baseKey: 0, progression: [0, 5, 7, 0])
+        )
+        let transposedSameSong = makeVector(
+            signature: "same-song",
+            tonal: makeTonalEvidence(baseKey: 4, progression: [0, 5, 7, 0])
+        )
+        let differentSong = makeVector(
+            signature: "different-song",
+            tonal: makeTonalEvidence(baseKey: 4, progression: [0, 3, 8, 10])
+        )
+
+        let sameEvidence = SongResolver.compare(transposedSameSong, stored)
+        let differentEvidence = SongResolver.compare(differentSong, stored)
+
+        XCTAssertGreaterThan(
+            try XCTUnwrap(sameEvidence.tonal),
+            try XCTUnwrap(differentEvidence.tonal)
+        )
+    }
+
+    func testExistingFingerprintUpgradesWithTonalEvidenceWithoutChangingID() throws {
+        let arrangementID = UUID()
+        let legacy = makeVector(signature: "same-signature")
+        let enriched = makeVector(
+            signature: "same-signature",
+            tonal: makeTonalEvidence(baseKey: 0, progression: [0, 5, 7, 0])
+        )
+        var library = SongResolverEvidenceLibrary()
+
+        let first = library.register(
+            arrangementID: arrangementID,
+            evidence: legacy,
+            sourceFileName: "legacy.wav"
+        )
+        let second = library.register(
+            arrangementID: arrangementID,
+            evidence: enriched,
+            sourceFileName: "enriched.wav"
+        )
+
+        XCTAssertEqual(first.id, second.id)
+        XCTAssertEqual(library.fingerprints.count, 1)
+        XCTAssertNotNil(library.fingerprints.first?.evidence.tonalEvidence)
+        XCTAssertEqual(library.fingerprints.first?.sourceFileName, "enriched.wav")
+    }
+
+    func testLegacyAudioEvidenceJSONWithoutTonalFieldStillDecodes() throws {
+        let json = """
+        {
+          "durationSec": 180,
+          "sampleRate": 48000,
+          "channelCount": 2,
+          "energyEnvelope": [0.1, 0.2],
+          "transientEnvelope": [0.2, 0.1],
+          "signature": "legacy"
+        }
+        """
+
+        let decoded = try JSONDecoder().decode(AudioEvidenceVector.self, from: Data(json.utf8))
+        XCTAssertNil(decoded.tonalEvidence)
+        XCTAssertEqual(decoded.signature, "legacy")
+    }
+
     func testOrphanEvidenceNotReferencedByArrangementIsIgnored() throws {
         var songMemory = SongMemoryLibrary()
         let link = songMemory.upsertConfirmedSong(makeSongInput(title: "Orphan"))
@@ -174,7 +256,8 @@ final class SongResolverEvidenceTests: XCTestCase {
         duration: Double = 180,
         energy: [Double]? = nil,
         transient: [Double]? = nil,
-        signature: String
+        signature: String,
+        tonal: TonalEvidenceVector? = nil
     ) -> AudioEvidenceVector {
         AudioEvidenceVector(
             durationSec: duration,
@@ -182,7 +265,34 @@ final class SongResolverEvidenceTests: XCTestCase {
             channelCount: 2,
             energyEnvelope: energy ?? risingEnvelope(),
             transientEnvelope: transient ?? alternatingEnvelope(),
-            signature: signature
+            signature: signature,
+            tonalEvidence: tonal
+        )
+    }
+
+    private func makeTonalEvidence(baseKey: Int, progression: [Int]) -> TonalEvidenceVector {
+        var frames: [Double] = []
+        var global = Array(repeating: 0.0, count: TonalEvidenceVector.pitchClassCount)
+
+        for frameIndex in 0..<TonalEvidenceVector.frameCount {
+            let degree = progression[frameIndex % progression.count]
+            let root = (baseKey + degree + 12) % 12
+            var frame = Array(repeating: 0.0, count: TonalEvidenceVector.pitchClassCount)
+            frame[root] = 0.55
+            frame[(root + 4) % 12] = 0.25
+            frame[(root + 7) % 12] = 0.20
+            frames.append(contentsOf: frame)
+            for pitchClass in 0..<12 {
+                global[pitchClass] += frame[pitchClass]
+            }
+        }
+
+        let total = global.reduce(0, +)
+        global = global.map { $0 / total }
+        return TonalEvidenceVector(
+            pitchClassFrames: frames,
+            globalPitchClass: global,
+            referenceAHz: 440
         )
     }
 

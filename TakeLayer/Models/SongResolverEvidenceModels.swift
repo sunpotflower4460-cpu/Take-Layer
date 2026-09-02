@@ -1,5 +1,22 @@
 import Foundation
 
+struct TonalEvidenceVector: Codable, Equatable, Sendable {
+    static let pitchClassCount = 12
+    static let frameCount = 32
+
+    var pitchClassFrames: [Double]
+    var globalPitchClass: [Double]
+    var referenceAHz: Double
+
+    func frame(at index: Int) -> ArraySlice<Double>? {
+        guard index >= 0, index < Self.frameCount else { return nil }
+        let start = index * Self.pitchClassCount
+        let end = start + Self.pitchClassCount
+        guard pitchClassFrames.count >= end else { return nil }
+        return pitchClassFrames[start..<end]
+    }
+}
+
 struct AudioEvidenceVector: Codable, Equatable, Sendable {
     static let bucketCount = 64
 
@@ -9,6 +26,7 @@ struct AudioEvidenceVector: Codable, Equatable, Sendable {
     var energyEnvelope: [Double]
     var transientEnvelope: [Double]
     var signature: String
+    var tonalEvidence: TonalEvidenceVector? = nil
 }
 
 struct ArrangementAudioFingerprint: Identifiable, Codable, Equatable, Sendable {
@@ -23,6 +41,10 @@ struct SongMatchEvidence: Codable, Equatable, Sendable {
     var duration: Double
     var energyEnvelope: Double
     var transientEnvelope: Double
+    var tonal: Double? = nil
+    /// Semitone shift that best maps the stored Arrangement fingerprint to the query WAV.
+    /// Example: +2 means the query is best explained as two semitones above the stored tonal pattern.
+    var transpositionSemitones: Int? = nil
 }
 
 struct SongMatchCandidate: Identifiable, Codable, Equatable, Sendable {
@@ -59,10 +81,19 @@ struct SongResolverEvidenceLibrary: Codable, Equatable, Sendable {
         sourceFileName: String?,
         now: Date = Date()
     ) -> ArrangementAudioFingerprint {
-        if let existing = fingerprints.first(where: {
+        if let index = fingerprints.firstIndex(where: {
             $0.arrangementID == arrangementID && $0.evidence.signature == evidence.signature
         }) {
-            return existing
+            // Phase 7 Tonal Evidence upgrades existing local fingerprints in place when
+            // the deterministic legacy signature identifies the same WAV evidence.
+            if fingerprints[index].evidence.tonalEvidence == nil,
+               evidence.tonalEvidence != nil {
+                fingerprints[index].evidence.tonalEvidence = evidence.tonalEvidence
+                if let sourceFileName {
+                    fingerprints[index].sourceFileName = sourceFileName
+                }
+            }
+            return fingerprints[index]
         }
 
         let fingerprint = ArrangementAudioFingerprint(
