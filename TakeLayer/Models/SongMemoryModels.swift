@@ -103,6 +103,8 @@ struct ConfirmedSongMemoryInput: Equatable {
     var tuningHz: Double?
     var arrangementName: String
     var arrangementType: SongArrangementType
+    var arrangementTempoHint: Double?
+    var arrangementKeyHint: String
     var formalLyricsText: String
     var lyricsLanguage: String
 }
@@ -156,6 +158,8 @@ struct SongMemoryLibrary: Codable, Equatable {
         let aliases = uniqueTrimmed(input.aliases)
         let keySignature = optionalTrimmed(input.keySignature)
         let arrangementName = input.arrangementName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let arrangementTempoHint = sanitizedPositive(input.arrangementTempoHint) ?? sanitizedPositive(input.bpm)
+        let arrangementKeyHint = optionalTrimmed(input.arrangementKeyHint) ?? keySignature
         let language = optionalTrimmed(input.lyricsLanguage)
 
         let songID: UUID
@@ -218,8 +222,8 @@ struct SongMemoryLibrary: Codable, Equatable {
             arrangementID = existingArrangementID
             arrangements[index].name = arrangementName.isEmpty ? input.arrangementType.displayName : arrangementName
             arrangements[index].type = input.arrangementType
-            arrangements[index].tempoHint = sanitizedPositive(input.bpm)
-            arrangements[index].keyHint = keySignature
+            arrangements[index].tempoHint = arrangementTempoHint
+            arrangements[index].keyHint = arrangementKeyHint
             arrangements[index].updatedAt = now
         } else {
             arrangementID = UUID()
@@ -230,8 +234,8 @@ struct SongMemoryLibrary: Codable, Equatable {
                     name: arrangementName.isEmpty ? input.arrangementType.displayName : arrangementName,
                     type: input.arrangementType,
                     expectedDurationSec: nil,
-                    tempoHint: sanitizedPositive(input.bpm),
-                    keyHint: keySignature,
+                    tempoHint: arrangementTempoHint,
+                    keyHint: arrangementKeyHint,
                     fingerprintIDs: [],
                     createdAt: now,
                     updatedAt: now
@@ -240,27 +244,26 @@ struct SongMemoryLibrary: Codable, Equatable {
         }
 
         let lyricsText = input.formalLyricsText.trimmingCharacters(in: .whitespacesAndNewlines)
-        if lyricsText.isEmpty {
-            if let existingLyricsID = profiles.first(where: { $0.id == profileID })?.formalLyricsID {
-                formalLyrics.removeAll { $0.id == existingLyricsID }
-            }
-            if let profileIndex = profiles.firstIndex(where: { $0.id == profileID }) {
-                profiles[profileIndex].formalLyricsID = nil
-                profiles[profileIndex].updatedAt = now
-            }
-        } else if let profileIndex = profiles.firstIndex(where: { $0.id == profileID }) {
-            if let existingLyricsID = profiles[profileIndex].formalLyricsID,
-               let lyricsIndex = formalLyrics.firstIndex(where: { $0.id == existingLyricsID }) {
+        if let profileIndex = profiles.firstIndex(where: { $0.id == profileID }) {
+            if lyricsText.isEmpty {
+                if let existingLyricsID = profiles[profileIndex].formalLyricsID,
+                   let lyricsIndex = formalLyrics.firstIndex(where: { $0.id == existingLyricsID }),
+                   formalLyrics[lyricsIndex].source == .userConfirmed {
+                    formalLyrics.remove(at: lyricsIndex)
+                    profiles[profileIndex].formalLyricsID = nil
+                }
+            } else if let existingLyricsID = profiles[profileIndex].formalLyricsID,
+                      let lyricsIndex = formalLyrics.firstIndex(where: { $0.id == existingLyricsID }),
+                      formalLyrics[lyricsIndex].source == .userConfirmed {
                 let changed = formalLyrics[lyricsIndex].text != lyricsText || formalLyrics[lyricsIndex].language != language
                 formalLyrics[lyricsIndex].text = lyricsText
-                formalLyrics[lyricsIndex].source = .userConfirmed
                 formalLyrics[lyricsIndex].userConfirmed = true
                 formalLyrics[lyricsIndex].language = language
                 if changed {
                     formalLyrics[lyricsIndex].version += 1
                 }
                 formalLyrics[lyricsIndex].updatedAt = now
-            } else {
+            } else if !lyricsText.isEmpty {
                 let lyricsID = UUID()
                 formalLyrics.append(
                     FormalLyrics(
