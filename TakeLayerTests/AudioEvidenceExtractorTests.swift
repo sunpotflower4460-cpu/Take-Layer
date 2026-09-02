@@ -31,13 +31,15 @@ final class AudioEvidenceExtractorTests: XCTestCase {
             samples[frame] = Float(sample)
         }
 
-        let file = try AVAudioFile(
-            forWriting: url,
-            settings: format.settings,
-            commonFormat: .pcmFormatFloat32,
-            interleaved: false
-        )
-        try file.write(from: buffer)
+        do {
+            let file = try AVAudioFile(
+                forWriting: url,
+                settings: format.settings,
+                commonFormat: .pcmFormatFloat32,
+                interleaved: false
+            )
+            try file.write(from: buffer)
+        }
 
         let first = try AudioEvidenceExtractor.extract(from: url)
         let second = try AudioEvidenceExtractor.extract(from: url)
