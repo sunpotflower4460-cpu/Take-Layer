@@ -136,7 +136,9 @@ final class MVPAlphaViewModel: ObservableObject {
 
         Task {
             do {
-                let evidence = try AudioEvidenceExtractor.extract(from: url)
+                let evidence = try await Task.detached(priority: .userInitiated) {
+                    try AudioEvidenceExtractor.extract(from: url)
+                }.value
                 var updatedEvidenceLibrary = songResolverEvidenceLibrary
                 let fingerprint = updatedEvidenceLibrary.register(
                     arrangementID: arrangementID,
@@ -175,7 +177,9 @@ final class MVPAlphaViewModel: ObservableObject {
 
         Task {
             do {
-                let evidence = try AudioEvidenceExtractor.extract(from: url)
+                let evidence = try await Task.detached(priority: .userInitiated) {
+                    try AudioEvidenceExtractor.extract(from: url)
+                }.value
                 let result = SongResolver.resolve(
                     query: evidence,
                     songMemory: songMemoryLibrary,
