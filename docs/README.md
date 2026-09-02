@@ -12,14 +12,15 @@ Read these first when working on the active TakeLayer implementation.
 6. `phase-7-song-resolver-evidence.md`
 7. `phase-7-tonal-evidence.md`
 8. `phase-7-elastic-tonal-alignment.md`
-9. `architecture.md`
-10. `mvp-scope.md`
-11. `data-model.md`
-12. `non-goals.md`
-13. `testing-cases.md`
-14. `codex-instructions.md`
-15. `glossary.md`
-16. `../README.md` — historical integrated v1.2 design; use `phases.md` for current implementation status.
+9. `phase-7-resolver-calibration-harness.md`
+10. `architecture.md`
+11. `mvp-scope.md`
+12. `data-model.md`
+13. `non-goals.md`
+14. `testing-cases.md`
+15. `codex-instructions.md`
+16. `glossary.md`
+17. `../README.md` — historical integrated v1.2 design; use `phases.md` for current implementation status.
 
 ## Reliability and deterministic editing foundations
 
@@ -79,7 +80,7 @@ Merged tonal matching foundation:
 
 ### `phase-7-elastic-tonal-alignment.md`
 
-Active structural-tolerance gate:
+Merged structural-tolerance foundation:
 
 - bounded semi-global DTW-style comparison over the fixed 32 tonal frames
 - modest intro / outro endpoint tolerance
@@ -88,6 +89,19 @@ Active structural-tolerance gate:
 - explainable elastic warp fraction
 - transposition-aware comparison retained
 - human confirmation and TimelineMapper authority retained
+
+### `phase-7-resolver-calibration-harness.md`
+
+Active measurement gate:
+
+- labeled same-Arrangement / same-song-different-Arrangement / different-song cases
+- real completed-WAV URLs converted into deterministic benchmark evidence
+- no raw WAV bytes stored in dataset JSON
+- per-label confidence distributions
+- observed positive / negative confidence gap
+- threshold confusion matrix and precision / recall / specificity / F1 / balanced accuracy
+- deterministic inspectable JSON datasets and reports
+- no automatic threshold or Resolver weight changes
 
 ## Future AI Music Video Director
 
