@@ -131,6 +131,7 @@ final class MVPAlphaViewModel: ObservableObject {
     func importMasterAudio(from pickedURL: URL) {
         isImportingAudio = true
         errorMessage = nil
+        let isReplacingMasterAudio = project.importedMasterAudio != nil
         Task {
             do {
                 let storedURL = try MediaImportStore.copyIntoImports(pickedURL)
@@ -138,6 +139,11 @@ final class MVPAlphaViewModel: ObservableObject {
                 audioPreviewTimeSec = 0
                 project.songStartAudioSec = nil
                 project.shortEditDraft = nil
+                if isReplacingMasterAudio {
+                    // A replacement WAV may represent a different song or arrangement.
+                    // Do not carry an old identity forward without explicit confirmation.
+                    project.songMemoryLink = nil
+                }
                 updateDefaultTrimIfPossible()
                 touchAndPersist()
             } catch {
