@@ -2,9 +2,11 @@
 
 ## Status
 
-Active foundation branch: `phase-7-song-intelligence-foundation`.
+Merged to `main` via PR #8 on 2026-09-02.
 
-This phase begins the future AI Director track without introducing generative editing decisions or automatic identity adoption.
+The active follow-up gate is documented in `phase-7-song-resolver-evidence.md`.
+
+This foundation begins the future AI Director track without introducing generative editing decisions or automatic identity adoption.
 
 ## Goal
 
@@ -86,11 +88,10 @@ Information precedence remains:
 
 No future provider or AI estimate may silently overwrite a user-confirmed title, artist, arrangement, or formal lyrics.
 
-## Explicitly not implemented yet
+## Deliberately deferred from this merged foundation
 
-- Audio fingerprint generation.
+- Audio fingerprint generation and resolver evidence.
 - Chroma / melody / lyric-based same-song matching.
-- Automatic Song Resolver candidate ranking.
 - External MusicBrainz / Apple Music metadata lookup.
 - Automatic lyric transcription.
 - Known-lyrics forced alignment.
@@ -100,9 +101,9 @@ No future provider or AI estimate may silently overwrite a user-confirmed title,
 - Preference learning.
 - Multi-part AI Director.
 
-## Next gate
+## Follow-up gate
 
-The next safe sub-phase is **Song Resolver Evidence Foundation**:
+The immediate follow-up is **Song Resolver Evidence Foundation**:
 
 1. derive deterministic evidence from imported master audio,
 2. store fingerprints per Arrangement,
@@ -110,4 +111,4 @@ The next safe sub-phase is **Song Resolver Evidence Foundation**:
 4. return confidence-scored candidates,
 5. require user confirmation before attaching a match.
 
-The resolver must propose; it must not silently adopt low-confidence identity.
+The resolver must propose; it must not silently adopt identity from confidence alone.
