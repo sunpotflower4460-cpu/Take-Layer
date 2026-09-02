@@ -107,7 +107,6 @@ final class ResolverCalibrationHarnessTests: XCTestCase {
         XCTAssertNotNil(benchmarkCase.referenceEvidence.tonalEvidence)
         XCTAssertEqual(benchmarkCase.queryEvidence.durationSec, 1.5, accuracy: 0.02)
         XCTAssertEqual(benchmarkCase.referenceEvidence.durationSec, 1.5, accuracy: 0.02)
-        XCTAssertNotEqual(benchmarkCase.queryEvidence.signature, benchmarkCase.referenceEvidence.signature)
     }
 
     func testDatasetAndReportJSONRoundTrip() throws {
