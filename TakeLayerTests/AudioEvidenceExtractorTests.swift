@@ -53,5 +53,18 @@ final class AudioEvidenceExtractorTests: XCTestCase {
         XCTAssertEqual(first.signature.count, 64)
         XCTAssertGreaterThan(first.energyEnvelope.max() ?? 0, 0.99)
         XCTAssertFalse(first.energyEnvelope.allSatisfy { $0 == 0 })
+
+        let tonal = try XCTUnwrap(first.tonalEvidence)
+        XCTAssertEqual(
+            tonal.pitchClassFrames.count,
+            TonalEvidenceVector.frameCount * TonalEvidenceVector.pitchClassCount
+        )
+        XCTAssertEqual(tonal.globalPitchClass.count, TonalEvidenceVector.pitchClassCount)
+        XCTAssertEqual(tonal.referenceAHz, 440, accuracy: 0.001)
+
+        // 220 Hz is A3. With C = pitch class 0, A = 9.
+        let dominantPitchClass = tonal.globalPitchClass.enumerated().max(by: { $0.element < $1.element })?.offset
+        XCTAssertEqual(dominantPitchClass, 9)
+        XCTAssertGreaterThan(tonal.globalPitchClass[9], 0.70)
     }
 }
