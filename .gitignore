@@ -6,5 +6,8 @@ DerivedData/
 *.xcuserstate
 xcuserdata/
 
+# Local Song Resolver benchmark corpus / derived private evidence
+ResolverBenchmarks/Private/
+
 # macOS
 .DS_Store
