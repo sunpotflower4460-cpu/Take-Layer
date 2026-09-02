@@ -2,9 +2,9 @@
 
 ## Status
 
-Active branch: `phase-7-song-resolver-evidence`.
+Merged on `main` via PR #9.
 
-This sub-phase begins deterministic same-song / same-arrangement candidate matching. It extends the merged human-confirmed Song Memory foundation without allowing automatic identity adoption.
+This sub-phase began deterministic same-song / same-arrangement candidate matching. It extends the merged human-confirmed Song Memory foundation without allowing automatic identity adoption.
 
 ## Goal
 
@@ -41,13 +41,17 @@ confidence
 
 Envelope similarity uses centered correlation mapped to 0...1. Exact matching signatures return perfect evidence scores.
 
-This is an evidence foundation, not the final Song Resolver. It is expected that later gates add chroma, melody, landmark fingerprinting, lyrics, and other evidence sources.
+This is an evidence foundation, not the final Song Resolver. Later Phase 7 gates may add tonal, melody, landmark, lyrics, and other evidence sources while preserving human confirmation.
 
 ## Persistence
 
 Registered `ArrangementAudioFingerprint` records are stored separately under the local Song Memory resolver-evidence store.
 
 `ArrangementProfile.fingerprintIDs` stores references to registered evidence records. Song metadata remains in the existing Song Memory store.
+
+Only evidence records explicitly referenced from an Arrangement are eligible for Resolver candidate ranking; orphan evidence is ignored.
+
+Registration persists Song Memory references and resolver evidence with rollback protection so a failed evidence write does not intentionally leave a new active candidate reference behind.
 
 ## Human-confirmation rule
 
@@ -91,21 +95,23 @@ The MVP flow exposes a Song Resolver Evidence card that can:
 
 Audio evidence extraction runs off the main actor so long WAVs do not intentionally block SwiftUI state updates.
 
-## Tests required before merge
+## Verification completed before merge
 
 - Exact fingerprint produces confidence 1.0.
 - Exact fingerprint still does not auto-resolve.
 - Closer Arrangement ranks ahead of a distant one.
 - Duplicate evidence registration is idempotent.
 - Fingerprint-ID attachment to an Arrangement is idempotent.
+- Orphan evidence is ignored.
 - Empty evidence library returns no candidate and no automatic resolution.
+- Synthetic WAV extraction is deterministic.
 - Existing TimelineMapper, Short Foundation, and Song Memory tests remain green.
-- XcodeGen generation, iOS Simulator build, and XCTest all pass.
+- XcodeGen generation, iOS Simulator build, and XCTest passed on the PR head.
 
-## Explicitly not implemented yet
+## Explicitly not implemented in this merged gate
 
 - Robust landmark fingerprinting.
-- Chroma similarity.
+- Chroma / tonal similarity.
 - Melody contour matching.
 - Lyrics evidence.
 - Automatic metadata lookup.
@@ -118,4 +124,4 @@ Audio evidence extraction runs off the main actor so long WAVs do not intentiona
 
 ## Next gate
 
-After this evidence foundation is stable, the next safe Phase 7 increment is to improve resolver evidence quality without changing the confirmation contract. Likely additions are chroma / tonal evidence and a stronger audio-landmark fingerprint, followed by confidence calibration against real recordings of the same song in different arrangements.
+The active successor is `phase-7-tonal-evidence`, documented in `phase-7-tonal-evidence.md`. It improves Resolver quality with deterministic 12-pitch-class tonal evidence and transposition-aware comparison while preserving the same human-confirmation contract.
