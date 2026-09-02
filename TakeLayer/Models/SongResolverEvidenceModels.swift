@@ -45,6 +45,12 @@ struct SongMatchEvidence: Codable, Equatable, Sendable {
     /// Semitone shift that best maps the stored Arrangement fingerprint to the query WAV.
     /// Example: +2 means the query is best explained as two semitones above the stored tonal pattern.
     var transpositionSemitones: Int? = nil
+    /// Fraction of the shorter 32-frame tonal sequence included in the best elastic alignment.
+    /// 1.0 means the alignment used the full normalized structure; lower values indicate endpoint trimming.
+    var tonalAlignmentCoverage: Double? = nil
+    /// Fraction of non-diagonal DTW-style path steps in the best tonal alignment.
+    /// Higher values mean more structural stretching / compression was required.
+    var tonalWarpFraction: Double? = nil
 }
 
 struct SongMatchCandidate: Identifiable, Codable, Equatable, Sendable {

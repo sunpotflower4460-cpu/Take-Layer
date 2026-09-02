@@ -2,12 +2,14 @@
 
 ## Status
 
-Active branch: `phase-7-tonal-evidence`.
+Merged on `main` via PR #10 (`Phase 7: Tonal Evidence Foundation`).
 
 Prerequisites merged on `main`:
 
 - Phase 7 human-confirmed Song Memory foundation.
 - Phase 7 Song Resolver Evidence Foundation.
+
+The subsequent active resolver gate is documented in `phase-7-elastic-tonal-alignment.md`.
 
 ## Goal
 
@@ -92,22 +94,22 @@ Candidate details now expose:
 
 This evidence is shown so a user can understand why a candidate ranked highly instead of receiving an unexplained AI decision.
 
-## Tests required before merge
+## Verification completed before merge
 
-- existing TimelineMapper tests remain green,
-- existing Short Foundation tests remain green,
-- existing Song Memory / Resolver Evidence tests remain green,
+- existing TimelineMapper tests remained green,
+- existing Short Foundation tests remained green,
+- existing Song Memory / Resolver Evidence tests remained green,
 - legacy `AudioEvidenceVector` JSON without Tonal Evidence still decodes,
 - an old same-signature fingerprint upgrades without changing its ID,
 - synthetic tonal patterns detect a known transposition,
 - a different tonal progression scores below a transposed equivalent progression,
 - a synthetic WAV produces deterministic Tonal Evidence and identifies its expected dominant pitch class,
-- iOS Simulator build and XCTest pass.
+- XcodeGen generation, iOS Simulator build, and XCTest passed on the PR and again on merged `main`.
 
-## Explicitly not implemented yet
+## Not implemented by this gate
 
 - Full FFT landmark fingerprinting.
-- Dynamic time warping / elastic section alignment.
+- Elastic section alignment.
 - Melody contour extraction.
 - Vocal melody matching.
 - Lyrics-based identity evidence.
@@ -120,6 +122,6 @@ This evidence is shown so a user can understand why a candidate ranked highly in
 
 ## Next gate
 
-After this foundation is stable, the next useful Resolver gate should add **tempo / structure tolerance** rather than immediately adding generative AI.
+The next Resolver gate is **Elastic Tonal Alignment**, implemented separately on `phase-7-elastic-tonal-alignment`.
 
-A likely next step is section-aware or DTW-like tonal sequence comparison so the same work can still match when an acoustic or live arrangement contains a longer intro, shortened section, or materially different tempo.
+It extends the fixed 32-frame tonal evidence with bounded structural stretch / compression tolerance while preserving the same human-confirmation and TimelineMapper boundaries.

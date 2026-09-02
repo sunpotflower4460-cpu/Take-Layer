@@ -11,14 +11,15 @@ Read these first when working on the active TakeLayer implementation.
 5. `phase-7-song-intelligence-foundation.md`
 6. `phase-7-song-resolver-evidence.md`
 7. `phase-7-tonal-evidence.md`
-8. `architecture.md`
-9. `mvp-scope.md`
-10. `data-model.md`
-11. `non-goals.md`
-12. `testing-cases.md`
-13. `codex-instructions.md`
-14. `glossary.md`
-15. `../README.md` — historical integrated v1.2 design; use `phases.md` for current implementation status.
+8. `phase-7-elastic-tonal-alignment.md`
+9. `architecture.md`
+10. `mvp-scope.md`
+11. `data-model.md`
+12. `non-goals.md`
+13. `testing-cases.md`
+14. `codex-instructions.md`
+15. `glossary.md`
+16. `../README.md` — historical integrated v1.2 design; use `phases.md` for current implementation status.
 
 ## Reliability and deterministic editing foundations
 
@@ -66,7 +67,7 @@ Merged deterministic candidate-evidence foundation:
 
 ### `phase-7-tonal-evidence.md`
 
-Active tonal matching gate:
+Merged tonal matching foundation:
 
 - 12 pitch classes
 - 32 normalized-time Chroma-like frames
@@ -75,6 +76,18 @@ Active tonal matching gate:
 - tuning tolerance
 - backwards-compatible fingerprint enrichment
 - explainable tonal score and key-shift evidence
+
+### `phase-7-elastic-tonal-alignment.md`
+
+Active structural-tolerance gate:
+
+- bounded semi-global DTW-style comparison over the fixed 32 tonal frames
+- modest intro / outro endpoint tolerance
+- section stretch / compression tolerance
+- explainable tonal structure coverage
+- explainable elastic warp fraction
+- transposition-aware comparison retained
+- human confirmation and TimelineMapper authority retained
 
 ## Future AI Music Video Director
 

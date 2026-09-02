@@ -2,9 +2,9 @@
 
 ## Repository status
 
-As of 2026-09-02, `main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, **Phase 1.5 Short Foundation**, the first **Phase 7 Song Intelligence Foundation** with human-confirmed Song Memory, and **Phase 7 Song Resolver Evidence Foundation**. Phase 0.5A and Phase 0.5B are also merged.
+As of 2026-09-02, `main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, **Phase 1.5 Short Foundation**, the first **Phase 7 Song Intelligence Foundation** with human-confirmed Song Memory, **Phase 7 Song Resolver Evidence Foundation**, and **Phase 7 Tonal Evidence Foundation**. Phase 0.5A and Phase 0.5B are also merged.
 
-**Phase 7 Tonal Evidence Foundation** is now the active implementation gate. The current sub-scope adds deterministic Chroma-like evidence and transposition-aware matching while retaining explicit human confirmation. Melody / lyrics evidence, elastic DTW, external metadata, automatic identity adoption, and AI Director generation remain later gates.
+**Phase 7 Elastic Tonal Alignment** is now the active implementation gate. The current sub-scope adds bounded semi-global DTW-style alignment over the existing 32-frame tonal evidence, plus explainable coverage / warp evidence, while retaining explicit human confirmation. Song-section labeling, melody / lyrics evidence, external metadata, automatic identity adoption, and AI Director generation remain later gates.
 
 This file is a roadmap. A later phase is not active merely because it appears here. Implement only the phase or scope explicitly requested.
 
@@ -141,7 +141,7 @@ The phases below describe the long-term AI Music Video Director direction. They 
 
 ## Phase 7: Song Intelligence Foundation
 
-Status: active tonal-evidence gate. The human-confirmed Song Memory foundation and deterministic Resolver Evidence foundation are merged on `main`.
+Status: active elastic-tonal-alignment gate. Human-confirmed Song Memory, deterministic Resolver Evidence, and Tonal Evidence are merged on `main`.
 
 Goal: TakeLayer begins to understand and remember the musical work itself.
 
@@ -172,7 +172,7 @@ See `phase-7-song-intelligence-foundation.md`.
 
 See `phase-7-song-resolver-evidence.md`.
 
-### Active Tonal Evidence sub-scope
+### Merged Tonal Evidence foundation
 
 - Optional backwards-compatible `TonalEvidenceVector`.
 - 12 octave-folded pitch classes.
@@ -187,15 +187,28 @@ See `phase-7-song-resolver-evidence.md`.
 
 See `phase-7-tonal-evidence.md`.
 
+### Active Elastic Tonal Alignment sub-scope
+
+- Bounded semi-global DTW-style alignment over the existing 32 tonal frames.
+- Limited endpoint trimming for modest intro / outro differences.
+- Horizontal / vertical alignment moves for section stretch / compression.
+- All-12 transposition search remains intact.
+- `tonalAlignmentCoverage` exposes how much normalized structure was used.
+- `tonalWarpFraction` exposes how much non-diagonal structural warping was required.
+- Tonal score penalizes excessive endpoint exclusion and structural warp.
+- Human confirmation remains mandatory regardless of confidence.
+- No TimelineMapper or synchronization-field mutation.
+
+See `phase-7-elastic-tonal-alignment.md`.
+
 ### Later Phase 7 gates
 
 - Stronger audio landmark fingerprinting.
-- Elastic tonal alignment / DTW for materially different section timing.
 - Melody contour evidence.
 - Lyrics evidence and known-text alignment.
 - Metadata Provider Adapter layer.
 - Song sections and highlight candidates.
-- Confidence calibration against real same-song / different-arrangement recordings.
+- Real-data confidence calibration against confirmed same-song / different-arrangement recordings and known negatives.
 
 Success criterion for full Phase 7:
 
