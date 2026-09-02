@@ -1,3 +1,4 @@
+import AVFoundation
 import Foundation
 import XCTest
 @testable import TakeLayer
@@ -77,6 +78,36 @@ final class ResolverCalibrationHarnessTests: XCTestCase {
         XCTAssertEqual(threshold.specificity, 1, accuracy: 0.000_001)
         XCTAssertEqual(threshold.f1, 1, accuracy: 0.000_001)
         XCTAssertEqual(threshold.balancedAccuracy, 1, accuracy: 0.000_001)
+    }
+
+    func testMakeCaseExtractsEvidenceFromRealWAVURLs() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("TakeLayer-Calibration-WAV-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let queryURL = directory.appendingPathComponent("query.wav")
+        let referenceURL = directory.appendingPathComponent("reference.wav")
+        try writeSyntheticWAV(to: queryURL, frequency: 220)
+        try writeSyntheticWAV(to: referenceURL, frequency: 246.94)
+
+        let benchmarkCase = try ResolverCalibrationHarness.makeCase(
+            name: "real WAV boundary",
+            relationship: .sameSongDifferentArrangement,
+            queryWAVURL: queryURL,
+            referenceWAVURL: referenceURL,
+            notes: "Synthetic files exercise the real AVAudioFile extraction boundary."
+        )
+
+        XCTAssertEqual(benchmarkCase.name, "real WAV boundary")
+        XCTAssertEqual(benchmarkCase.relationship, .sameSongDifferentArrangement)
+        XCTAssertEqual(benchmarkCase.queryEvidence.signature.count, 64)
+        XCTAssertEqual(benchmarkCase.referenceEvidence.signature.count, 64)
+        XCTAssertNotNil(benchmarkCase.queryEvidence.tonalEvidence)
+        XCTAssertNotNil(benchmarkCase.referenceEvidence.tonalEvidence)
+        XCTAssertEqual(benchmarkCase.queryEvidence.durationSec, 1.5, accuracy: 0.02)
+        XCTAssertEqual(benchmarkCase.referenceEvidence.durationSec, 1.5, accuracy: 0.02)
+        XCTAssertNotEqual(benchmarkCase.queryEvidence.signature, benchmarkCase.referenceEvidence.signature)
     }
 
     func testDatasetAndReportJSONRoundTrip() throws {
@@ -190,6 +221,36 @@ final class ResolverCalibrationHarnessTests: XCTestCase {
             globalPitchClass: global,
             referenceAHz: 440
         )
+    }
+
+    private func writeSyntheticWAV(to url: URL, frequency: Double) throws {
+        let sampleRate = 8_000.0
+        let frameCount = AVAudioFrameCount(sampleRate * 1.5)
+        let format = try XCTUnwrap(
+            AVAudioFormat(
+                commonFormat: .pcmFormatFloat32,
+                sampleRate: sampleRate,
+                channels: 1,
+                interleaved: false
+            )
+        )
+        let buffer = try XCTUnwrap(AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCount))
+        buffer.frameLength = frameCount
+        let samples = try XCTUnwrap(buffer.floatChannelData?[0])
+
+        for frame in 0..<Int(frameCount) {
+            let time = Double(frame) / sampleRate
+            let envelope = 0.35 + 0.45 * (Double(frame) / Double(frameCount))
+            samples[frame] = Float(sin(2 * .pi * frequency * time) * envelope)
+        }
+
+        let file = try AVAudioFile(
+            forWriting: url,
+            settings: format.settings,
+            commonFormat: .pcmFormatFloat32,
+            interleaved: false
+        )
+        try file.write(from: buffer)
     }
 
     private func risingEnvelope() -> [Double] {
