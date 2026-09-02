@@ -94,18 +94,7 @@ struct SongResolverEvidenceView: View {
                     .font(.headline.monospacedDigit())
             }
 
-            var rows: [(String, String)] = [
-                ("duration", percent(candidate.evidence.duration)),
-                ("energy shape", percent(candidate.evidence.energyEnvelope)),
-                ("transient shape", percent(candidate.evidence.transientEnvelope))
-            ]
-            if let tonal = candidate.evidence.tonal {
-                rows.append(("tonal / chroma", percent(tonal)))
-            }
-            if let semitones = candidate.evidence.transpositionSemitones {
-                rows.append(("estimated key shift", semitoneText(semitones)))
-            }
-            MediaInfoGrid(rows: rows)
+            MediaInfoGrid(rows: evidenceRows(for: candidate.evidence))
 
             if isResolved {
                 Label("この候補へ確認済み接続", systemImage: "checkmark.circle.fill")
@@ -121,6 +110,21 @@ struct SongResolverEvidenceView: View {
         .padding(10)
         .background(.secondary.opacity(0.08))
         .clipShape(RoundedRectangle(cornerRadius: 10))
+    }
+
+    private func evidenceRows(for evidence: SongMatchEvidence) -> [(String, String)] {
+        var rows: [(String, String)] = [
+            ("duration", percent(evidence.duration)),
+            ("energy shape", percent(evidence.energyEnvelope)),
+            ("transient shape", percent(evidence.transientEnvelope))
+        ]
+        if let tonal = evidence.tonal {
+            rows.append(("tonal / chroma", percent(tonal)))
+        }
+        if let semitones = evidence.transpositionSemitones {
+            rows.append(("estimated key shift", semitoneText(semitones)))
+        }
+        return rows
     }
 
     private func percent(_ value: Double) -> String {
