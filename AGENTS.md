@@ -10,9 +10,9 @@ Long-term direction: TakeLayer Core may support an AI Music Video Director that 
 
 ## Repository implementation baseline
 
-`main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, **Phase 1.5 Short Foundation**, the first **Phase 7 Song Intelligence Foundation** with human-confirmed Song Memory, and **Phase 7 Song Resolver Evidence Foundation**.
+`main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, **Phase 1.5 Short Foundation**, **Phase 7 Song Intelligence Foundation**, **Phase 7 Song Resolver Evidence Foundation**, and **Phase 7 Tonal Evidence Foundation**.
 
-`phase-7-tonal-evidence` is the active branch. Its current scope is deterministic Chroma-like tonal evidence, transposition-aware candidate evidence, backwards-compatible fingerprint enrichment, and explainable candidate scoring. Melody / lyrics matching, elastic DTW, external metadata lookup, automatic identity adoption, AI Director generation, and preference learning are not activated by this branch.
+`phase-7-elastic-tonal-alignment` is the active branch. Its current scope is bounded semi-global DTW-style alignment over the existing 32-frame tonal evidence, explainable structural coverage / warp evidence, and regression coverage. Song-section labeling, melody / lyrics matching, external metadata lookup, automatic identity adoption, AI Director generation, and preference learning are not activated by this branch.
 
 For every task, implement only the explicitly requested phase or scope and preserve already-merged behavior.
 
@@ -71,7 +71,7 @@ Song Memory is not a synchronization authority. It must not mutate `songStartRaw
 
 Song Resolver may read completed-WAV evidence and Song Memory to produce candidates, but it must not silently promote analysis evidence into user-confirmed identity.
 
-Tonal / Chroma evidence is an analysis estimate. Even a perfect tonal score is not equivalent to user confirmation.
+Tonal / Chroma and elastic alignment evidence are analysis estimates. Even a perfect score is not equivalent to user confirmation.
 
 ## Tech direction
 
@@ -89,30 +89,32 @@ Tonal / Chroma evidence is an analysis estimate. Even a perfect tonal score is n
 
 - Implement only the requested phase.
 - Do not implement multiple phases in one pass.
-- Phase 0.5A, Phase 0.5B, Phase 1, Phase 1.1, and Phase 1.5 have already been merged into `main`.
-- The first Phase 7 Song Intelligence Foundation is merged into `main`.
+- Phase 0.5A, Phase 0.5B, Phase 1, Phase 1.1, and Phase 1.5 are merged into `main`.
+- Phase 7 Song Intelligence Foundation is merged into `main`.
 - Phase 7 Song Resolver Evidence Foundation is merged into `main`.
-- The active Phase 7 sub-gate is documented in `docs/phase-7-tonal-evidence.md`.
+- Phase 7 Tonal Evidence Foundation is merged into `main`.
+- The active Phase 7 sub-gate is documented in `docs/phase-7-elastic-tonal-alignment.md`.
 - `docs/ai-director-vision.md`, `docs/song-memory-feedback.md`, and `docs/ai-director-data-model.md` are architecture references; they do not automatically activate all described capabilities.
 - Do not infer that Phase 8, Phase 9, Phase 10, or unactivated Phase 7 sub-gates are active.
 
-## Active Phase 7 tonal-evidence gates
+## Active Phase 7 elastic-alignment gates
 
-Before calling the current tonal foundation complete:
+Before calling the current gate complete:
 
-- Existing `AudioEvidenceVector` JSON without tonal fields must remain decodable.
-- A newly analyzed completed WAV produces deterministic 12-pitch-class tonal evidence.
-- Tonal evidence contains both global pitch-class distribution and fixed normalized-time frames.
-- Resolver compares all 12 pitch-class rotations and reports the best estimated transposition.
-- Tonal candidate scoring remains an inspectable component of total confidence.
-- Existing fingerprints can be enriched in place when the legacy signature proves the same registered evidence.
-- A perfect tonal match still remains unresolved until the user explicitly confirms it.
+- Existing `SongMatchEvidence` JSON without alignment fields must remain decodable.
+- Elastic alignment must operate on the fixed tonal evidence, not raw-audio timeline truth.
+- All 12 transposition candidates remain supported.
+- Limited endpoint differences and section stretch / compression are tolerated.
+- Candidate evidence exposes `tonalAlignmentCoverage` and `tonalWarpFraction`.
+- Coverage and warp values remain bounded 0...1.
+- A same-song stretched fixture must score above a materially different structure fixture.
+- Exact evidence must report full coverage / zero warp and still require human confirmation.
 - Resolver code must not modify TimelineMapper or synchronization fields.
 - XcodeGen must generate the project.
 - iOS Simulator build and XCTest must pass.
-- Existing TimelineMapper, Short Foundation, Song Memory, and Resolver Evidence tests must continue to pass.
+- Existing TimelineMapper, Short Foundation, Song Memory, Resolver Evidence, and Tonal Evidence tests must continue to pass.
 
-See `docs/phase-7-tonal-evidence.md`.
+See `docs/phase-7-elastic-tonal-alignment.md`.
 
 ## Do not implement list
 
@@ -130,9 +132,9 @@ Do not add these unless the active phase explicitly requests them:
 - DAW API integration.
 - Automatic take adoption.
 - Automatic deletion of raw videos.
-- Robust landmark fingerprinting beyond the active Tonal Evidence gate.
+- High-resolution unconstrained DTW over raw audio features.
+- Song-section labels beyond the active gate.
 - Melody contour / vocal melody evidence.
-- Full DTW / elastic arrangement alignment.
 - Lyrics identity evidence beyond an explicitly activated gate.
 - Automatic Song / Arrangement adoption from resolver confidence.
 - External music metadata lookup.
@@ -142,7 +144,7 @@ Do not add these unless the active phase explicitly requests them:
 - AI Music Video Director proposal generation.
 - Preference learning / edit-delta learning.
 
-Do not remove or regress already-merged functionality such as import/record flow, WAV import, manual song-start markers, trim, manual offset, validation, deterministic Short editing, Song Memory, Resolver Evidence, or single-screen export unless explicitly requested.
+Do not remove or regress already-merged functionality such as import/record flow, WAV import, manual song-start markers, trim, manual offset, validation, deterministic Short editing, Song Memory, Resolver Evidence, Tonal Evidence, or single-screen export unless explicitly requested.
 
 ## Future AI Director references
 
