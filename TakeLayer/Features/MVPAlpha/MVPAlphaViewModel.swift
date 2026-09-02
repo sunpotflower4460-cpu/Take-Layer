@@ -5,6 +5,7 @@ import Foundation
 @MainActor
 final class MVPAlphaViewModel: ObservableObject {
     @Published var project: ProjectDraft
+    @Published var songMemoryLibrary: SongMemoryLibrary
     @Published var videoPreviewTimeSec: Double = 0
     @Published var audioPreviewTimeSec: Double = 0
     @Published var isImportingVideo = false
@@ -14,13 +15,26 @@ final class MVPAlphaViewModel: ObservableObject {
     @Published var errorMessage: String?
 
     init() {
+        let loadedProject: ProjectDraft
+        var loadErrors: [String] = []
         do {
-            self.project = try ProjectStore.loadMostRecent() ?? ProjectDraft(title: "New TakeLayer Project")
-            self.errorMessage = nil
+            loadedProject = try ProjectStore.loadMostRecent() ?? ProjectDraft(title: "New TakeLayer Project")
         } catch {
-            self.project = ProjectDraft(title: "New TakeLayer Project")
-            self.errorMessage = error.localizedDescription
+            loadedProject = ProjectDraft(title: "New TakeLayer Project")
+            loadErrors.append(error.localizedDescription)
         }
+
+        let loadedSongMemory: SongMemoryLibrary
+        do {
+            loadedSongMemory = try SongMemoryStore.load()
+        } catch {
+            loadedSongMemory = SongMemoryLibrary()
+            loadErrors.append(error.localizedDescription)
+        }
+
+        self.project = loadedProject
+        self.songMemoryLibrary = loadedSongMemory
+        self.errorMessage = loadErrors.isEmpty ? nil : loadErrors.joined(separator: "\n")
     }
 
     var validationResult: ExportValidationResult {
@@ -62,6 +76,26 @@ final class MVPAlphaViewModel: ObservableObject {
 
     func updateTitle(_ title: String) {
         project.title = title
+        touchAndPersist()
+    }
+
+    func saveConfirmedSongMemory(_ input: ConfirmedSongMemoryInput) {
+        errorMessage = nil
+        var updatedLibrary = songMemoryLibrary
+        let link = updatedLibrary.upsertConfirmedSong(input)
+
+        do {
+            try SongMemoryStore.save(updatedLibrary)
+            songMemoryLibrary = updatedLibrary
+            project.songMemoryLink = link
+            touchAndPersist()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func detachSongMemory() {
+        project.songMemoryLink = nil
         touchAndPersist()
     }
 
