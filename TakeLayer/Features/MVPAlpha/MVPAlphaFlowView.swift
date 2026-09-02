@@ -35,6 +35,18 @@ struct MVPAlphaFlowView: View {
                         isImporting: viewModel.isImportingAudio,
                         onImport: { isAudioImporterPresented = true }
                     )
+                    SongResolverEvidenceView(
+                        project: viewModel.project,
+                        songMemory: viewModel.songMemoryLibrary,
+                        evidenceLibrary: viewModel.songResolverEvidenceLibrary,
+                        currentEvidence: viewModel.currentAudioEvidence,
+                        matchResult: viewModel.songMatchResult,
+                        isAnalyzing: viewModel.isAnalyzingSongEvidence,
+                        message: viewModel.songResolverMessage,
+                        onRegisterEvidence: viewModel.registerCurrentMasterAsArrangementEvidence,
+                        onAnalyze: viewModel.analyzeCurrentMasterAgainstSongMemory,
+                        onConfirmCandidate: viewModel.confirmSongMatch
+                    )
                     if let video = viewModel.project.activeVideo {
                         VideoSongStartEditorView(
                             video: video,
@@ -119,9 +131,9 @@ struct MVPAlphaFlowView: View {
             Text("TakeLayer Core + Song Intelligence")
                 .font(.largeTitle)
                 .fontWeight(.bold)
-            Text("完成WAV基準の同期を守りながら、曲名・Arrangement・正式歌詞をSong Memoryとして再利用できる土台を育てます。")
+            Text("完成WAV基準の同期を守りながら、Song Memoryと決定論的Audio Evidenceで曲・Arrangement候補を安全に再利用します。")
                 .foregroundStyle(.secondary)
-            Text("Project timeline 0:00 = 曲開始。同期はTimelineMapper、人間確認済み曲情報はSong Memoryが正本です。")
+            Text("Project timeline 0:00 = 曲開始。同期はTimelineMapper、確認済み曲情報はSong Memory、Resolverは候補提示だけを担当します。")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }

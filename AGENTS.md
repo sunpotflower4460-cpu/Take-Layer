@@ -10,9 +10,9 @@ Long-term direction: TakeLayer Core may support an AI Music Video Director that 
 
 ## Repository implementation baseline
 
-`main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, and **Phase 1.5 Short Foundation** foundations.
+`main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, **Phase 1.5 Short Foundation**, and the first **Phase 7 Song Intelligence Foundation** with human-confirmed Song Memory.
 
-`phase-7-song-intelligence-foundation` is the active branch. Its current scope is human-confirmed Song Memory, Song / Arrangement separation, formal lyrics persistence, and Project linkage. Automatic resolver evidence, external metadata lookup, AI Director generation, and preference learning are not activated by this branch.
+`phase-7-song-resolver-evidence` is the active branch. Its current scope is deterministic local audio evidence, per-Arrangement fingerprint registration, confidence-scored candidate ranking, and explicit human confirmation before Project linkage. External metadata lookup, chroma / melody / lyrics matching, automatic identity adoption, AI Director generation, and preference learning are not activated by this branch.
 
 For every task, implement only the explicitly requested phase or scope and preserve already-merged behavior.
 
@@ -30,6 +30,7 @@ For every task, implement only the explicitly requested phase or scope and prese
 - Future AI suggestions must remain inspectable, reversible, and confidence-aware.
 - Generative AI must never become the source of truth for synchronization.
 - User-confirmed song metadata and lyrics must not be silently overwritten by external metadata or AI estimates.
+- Resolver confidence alone must not create or replace a Project Song Memory link during the active evidence-foundation gate.
 
 ## Timeline authority
 
@@ -68,12 +69,15 @@ For song identity, arrangement metadata, and formal lyrics, use this precedence:
 
 Song Memory is not a synchronization authority. It must not mutate `songStartRawSec`, `songStartAudioSec`, `offsetMs`, trim ranges, or renderer mapping.
 
+The active Song Resolver gate may read completed-WAV audio and Song Memory to produce candidates, but it must not silently promote analysis evidence into user-confirmed identity.
+
 ## Tech direction
 
 - iOS MVP first.
 - Swift / SwiftUI.
 - AVFoundation.
-- Accelerate / vDSP.
+- Accelerate / vDSP when stronger signal processing is explicitly activated.
+- CryptoKit is acceptable for deterministic local evidence signatures.
 - SwiftData is a future persistence target; current persistence uses small JSON store boundaries.
 - Xcode project generation is defined by `project.yml` using XcodeGen.
 - Do not make FFmpegKit a core dependency.
@@ -84,24 +88,27 @@ Song Memory is not a synchronization authority. It must not mutate `songStartRaw
 - Implement only the requested phase.
 - Do not implement multiple phases in one pass.
 - Phase 0.5A, Phase 0.5B, Phase 1, Phase 1.1, and Phase 1.5 have already been merged into `main`.
-- Phase 7 Song Intelligence Foundation is explicitly activated only for the scope documented in `docs/phase-7-song-intelligence-foundation.md`.
+- The first Phase 7 Song Intelligence Foundation is merged into `main`.
+- The active Phase 7 sub-gate is documented in `docs/phase-7-song-resolver-evidence.md`.
 - `docs/ai-director-vision.md`, `docs/song-memory-feedback.md`, and `docs/ai-director-data-model.md` are architecture references; they do not automatically activate all described capabilities.
 - Do not infer that Phase 8, Phase 9, Phase 10, or unactivated Phase 7 sub-gates are active.
 
-## Active Phase 7 gates
+## Active Phase 7 resolver-evidence gates
 
-Before calling the current Song Intelligence foundation complete:
+Before calling the current resolver evidence foundation complete:
 
-- `SongIdentity`, `SongProfile`, `ArrangementProfile`, and `FormalLyrics` must be Codable and persistent.
-- A Project may link to a Song and Arrangement without changing synchronization.
-- User-confirmed values must remain explicit and highest-precedence.
-- Existing Song Memory entries must be selectable and editable.
-- Formal lyrics must be versioned when changed.
+- A completed WAV can produce a deterministic fixed-size `AudioEvidenceVector` locally.
+- Registered evidence belongs to an explicit confirmed Arrangement.
+- Evidence records persist separately and are referenced from `ArrangementProfile.fingerprintIDs`.
+- Duplicate registration of the same signature for the same Arrangement is idempotent.
+- Candidate ranking exposes component scores and total confidence.
+- Even a perfect-confidence candidate remains unresolved until the user explicitly confirms it.
+- Resolver code must not modify TimelineMapper or synchronization fields.
 - XcodeGen must generate the project.
 - iOS Simulator build and XCTest must pass.
-- Existing TimelineMapper and Short Foundation tests must continue to pass.
+- Existing TimelineMapper, Short Foundation, and Song Memory tests must continue to pass.
 
-See `docs/phase-7-song-intelligence-foundation.md`.
+See `docs/phase-7-song-resolver-evidence.md`.
 
 ## Do not implement list
 
@@ -119,7 +126,8 @@ Do not add these unless the active phase explicitly requests them:
 - DAW API integration.
 - Automatic take adoption.
 - Automatic deletion of raw videos.
-- Audio fingerprint generation / same-song auto matching beyond the active Song Memory foundation.
+- Robust landmark / chroma / melody / lyrics Song Resolver evidence beyond the active simple evidence foundation.
+- Automatic Song / Arrangement adoption from resolver confidence.
 - External music metadata lookup.
 - Automatic lyric transcription or automatic lyric captions.
 - Lyrics forced-alignment beyond an explicitly activated gate.
@@ -127,7 +135,7 @@ Do not add these unless the active phase explicitly requests them:
 - AI Music Video Director proposal generation.
 - Preference learning / edit-delta learning.
 
-Do not remove or regress already-merged functionality such as import/record flow, WAV import, manual song-start markers, trim, manual offset, validation, deterministic Short editing, or single-screen export unless explicitly requested.
+Do not remove or regress already-merged functionality such as import/record flow, WAV import, manual song-start markers, trim, manual offset, validation, deterministic Short editing, Song Memory, or single-screen export unless explicitly requested.
 
 ## Future AI Director references
 
