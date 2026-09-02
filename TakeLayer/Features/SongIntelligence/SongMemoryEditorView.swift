@@ -63,6 +63,20 @@ struct SongMemoryEditorView: View {
 
             Text("Arrangement")
                 .font(.subheadline.weight(.semibold))
+
+            if selectedSongID != nil {
+                Picker("Arrangement Memory", selection: $existingArrangementID) {
+                    Text("新しいArrangement").tag(Optional<UUID>.none)
+                    ForEach(availableArrangements) { arrangement in
+                        Text(arrangementLabel(arrangement)).tag(Optional(arrangement.id))
+                    }
+                }
+                .pickerStyle(.menu)
+                .onChange(of: existingArrangementID) { _, newValue in
+                    loadArrangement(newValue)
+                }
+            }
+
             Picker("Type", selection: $arrangementType) {
                 ForEach(SongArrangementType.allCases) { type in
                     Text(type.displayName).tag(type)
@@ -71,6 +85,14 @@ struct SongMemoryEditorView: View {
             .pickerStyle(.menu)
             TextField("Arrangement name", text: $arrangementName)
                 .textFieldStyle(.roundedBorder)
+
+            if selectedSongID != nil {
+                Text(existingArrangementID == nil
+                    ? "この曲に新しいArrangementを追加してProjectへ接続します。"
+                    : "選択したArrangementの確認済み情報を更新します。")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
 
             Divider()
 
@@ -97,7 +119,7 @@ struct SongMemoryEditorView: View {
                 .foregroundStyle(.secondary)
 
             HStack {
-                Button(selectedSongID == nil ? "Song Memoryに登録" : "確認済み情報を更新") {
+                Button(saveButtonTitle) {
                     onSave(makeInput())
                 }
                 .buttonStyle(.borderedProminent)
@@ -115,6 +137,10 @@ struct SongMemoryEditorView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("このProjectは「\(linkedIdentity.canonicalTitle)」に接続済み")
                         .font(.footnote.weight(.semibold))
+                    if let linkedArrangement = library.arrangement(for: linkedArrangementID) {
+                        Text("Arrangement: \(linkedArrangement.name)")
+                            .font(.caption)
+                    }
                     Text("userConfirmed: \(linkedIdentity.userConfirmed ? "true" : "false") / confidence: \(linkedIdentity.confidence, format: .number.precision(.fractionLength(2)))")
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -139,11 +165,31 @@ struct SongMemoryEditorView: View {
         }
     }
 
+    private var availableArrangements: [ArrangementProfile] {
+        library.arrangements(for: selectedSongID).sorted {
+            $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
+        }
+    }
+
+    private var saveButtonTitle: String {
+        if selectedSongID == nil {
+            return "Song Memoryに登録"
+        }
+        if existingArrangementID == nil {
+            return "新しいArrangementを追加"
+        }
+        return "確認済み情報を更新"
+    }
+
     private func identityLabel(_ identity: SongIdentity) -> String {
         guard let artist = identity.artistName, !artist.isEmpty else {
             return identity.canonicalTitle
         }
         return "\(identity.canonicalTitle) — \(artist)"
+    }
+
+    private func arrangementLabel(_ arrangement: ArrangementProfile) -> String {
+        "\(arrangement.name) — \(arrangement.type.displayName)"
     }
 
     private func loadSong(_ songID: UUID?) {
@@ -184,11 +230,10 @@ struct SongMemoryEditorView: View {
            linked.songID == identity.id {
             preferredArrangement = linked
         } else {
-            preferredArrangement = library.arrangements(for: identity.id).first
+            preferredArrangement = availableArrangements.first
         }
         existingArrangementID = preferredArrangement?.id
-        arrangementName = preferredArrangement?.name ?? ""
-        arrangementType = preferredArrangement?.type ?? .acousticSolo
+        loadArrangement(preferredArrangement?.id)
 
         if let lyrics = library.lyrics(for: identity.id) {
             formalLyricsText = lyrics.text
@@ -197,6 +242,17 @@ struct SongMemoryEditorView: View {
             formalLyricsText = ""
             lyricsLanguage = "ja"
         }
+    }
+
+    private func loadArrangement(_ arrangementID: UUID?) {
+        guard let arrangement = library.arrangement(for: arrangementID),
+              arrangement.songID == selectedSongID else {
+            arrangementName = ""
+            arrangementType = .acousticSolo
+            return
+        }
+        arrangementName = arrangement.name
+        arrangementType = arrangement.type
     }
 
     private func makeInput() -> ConfirmedSongMemoryInput {
