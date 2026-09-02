@@ -1,3 +1,4 @@
+import Foundation
 import XCTest
 @testable import TakeLayer
 
@@ -69,6 +70,26 @@ final class SongMemoryFoundationTests: XCTestCase {
         XCTAssertEqual(lyrics.text, "second version")
     }
 
+    func testExistingSongCanCreateAdditionalArrangementWithoutDuplicatingIdentity() throws {
+        var library = SongMemoryLibrary()
+        let first = library.upsertConfirmedSong(makeInput(canonicalTitle: "Re:trip"))
+
+        var duoInput = makeInput(canonicalTitle: "Re:trip")
+        duoInput.existingSongID = first.songID
+        duoInput.existingArrangementID = nil
+        duoInput.arrangementName = "Duo"
+        duoInput.arrangementType = .duo
+
+        let second = library.upsertConfirmedSong(duoInput)
+
+        XCTAssertEqual(first.songID, second.songID)
+        XCTAssertNotEqual(first.arrangementID, second.arrangementID)
+        XCTAssertEqual(library.identities.count, 1)
+        XCTAssertEqual(library.arrangements(for: first.songID).count, 2)
+        XCTAssertEqual(library.arrangement(for: second.arrangementID)?.type, .duo)
+        XCTAssertEqual(library.arrangement(for: second.arrangementID)?.name, "Duo")
+    }
+
     func testSavingEmptyFormalLyricsRemovesOnlyConfirmedLyrics() throws {
         var library = SongMemoryLibrary()
         let first = library.upsertConfirmedSong(
@@ -107,6 +128,45 @@ final class SongMemoryFoundationTests: XCTestCase {
         let profile = try XCTUnwrap(library.profile(for: link.songID))
         XCTAssertNil(profile.bpm)
         XCTAssertNil(profile.tuningHz)
+    }
+
+    func testSongMemoryLibraryCodableRoundTripPreservesConfirmedData() throws {
+        var library = SongMemoryLibrary()
+        let link = library.upsertConfirmedSong(
+            makeInput(
+                canonicalTitle: "Aquarium",
+                artistName: "flowertty",
+                aliases: ["AQ"],
+                bpm: 84,
+                keySignature: "D",
+                tuningHz: 432,
+                formalLyricsText: "水の中で"
+            ),
+            now: Date(timeIntervalSince1970: 2_000)
+        )
+
+        let data = try JSONEncoder().encode(library)
+        let decoded = try JSONDecoder().decode(SongMemoryLibrary.self, from: data)
+
+        XCTAssertEqual(decoded, library)
+        XCTAssertEqual(decoded.identity(for: link.songID)?.canonicalTitle, "Aquarium")
+        XCTAssertEqual(decoded.lyrics(for: link.songID)?.text, "水の中で")
+    }
+
+    func testLegacyProjectJSONWithoutSongMemoryLinkStillDecodes() throws {
+        var project = ProjectDraft(title: "Legacy Project")
+        project.offsetMs = 12
+
+        let currentData = try JSONEncoder().encode(project)
+        var object = try XCTUnwrap(JSONSerialization.jsonObject(with: currentData) as? [String: Any])
+        object.removeValue(forKey: "songMemoryLink")
+        let legacyData = try JSONSerialization.data(withJSONObject: object)
+
+        let decoded = try JSONDecoder().decode(ProjectDraft.self, from: legacyData)
+
+        XCTAssertEqual(decoded.title, "Legacy Project")
+        XCTAssertEqual(decoded.offsetMs, 12)
+        XCTAssertNil(decoded.songMemoryLink)
     }
 
     private func makeInput(
