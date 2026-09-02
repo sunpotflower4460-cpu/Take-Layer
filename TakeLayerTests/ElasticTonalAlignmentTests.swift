@@ -82,7 +82,7 @@ final class ElasticTonalAlignmentTests: XCTestCase {
 
         XCTAssertGreaterThan(try XCTUnwrap(evidence.tonal), 0.70)
         XCTAssertGreaterThanOrEqual(coverage, 0.75)
-        XCTAssertLessThanOrEqual(coverage, 1)
+        XCTAssertLessThan(coverage, 1)
     }
 
     func testExactFingerprintReportsFullCoverageZeroWarpAndStillNeedsHumanConfirmation() throws {
