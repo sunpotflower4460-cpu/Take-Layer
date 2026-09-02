@@ -10,9 +10,9 @@ Long-term direction: TakeLayer Core may support an AI Music Video Director that 
 
 ## Repository implementation baseline
 
-`main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, **Phase 1.5 Short Foundation**, and the first **Phase 7 Song Intelligence Foundation** with human-confirmed Song Memory.
+`main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, **Phase 1.5 Short Foundation**, the first **Phase 7 Song Intelligence Foundation** with human-confirmed Song Memory, and **Phase 7 Song Resolver Evidence Foundation**.
 
-`phase-7-song-resolver-evidence` is the active branch. Its current scope is deterministic local audio evidence, per-Arrangement fingerprint registration, confidence-scored candidate ranking, and explicit human confirmation before Project linkage. External metadata lookup, chroma / melody / lyrics matching, automatic identity adoption, AI Director generation, and preference learning are not activated by this branch.
+`phase-7-tonal-evidence` is the active branch. Its current scope is deterministic Chroma-like tonal evidence, transposition-aware candidate evidence, backwards-compatible fingerprint enrichment, and explainable candidate scoring. Melody / lyrics matching, elastic DTW, external metadata lookup, automatic identity adoption, AI Director generation, and preference learning are not activated by this branch.
 
 For every task, implement only the explicitly requested phase or scope and preserve already-merged behavior.
 
@@ -30,7 +30,7 @@ For every task, implement only the explicitly requested phase or scope and prese
 - Future AI suggestions must remain inspectable, reversible, and confidence-aware.
 - Generative AI must never become the source of truth for synchronization.
 - User-confirmed song metadata and lyrics must not be silently overwritten by external metadata or AI estimates.
-- Resolver confidence alone must not create or replace a Project Song Memory link during the active evidence-foundation gate.
+- Resolver confidence alone must not create or replace a Project Song Memory link.
 
 ## Timeline authority
 
@@ -69,14 +69,16 @@ For song identity, arrangement metadata, and formal lyrics, use this precedence:
 
 Song Memory is not a synchronization authority. It must not mutate `songStartRawSec`, `songStartAudioSec`, `offsetMs`, trim ranges, or renderer mapping.
 
-The active Song Resolver gate may read completed-WAV audio and Song Memory to produce candidates, but it must not silently promote analysis evidence into user-confirmed identity.
+Song Resolver may read completed-WAV evidence and Song Memory to produce candidates, but it must not silently promote analysis evidence into user-confirmed identity.
+
+Tonal / Chroma evidence is an analysis estimate. Even a perfect tonal score is not equivalent to user confirmation.
 
 ## Tech direction
 
 - iOS MVP first.
 - Swift / SwiftUI.
 - AVFoundation.
-- Accelerate / vDSP when stronger signal processing is explicitly activated.
+- Accelerate / vDSP when stronger signal processing is explicitly activated and materially useful.
 - CryptoKit is acceptable for deterministic local evidence signatures.
 - SwiftData is a future persistence target; current persistence uses small JSON store boundaries.
 - Xcode project generation is defined by `project.yml` using XcodeGen.
@@ -89,26 +91,28 @@ The active Song Resolver gate may read completed-WAV audio and Song Memory to pr
 - Do not implement multiple phases in one pass.
 - Phase 0.5A, Phase 0.5B, Phase 1, Phase 1.1, and Phase 1.5 have already been merged into `main`.
 - The first Phase 7 Song Intelligence Foundation is merged into `main`.
-- The active Phase 7 sub-gate is documented in `docs/phase-7-song-resolver-evidence.md`.
+- Phase 7 Song Resolver Evidence Foundation is merged into `main`.
+- The active Phase 7 sub-gate is documented in `docs/phase-7-tonal-evidence.md`.
 - `docs/ai-director-vision.md`, `docs/song-memory-feedback.md`, and `docs/ai-director-data-model.md` are architecture references; they do not automatically activate all described capabilities.
 - Do not infer that Phase 8, Phase 9, Phase 10, or unactivated Phase 7 sub-gates are active.
 
-## Active Phase 7 resolver-evidence gates
+## Active Phase 7 tonal-evidence gates
 
-Before calling the current resolver evidence foundation complete:
+Before calling the current tonal foundation complete:
 
-- A completed WAV can produce a deterministic fixed-size `AudioEvidenceVector` locally.
-- Registered evidence belongs to an explicit confirmed Arrangement.
-- Evidence records persist separately and are referenced from `ArrangementProfile.fingerprintIDs`.
-- Duplicate registration of the same signature for the same Arrangement is idempotent.
-- Candidate ranking exposes component scores and total confidence.
-- Even a perfect-confidence candidate remains unresolved until the user explicitly confirms it.
+- Existing `AudioEvidenceVector` JSON without tonal fields must remain decodable.
+- A newly analyzed completed WAV produces deterministic 12-pitch-class tonal evidence.
+- Tonal evidence contains both global pitch-class distribution and fixed normalized-time frames.
+- Resolver compares all 12 pitch-class rotations and reports the best estimated transposition.
+- Tonal candidate scoring remains an inspectable component of total confidence.
+- Existing fingerprints can be enriched in place when the legacy signature proves the same registered evidence.
+- A perfect tonal match still remains unresolved until the user explicitly confirms it.
 - Resolver code must not modify TimelineMapper or synchronization fields.
 - XcodeGen must generate the project.
 - iOS Simulator build and XCTest must pass.
-- Existing TimelineMapper, Short Foundation, and Song Memory tests must continue to pass.
+- Existing TimelineMapper, Short Foundation, Song Memory, and Resolver Evidence tests must continue to pass.
 
-See `docs/phase-7-song-resolver-evidence.md`.
+See `docs/phase-7-tonal-evidence.md`.
 
 ## Do not implement list
 
@@ -126,7 +130,10 @@ Do not add these unless the active phase explicitly requests them:
 - DAW API integration.
 - Automatic take adoption.
 - Automatic deletion of raw videos.
-- Robust landmark / chroma / melody / lyrics Song Resolver evidence beyond the active simple evidence foundation.
+- Robust landmark fingerprinting beyond the active Tonal Evidence gate.
+- Melody contour / vocal melody evidence.
+- Full DTW / elastic arrangement alignment.
+- Lyrics identity evidence beyond an explicitly activated gate.
 - Automatic Song / Arrangement adoption from resolver confidence.
 - External music metadata lookup.
 - Automatic lyric transcription or automatic lyric captions.
@@ -135,7 +142,7 @@ Do not add these unless the active phase explicitly requests them:
 - AI Music Video Director proposal generation.
 - Preference learning / edit-delta learning.
 
-Do not remove or regress already-merged functionality such as import/record flow, WAV import, manual song-start markers, trim, manual offset, validation, deterministic Short editing, Song Memory, or single-screen export unless explicitly requested.
+Do not remove or regress already-merged functionality such as import/record flow, WAV import, manual song-start markers, trim, manual offset, validation, deterministic Short editing, Song Memory, Resolver Evidence, or single-screen export unless explicitly requested.
 
 ## Future AI Director references
 
