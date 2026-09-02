@@ -6,10 +6,15 @@ import Foundation
 final class MVPAlphaViewModel: ObservableObject {
     @Published var project: ProjectDraft
     @Published var songMemoryLibrary: SongMemoryLibrary
+    @Published var songResolverEvidenceLibrary: SongResolverEvidenceLibrary
+    @Published var currentAudioEvidence: AudioEvidenceVector?
+    @Published var songMatchResult: SongMatchResult?
+    @Published var songResolverMessage: String?
     @Published var videoPreviewTimeSec: Double = 0
     @Published var audioPreviewTimeSec: Double = 0
     @Published var isImportingVideo = false
     @Published var isImportingAudio = false
+    @Published var isAnalyzingSongEvidence = false
     @Published var isExporting = false
     @Published var exportResult: ExportResult?
     @Published var errorMessage: String?
@@ -32,8 +37,20 @@ final class MVPAlphaViewModel: ObservableObject {
             loadErrors.append(error.localizedDescription)
         }
 
+        let loadedResolverEvidence: SongResolverEvidenceLibrary
+        do {
+            loadedResolverEvidence = try SongResolverEvidenceStore.load()
+        } catch {
+            loadedResolverEvidence = SongResolverEvidenceLibrary()
+            loadErrors.append(error.localizedDescription)
+        }
+
         self.project = loadedProject
         self.songMemoryLibrary = loadedSongMemory
+        self.songResolverEvidenceLibrary = loadedResolverEvidence
+        self.currentAudioEvidence = nil
+        self.songMatchResult = nil
+        self.songResolverMessage = nil
         self.errorMessage = loadErrors.isEmpty ? nil : loadErrors.joined(separator: "\n")
     }
 
@@ -88,6 +105,7 @@ final class MVPAlphaViewModel: ObservableObject {
             try SongMemoryStore.save(updatedLibrary)
             songMemoryLibrary = updatedLibrary
             project.songMemoryLink = link
+            songResolverMessage = nil
             touchAndPersist()
         } catch {
             errorMessage = error.localizedDescription
@@ -96,6 +114,109 @@ final class MVPAlphaViewModel: ObservableObject {
 
     func detachSongMemory() {
         project.songMemoryLink = nil
+        songResolverMessage = nil
+        touchAndPersist()
+    }
+
+    func registerCurrentMasterAsArrangementEvidence() {
+        guard let audio = project.importedMasterAudio else {
+            errorMessage = "先に完成WAVを読み込んでください。"
+            return
+        }
+        guard let arrangementID = project.songMemoryLink?.arrangementID,
+              songMemoryLibrary.arrangement(for: arrangementID) != nil else {
+            errorMessage = "Evidenceを登録する前にProjectをSong / Arrangementへ接続してください。"
+            return
+        }
+
+        isAnalyzingSongEvidence = true
+        errorMessage = nil
+        songResolverMessage = "WAVからArrangement Evidenceを抽出しています…"
+        let url = audio.url
+
+        Task {
+            do {
+                let evidence = try AudioEvidenceExtractor.extract(from: url)
+                var updatedEvidenceLibrary = songResolverEvidenceLibrary
+                let fingerprint = updatedEvidenceLibrary.register(
+                    arrangementID: arrangementID,
+                    evidence: evidence,
+                    sourceFileName: url.lastPathComponent
+                )
+
+                var updatedSongMemory = songMemoryLibrary
+                updatedSongMemory.attachFingerprintID(fingerprint.id, to: arrangementID)
+
+                try SongResolverEvidenceStore.save(updatedEvidenceLibrary)
+                try SongMemoryStore.save(updatedSongMemory)
+
+                currentAudioEvidence = evidence
+                songResolverEvidenceLibrary = updatedEvidenceLibrary
+                songMemoryLibrary = updatedSongMemory
+                songResolverMessage = "このWAVをArrangement Evidenceとして登録しました。"
+            } catch {
+                errorMessage = error.localizedDescription
+                songResolverMessage = nil
+            }
+            isAnalyzingSongEvidence = false
+        }
+    }
+
+    func analyzeCurrentMasterAgainstSongMemory() {
+        guard let audio = project.importedMasterAudio else {
+            errorMessage = "先に完成WAVを読み込んでください。"
+            return
+        }
+
+        isAnalyzingSongEvidence = true
+        errorMessage = nil
+        songResolverMessage = "既知Arrangementとの一致候補を解析しています…"
+        let url = audio.url
+
+        Task {
+            do {
+                let evidence = try AudioEvidenceExtractor.extract(from: url)
+                let result = SongResolver.resolve(
+                    query: evidence,
+                    songMemory: songMemoryLibrary,
+                    evidenceLibrary: songResolverEvidenceLibrary
+                )
+                currentAudioEvidence = evidence
+                songMatchResult = result
+                songResolverMessage = result.candidates.isEmpty
+                    ? "比較できるArrangement Evidenceがまだありません。"
+                    : "候補を\(result.candidates.count)件見つけました。接続は人間が確認した場合だけ行います。"
+            } catch {
+                errorMessage = error.localizedDescription
+                songResolverMessage = nil
+            }
+            isAnalyzingSongEvidence = false
+        }
+    }
+
+    func confirmSongMatch(_ candidate: SongMatchCandidate) {
+        guard songMatchResult?.candidates.contains(where: {
+            $0.songID == candidate.songID && $0.arrangementID == candidate.arrangementID
+        }) == true,
+        songMemoryLibrary.identity(for: candidate.songID) != nil,
+        let arrangement = songMemoryLibrary.arrangement(for: candidate.arrangementID),
+        arrangement.songID == candidate.songID else {
+            errorMessage = "選択したSong候補を現在のSong Memoryで確認できませんでした。"
+            return
+        }
+
+        project.songMemoryLink = ProjectSongMemoryLink(
+            songID: candidate.songID,
+            arrangementID: candidate.arrangementID,
+            linkedAt: Date()
+        )
+        songMatchResult = SongMatchResult(
+            candidates: songMatchResult?.candidates ?? [],
+            resolvedSongID: candidate.songID,
+            resolvedArrangementID: candidate.arrangementID,
+            needsUserConfirmation: false
+        )
+        songResolverMessage = "確認済み候補をProjectへ接続しました。"
         touchAndPersist()
     }
 
@@ -139,6 +260,9 @@ final class MVPAlphaViewModel: ObservableObject {
                 audioPreviewTimeSec = 0
                 project.songStartAudioSec = nil
                 project.shortEditDraft = nil
+                currentAudioEvidence = nil
+                songMatchResult = nil
+                songResolverMessage = nil
                 if isReplacingMasterAudio {
                     // A replacement WAV may represent a different song or arrangement.
                     // Do not carry an old identity forward without explicit confirmation.
