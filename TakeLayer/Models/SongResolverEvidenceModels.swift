@@ -1,6 +1,6 @@
 import Foundation
 
-struct AudioEvidenceVector: Codable, Equatable {
+struct AudioEvidenceVector: Codable, Equatable, Sendable {
     static let bucketCount = 64
 
     var durationSec: Double
@@ -11,7 +11,7 @@ struct AudioEvidenceVector: Codable, Equatable {
     var signature: String
 }
 
-struct ArrangementAudioFingerprint: Identifiable, Codable, Equatable {
+struct ArrangementAudioFingerprint: Identifiable, Codable, Equatable, Sendable {
     var id: UUID
     var arrangementID: UUID
     var evidence: AudioEvidenceVector
@@ -19,13 +19,13 @@ struct ArrangementAudioFingerprint: Identifiable, Codable, Equatable {
     var createdAt: Date
 }
 
-struct SongMatchEvidence: Codable, Equatable {
+struct SongMatchEvidence: Codable, Equatable, Sendable {
     var duration: Double
     var energyEnvelope: Double
     var transientEnvelope: Double
 }
 
-struct SongMatchCandidate: Identifiable, Codable, Equatable {
+struct SongMatchCandidate: Identifiable, Codable, Equatable, Sendable {
     var id: UUID { arrangementID }
     var songID: UUID
     var arrangementID: UUID
@@ -34,14 +34,14 @@ struct SongMatchCandidate: Identifiable, Codable, Equatable {
     var evidence: SongMatchEvidence
 }
 
-struct SongMatchResult: Codable, Equatable {
+struct SongMatchResult: Codable, Equatable, Sendable {
     var candidates: [SongMatchCandidate]
     var resolvedSongID: UUID?
     var resolvedArrangementID: UUID?
     var needsUserConfirmation: Bool
 }
 
-struct SongResolverEvidenceLibrary: Codable, Equatable {
+struct SongResolverEvidenceLibrary: Codable, Equatable, Sendable {
     var fingerprints: [ArrangementAudioFingerprint] = []
 
     func fingerprints(for arrangementID: UUID) -> [ArrangementAudioFingerprint] {
