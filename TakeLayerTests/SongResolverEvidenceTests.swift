@@ -34,10 +34,7 @@ final class SongResolverEvidenceTests: XCTestCase {
     func testResolverRanksCloserArrangementFirst() throws {
         var songMemory = SongMemoryLibrary()
         let first = songMemory.upsertConfirmedSong(makeSongInput(title: "Aquarium"))
-
-        var secondInput = makeSongInput(title: "CREATOR")
-        let second = songMemory.upsertConfirmedSong(secondInput)
-        secondInput.existingSongID = second.songID
+        let second = songMemory.upsertConfirmedSong(makeSongInput(title: "CREATOR"))
 
         let query = makeVector(
             duration: 180,
@@ -59,16 +56,18 @@ final class SongResolverEvidenceTests: XCTestCase {
         )
 
         var evidenceLibrary = SongResolverEvidenceLibrary()
-        _ = evidenceLibrary.register(
+        let closeFingerprint = evidenceLibrary.register(
             arrangementID: try XCTUnwrap(first.arrangementID),
             evidence: close,
             sourceFileName: "aquarium.wav"
         )
-        _ = evidenceLibrary.register(
+        let farFingerprint = evidenceLibrary.register(
             arrangementID: try XCTUnwrap(second.arrangementID),
             evidence: far,
             sourceFileName: "creator.wav"
         )
+        songMemory.attachFingerprintID(closeFingerprint.id, to: try XCTUnwrap(first.arrangementID))
+        songMemory.attachFingerprintID(farFingerprint.id, to: try XCTUnwrap(second.arrangementID))
 
         let result = SongResolver.resolve(
             query: query,
@@ -81,7 +80,31 @@ final class SongResolverEvidenceTests: XCTestCase {
         XCTAssertGreaterThan(result.candidates[0].confidence, result.candidates[1].confidence)
     }
 
-    func testRegisteringSameEvidenceTwiceDoesNotDuplicateFingerprint() throws {
+    func testOrphanEvidenceNotReferencedByArrangementIsIgnored() throws {
+        var songMemory = SongMemoryLibrary()
+        let link = songMemory.upsertConfirmedSong(makeSongInput(title: "Orphan"))
+        let vector = makeVector(signature: "orphan")
+        var evidenceLibrary = SongResolverEvidenceLibrary()
+
+        _ = evidenceLibrary.register(
+            arrangementID: try XCTUnwrap(link.arrangementID),
+            evidence: vector,
+            sourceFileName: "orphan.wav"
+        )
+
+        let result = SongResolver.resolve(
+            query: vector,
+            songMemory: songMemory,
+            evidenceLibrary: evidenceLibrary
+        )
+
+        XCTAssertTrue(result.candidates.isEmpty)
+        XCTAssertFalse(result.needsUserConfirmation)
+        XCTAssertNil(result.resolvedSongID)
+        XCTAssertNil(result.resolvedArrangementID)
+    }
+
+    func testRegisteringSameEvidenceTwiceDoesNotDuplicateFingerprint() {
         let arrangementID = UUID()
         let vector = makeVector(signature: "stable")
         var library = SongResolverEvidenceLibrary()
