@@ -2,13 +2,15 @@
 
 ## Status
 
-Active branch: `phase-7-elastic-tonal-alignment`.
+Merged on `main` via PR #11 (`Phase 7: Elastic Tonal Alignment`).
 
 Prerequisites merged on `main`:
 
 - human-confirmed Song Memory,
 - deterministic Resolver Evidence,
 - transposition-aware Tonal Evidence.
+
+The subsequent active resolver gate is documented in `phase-7-resolver-calibration-harness.md`.
 
 ## Goal
 
@@ -92,28 +94,26 @@ Elastic tonal alignment must not modify or infer authoritative values for:
 
 It is not synchronization logic and must never be reused as TimelineMapper truth.
 
-## Required tests
+## Verification completed before merge
 
-Before merge:
-
-- a same harmonic structure with stretched sections and key transposition remains high-scoring,
-- the estimated transposition remains correct,
-- `tonalAlignmentCoverage` is present and bounded 0...1,
-- `tonalWarpFraction` is present and bounded 0...1,
-- stretched structure requires observable non-zero warp in the regression fixture,
-- a materially different tonal structure scores lower than the elastic same-song fixture,
-- endpoint differences can be tolerated only with visible coverage reduction,
-- exact registered evidence reports full coverage and zero warp,
-- exact evidence still does not auto-resolve,
-- old `SongMatchEvidence` JSON without new alignment fields still decodes,
-- all previous TimelineMapper / Short / Song Memory / Resolver / Tonal Evidence tests remain green,
-- iOS Simulator build and XCTest pass.
+- same harmonic structure with stretched sections and key transposition remained high-scoring,
+- estimated transposition remained correct,
+- `tonalAlignmentCoverage` stayed bounded 0...1,
+- `tonalWarpFraction` stayed bounded 0...1,
+- stretched structure required observable non-zero warp in the regression fixture,
+- materially different tonal structure scored lower than the elastic same-song fixture,
+- endpoint differences were tolerated with visible coverage reduction,
+- exact registered evidence reported full coverage and zero warp,
+- exact evidence still did not auto-resolve,
+- old `SongMatchEvidence` JSON without new alignment fields still decoded,
+- all previous TimelineMapper / Short / Song Memory / Resolver / Tonal Evidence tests remained green,
+- XcodeGen, iOS Simulator build, and XCTest passed before merge.
 
 ## Performance constraint
 
 The alignment operates only on the fixed 32-frame evidence representation, not raw audio samples. Complexity stays intentionally bounded and no new media decoding pass is required after tonal evidence extraction.
 
-## Explicitly not implemented yet
+## Not implemented by this gate
 
 - Arbitrary full-song subsequence discovery.
 - Beat-synchronous chroma.
@@ -128,6 +128,6 @@ The alignment operates only on the fixed 32-frame evidence representation, not r
 
 ## Next gate
 
-After elastic tonal alignment is stable, Phase 7 should prioritize **real-data confidence calibration and section / hook understanding** before automatic editing decisions.
+The next Phase 7 gate is **Resolver Calibration Harness**.
 
-A useful next step is a benchmark harness containing confirmed same-song / different-arrangement pairs and known-negative pairs. That gives TakeLayer empirical thresholds instead of inventing confidence cutoffs from synthetic fixtures.
+Before changing Resolver thresholds or weights, TakeLayer should measure confirmed same-song / different-arrangement pairs and known negatives with an inspectable benchmark report. This moves confidence decisions from synthetic intuition toward empirical evidence.
