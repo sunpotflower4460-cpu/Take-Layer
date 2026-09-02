@@ -14,7 +14,7 @@ struct SongResolverEvidenceView: View {
 
     var body: some View {
         SectionCard(title: "Song Resolver Evidence") {
-            Text("完成WAVから決定論的な音響Evidenceを作り、既知Arrangementとの候補を提示します。Tonal Evidenceは12音階の和声パターンと移調候補も比較しますが、Resolverは自動でSong Memoryへ接続しません。")
+            Text("完成WAVから決定論的な音響Evidenceを作り、既知Arrangementとの候補を提示します。Tonal Evidenceは移調に加えて構成の伸縮も比較しますが、Resolverは自動でSong Memoryへ接続しません。")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
 
@@ -123,6 +123,12 @@ struct SongResolverEvidenceView: View {
         }
         if let semitones = evidence.transpositionSemitones {
             rows.append(("estimated key shift", semitoneText(semitones)))
+        }
+        if let coverage = evidence.tonalAlignmentCoverage {
+            rows.append(("tonal structure coverage", percent(coverage)))
+        }
+        if let warp = evidence.tonalWarpFraction {
+            rows.append(("elastic warp", percent(warp)))
         }
         return rows
     }
