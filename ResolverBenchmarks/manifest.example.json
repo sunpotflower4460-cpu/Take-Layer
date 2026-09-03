@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "name": "TakeLayer local resolver benchmark",
+  "cases": [
+    {
+      "name": "song-a studio vs acoustic",
+      "relationship": "sameSongDifferentArrangement",
+      "queryPath": "songs/song-a/acoustic.wav",
+      "referencePath": "songs/song-a/studio.wav",
+      "notes": "Example only. Put real WAV files under ResolverBenchmarks/Private and copy this manifest there before running."
+    },
+    {
+      "name": "song-a studio vs unrelated song-b",
+      "relationship": "differentSong",
+      "queryPath": "songs/song-b/studio.wav",
+      "referencePath": "songs/song-a/studio.wav"
+    }
+  ]
+}
