@@ -9,16 +9,19 @@ struct ExportValidationResult {
 }
 
 struct ExportValidationItem: Identifiable {
-    let id = UUID()
     var title: String
     var message: String
     var isValid: Bool
+
+    var id: String { title }
 }
 
 enum ExportValidationService {
     static func validate(project: ProjectDraft) -> ExportValidationResult {
         let activeVideo = project.activeVideo
         let audio = project.importedMasterAudio
+        let videoFileExists = activeVideo.map { FileManager.default.fileExists(atPath: $0.url.path) } ?? false
+        let audioFileExists = audio.map { FileManager.default.fileExists(atPath: $0.url.path) } ?? false
         let selectedRawStartSec = project.selectedRawStartSec
         let selectedRawEndSec = project.selectedRawEndSec
         let mappingResult = Result<TimelineMapping, Error> {
@@ -39,6 +42,24 @@ enum ExportValidationService {
             outputDurationSec = 0
         }
 
+        let videoMessage: String
+        if activeVideo == nil {
+            videoMessage = "動画をインポートまたは録画してください。"
+        } else if !videoFileExists {
+            videoMessage = "保存済み動画ファイルが見つかりません。再インポートまたは再録画してください。"
+        } else {
+            videoMessage = "OK"
+        }
+
+        let audioMessage: String
+        if audio == nil {
+            audioMessage = "完成WAVをインポートしてください。"
+        } else if !audioFileExists {
+            audioMessage = "保存済み完成WAVファイルが見つかりません。再インポートしてください。"
+        } else {
+            audioMessage = "OK"
+        }
+
         let items = [
             ExportValidationItem(
                 title: "Project title",
@@ -47,13 +68,13 @@ enum ExportValidationService {
             ),
             ExportValidationItem(
                 title: "Video",
-                message: activeVideo == nil ? "動画をインポートまたは録画してください。" : "OK",
-                isValid: activeVideo != nil
+                message: videoMessage,
+                isValid: activeVideo != nil && videoFileExists
             ),
             ExportValidationItem(
                 title: "Master WAV",
-                message: audio == nil ? "完成WAVをインポートしてください。" : "OK",
-                isValid: audio != nil
+                message: audioMessage,
+                isValid: audio != nil && audioFileExists
             ),
             ExportValidationItem(
                 title: "Video song start",
