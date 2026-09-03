@@ -45,7 +45,19 @@ final class MVPAlphaViewModel: ObservableObject {
             loadErrors.append(error.localizedDescription)
         }
 
-        self.project = loadedProject
+        var normalizedProject = loadedProject
+        let repairedLink = loadedSongMemory.repairedProjectLink(loadedProject.songMemoryLink)
+        if repairedLink != loadedProject.songMemoryLink {
+            normalizedProject.songMemoryLink = repairedLink
+            normalizedProject.updatedAt = Date()
+            do {
+                try ProjectStore.save(normalizedProject)
+            } catch {
+                loadErrors.append(error.localizedDescription)
+            }
+        }
+
+        self.project = normalizedProject
         self.songMemoryLibrary = loadedSongMemory
         self.songResolverEvidenceLibrary = loadedResolverEvidence
         self.currentAudioEvidence = nil
@@ -105,6 +117,7 @@ final class MVPAlphaViewModel: ObservableObject {
             try SongMemoryStore.save(updatedLibrary)
             songMemoryLibrary = updatedLibrary
             project.songMemoryLink = link
+            songMatchResult = nil
             songResolverMessage = nil
             touchAndPersist()
         } catch {
@@ -114,11 +127,13 @@ final class MVPAlphaViewModel: ObservableObject {
 
     func detachSongMemory() {
         project.songMemoryLink = nil
+        songMatchResult = nil
         songResolverMessage = nil
         touchAndPersist()
     }
 
     func registerCurrentMasterAsArrangementEvidence() {
+        guard !isAnalyzingSongEvidence else { return }
         guard let audio = project.importedMasterAudio else {
             errorMessage = "先に完成WAVを読み込んでください。"
             return
@@ -133,12 +148,23 @@ final class MVPAlphaViewModel: ObservableObject {
         errorMessage = nil
         songResolverMessage = "WAVからArrangement Evidenceを抽出しています…"
         let url = audio.url
+        let audioID = audio.id
 
         Task {
+            defer { isAnalyzingSongEvidence = false }
             do {
                 let evidence = try await Task.detached(priority: .userInitiated) {
                     try AudioEvidenceExtractor.extract(from: url)
                 }.value
+
+                guard project.importedMasterAudio?.id == audioID,
+                      project.songMemoryLink?.arrangementID == arrangementID,
+                      songMemoryLibrary.arrangement(for: arrangementID) != nil else {
+                    currentAudioEvidence = nil
+                    songMatchResult = nil
+                    songResolverMessage = "解析中にWAVまたはSong / Arrangement接続が変更されたため、古い解析結果を破棄しました。"
+                    return
+                }
 
                 let originalSongMemory = songMemoryLibrary
                 var updatedEvidenceLibrary = songResolverEvidenceLibrary
@@ -164,16 +190,17 @@ final class MVPAlphaViewModel: ObservableObject {
                 currentAudioEvidence = evidence
                 songResolverEvidenceLibrary = updatedEvidenceLibrary
                 songMemoryLibrary = updatedSongMemory
+                songMatchResult = nil
                 songResolverMessage = "このWAVをArrangement Evidenceとして登録しました。"
             } catch {
                 errorMessage = error.localizedDescription
                 songResolverMessage = nil
             }
-            isAnalyzingSongEvidence = false
         }
     }
 
     func analyzeCurrentMasterAgainstSongMemory() {
+        guard !isAnalyzingSongEvidence else { return }
         guard let audio = project.importedMasterAudio else {
             errorMessage = "先に完成WAVを読み込んでください。"
             return
@@ -183,12 +210,22 @@ final class MVPAlphaViewModel: ObservableObject {
         errorMessage = nil
         songResolverMessage = "既知Arrangementとの一致候補を解析しています…"
         let url = audio.url
+        let audioID = audio.id
 
         Task {
+            defer { isAnalyzingSongEvidence = false }
             do {
                 let evidence = try await Task.detached(priority: .userInitiated) {
                     try AudioEvidenceExtractor.extract(from: url)
                 }.value
+
+                guard project.importedMasterAudio?.id == audioID else {
+                    currentAudioEvidence = nil
+                    songMatchResult = nil
+                    songResolverMessage = "解析中にWAVが変更されたため、古い解析結果を破棄しました。"
+                    return
+                }
+
                 let result = SongResolver.resolve(
                     query: evidence,
                     songMemory: songMemoryLibrary,
@@ -203,7 +240,6 @@ final class MVPAlphaViewModel: ObservableObject {
                 errorMessage = error.localizedDescription
                 songResolverMessage = nil
             }
-            isAnalyzingSongEvidence = false
         }
     }
 
@@ -242,7 +278,7 @@ final class MVPAlphaViewModel: ObservableObject {
                 project.importedVideo = try await MediaInfoReader.readVideo(from: storedURL)
                 project.recordedTake = nil
                 resetVideoDependentState()
-                touchAndPersist()
+                touchAndPersist(invalidateExport: true)
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -259,7 +295,7 @@ final class MVPAlphaViewModel: ObservableObject {
         project.recordedTake = take
         project.importedVideo = nil
         resetVideoDependentState()
-        touchAndPersist()
+        touchAndPersist(invalidateExport: true)
     }
 
     func importMasterAudio(from pickedURL: URL) {
@@ -282,7 +318,7 @@ final class MVPAlphaViewModel: ObservableObject {
                     project.songMemoryLink = nil
                 }
                 updateDefaultTrimIfPossible()
-                touchAndPersist()
+                touchAndPersist(invalidateExport: true)
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -309,7 +345,7 @@ final class MVPAlphaViewModel: ObservableObject {
         if !shouldPreserveShortTrim {
             updateDefaultTrimIfPossible()
         }
-        touchAndPersist()
+        touchAndPersist(invalidateExport: true)
     }
 
     func setAudioSongStart() {
@@ -321,7 +357,7 @@ final class MVPAlphaViewModel: ObservableObject {
         if !shouldPreserveShortTrim {
             updateDefaultTrimIfPossible()
         }
-        touchAndPersist()
+        touchAndPersist(invalidateExport: true)
     }
 
     func updateSelectedRawStart(_ value: Double) {
@@ -331,23 +367,23 @@ final class MVPAlphaViewModel: ObservableObject {
         if let end = project.selectedRawEndSec, end <= clamped {
             project.selectedRawEndSec = min(video.durationSec, clamped + 0.1)
         }
-        touchAndPersist()
+        touchAndPersist(invalidateExport: true)
     }
 
     func updateSelectedRawEnd(_ value: Double) {
         guard let video = project.activeVideo else { return }
         project.selectedRawEndSec = min(max(value, 0), video.durationSec)
-        touchAndPersist()
+        touchAndPersist(invalidateExport: true)
     }
 
     func adjustOffset(ms delta: Double) {
         project.offsetMs += delta
-        touchAndPersist()
+        touchAndPersist(invalidateExport: true)
     }
 
     func resetOffset() {
         project.offsetMs = 0
-        touchAndPersist()
+        touchAndPersist(invalidateExport: true)
     }
 
     func saveShortEditDraft(_ draft: ShortEditDraft) {
@@ -357,12 +393,21 @@ final class MVPAlphaViewModel: ObservableObject {
 
     func export() {
         guard canExport else { return }
+        let requestedProject = project
+        let requestedRevision = project.updatedAt
         isExporting = true
         exportResult = nil
         errorMessage = nil
+
         Task {
             do {
-                exportResult = try await VideoExportService.export(project: project)
+                let result = try await VideoExportService.export(project: requestedProject)
+                guard project.updatedAt == requestedRevision else {
+                    errorMessage = "書き出し中にProjectが変更されたため、古い書き出し結果は表示しません。もう一度書き出してください。"
+                    isExporting = false
+                    return
+                }
+                exportResult = result
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -418,7 +463,10 @@ final class MVPAlphaViewModel: ObservableObject {
         project.selectedRawEndSec = min(video.durationSec, songStartRawSec + effectiveDuration)
     }
 
-    private func touchAndPersist() {
+    private func touchAndPersist(invalidateExport: Bool = false) {
+        if invalidateExport {
+            exportResult = nil
+        }
         project.updatedAt = Date()
         do {
             try ProjectStore.save(project)
