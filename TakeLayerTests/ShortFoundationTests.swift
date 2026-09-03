@@ -216,9 +216,9 @@ final class ShortFoundationTests: XCTestCase {
         XCTAssertFalse(draft.hasOverlappingValidLyricCues)
     }
 
-    func testShortExportMediaTimePreservesOneMillisecondSteps() {
-        let first = ShortVideoExportService.mediaTime(1.001)
-        let second = ShortVideoExportService.mediaTime(1.002)
+    func testSharedMediaTimePreservesOneMillisecondSteps() {
+        let first = MediaTime.make(1.001)
+        let second = MediaTime.make(1.002)
 
         XCTAssertNotEqual(first.value, second.value)
         XCTAssertEqual(first.seconds, 1.001, accuracy: 0.000_001)
