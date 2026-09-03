@@ -10,9 +10,9 @@ Long-term direction: TakeLayer Core may support an AI Music Video Director that 
 
 ## Repository implementation baseline
 
-`main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, **Phase 1.5 Short Foundation**, **Phase 7 Song Intelligence Foundation**, **Phase 7 Song Resolver Evidence Foundation**, **Phase 7 Tonal Evidence Foundation**, and **Phase 7 Elastic Tonal Alignment**.
+`main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, **Phase 1.5 Short Foundation**, **Phase 7 Song Intelligence Foundation**, **Phase 7 Song Resolver Evidence Foundation**, **Phase 7 Tonal Evidence Foundation**, **Phase 7 Elastic Tonal Alignment**, and **Phase 7 Resolver Calibration Harness**.
 
-`phase-7-resolver-calibration-harness` is the active branch. Its current scope is labeled Resolver benchmark datasets, real-WAV-to-evidence benchmark case creation, deterministic confidence distributions, threshold-sweep metrics, and inspectable JSON reports. Automatic threshold selection, automatic Resolver weight tuning, Song-section labeling, melody / lyrics matching, external metadata lookup, automatic identity adoption, AI Director generation, and preference learning are not activated by this branch.
+`phase-7-private-corpus-runner` is the active branch. Its scope is a local manifest-driven benchmark runner, safe relative-path resolution, derived dataset/report generation, and a macOS developer CLI for repeated real-WAV calibration without committing raw media. Automatic threshold selection, automatic Resolver weight tuning, Song-section labeling, melody / lyrics matching, external metadata lookup, automatic identity adoption, AI Director generation, and preference learning are not activated by this branch.
 
 For every task, implement only the explicitly requested phase or scope and preserve already-merged behavior.
 
@@ -44,7 +44,7 @@ Project Timeline
 completed-WAV time
 ```
 
-Do not duplicate this arithmetic inside renderers, UI code, AI code, short extraction, Song Memory, Song Resolver, calibration code, or future multi-part code.
+Do not duplicate this arithmetic inside renderers, UI code, AI code, short extraction, Song Memory, Song Resolver, calibration code, corpus tooling, or future multi-part code.
 
 Manual offset convention:
 
@@ -71,7 +71,7 @@ Song Memory is not a synchronization authority. It must not mutate `songStartRaw
 
 Song Resolver may read completed-WAV evidence and Song Memory to produce candidates, but it must not silently promote analysis evidence into user-confirmed identity.
 
-Tonal / Chroma, elastic alignment, and calibration metrics are analysis evidence. Even perfect benchmark separation is not equivalent to user confirmation or permission for automatic adoption.
+Tonal / Chroma, elastic alignment, calibration metrics, and private-corpus reports are analysis evidence. Even perfect benchmark separation is not equivalent to user confirmation or permission for automatic adoption.
 
 ## Tech direction
 
@@ -79,7 +79,7 @@ Tonal / Chroma, elastic alignment, and calibration metrics are analysis evidence
 - Swift / SwiftUI.
 - AVFoundation.
 - Accelerate / vDSP when stronger signal processing is explicitly activated and materially useful.
-- CryptoKit is acceptable for deterministic local evidence signatures.
+- CryptoKit is acceptable for deterministic local evidence signatures and benchmark identifiers.
 - SwiftData is a future persistence target; current persistence uses small JSON store boundaries.
 - Xcode project generation is defined by `project.yml` using XcodeGen.
 - Do not make FFmpegKit a core dependency.
@@ -94,31 +94,33 @@ Tonal / Chroma, elastic alignment, and calibration metrics are analysis evidence
 - Phase 7 Song Resolver Evidence Foundation is merged into `main`.
 - Phase 7 Tonal Evidence Foundation is merged into `main`.
 - Phase 7 Elastic Tonal Alignment is merged into `main`.
-- The active Phase 7 sub-gate is documented in `docs/phase-7-resolver-calibration-harness.md`.
+- Phase 7 Resolver Calibration Harness is merged into `main`.
+- The active Phase 7 sub-gate is documented in `docs/phase-7-private-corpus-runner.md`.
 - `docs/ai-director-vision.md`, `docs/song-memory-feedback.md`, and `docs/ai-director-data-model.md` are architecture references; they do not automatically activate all described capabilities.
 - Do not infer that Phase 8, Phase 9, Phase 10, or unactivated Phase 7 sub-gates are active.
 
-## Active Phase 7 calibration-harness gates
+## Active Phase 7 private-corpus-runner gates
 
 Before calling the current gate complete:
 
-- Labeled cases distinguish same Arrangement, same Song / different Arrangement, and different Song.
-- A benchmark case can be derived from two real completed WAV URLs using the same `AudioEvidenceExtractor` as Resolver.
-- Dataset JSON stores derived evidence, not raw WAV bytes.
-- Calibration evaluation must call the existing `SongResolver.compare` and `SongResolver.combinedConfidence`; do not duplicate Resolver scoring.
-- Reports expose per-label confidence distributions and per-case component evidence.
-- Reports expose minimum positive confidence, maximum negative confidence, and their observed gap.
-- Threshold sweeps expose confusion counts, precision, recall, specificity, F1, and balanced accuracy.
-- Threshold values are clamped, deduplicated, and sorted deterministically.
-- No report may automatically modify Resolver weights or production thresholds.
-- No report may auto-link a Project or bypass human confirmation.
-- Calibration code must not modify TimelineMapper or synchronization fields.
-- Unsupported dataset schema versions fail explicitly.
+- Private benchmark WAVs remain outside version control under a gitignored corpus root.
+- A schema-versioned manifest describes labeled benchmark pairs using relative WAV paths only.
+- Absolute paths, `~` paths, parent traversal, and symlink escapes outside the corpus root are rejected.
+- Only WAV files are accepted by this gate.
+- Manifest cases may provide an explicit UUID or receive a deterministic derived UUID.
+- Duplicate effective benchmark case IDs fail explicitly.
+- The runner must reuse `AudioEvidenceExtractor`, `ResolverCalibrationHarness`, `SongResolver.compare`, and `SongResolver.combinedConfidence`; do not duplicate production scoring.
+- Generated dataset/report files contain derived evidence and metrics, never raw WAV bytes.
+- The macOS developer CLI must not upload audio or mutate product state.
+- The CLI must not modify Resolver weights or production thresholds.
+- The CLI must not auto-link Song Memory or bypass human confirmation.
+- Corpus tooling must not modify TimelineMapper or synchronization fields.
+- CI must compile the developer CLI in addition to the iOS app.
 - XcodeGen must generate the project.
 - iOS Simulator build and XCTest must pass.
-- Existing TimelineMapper, Short Foundation, Song Memory, Resolver Evidence, Tonal Evidence, and Elastic Alignment tests must continue to pass.
+- Existing TimelineMapper, Short Foundation, Song Memory, Resolver Evidence, Tonal Evidence, Elastic Alignment, and Calibration Harness tests must continue to pass.
 
-See `docs/phase-7-resolver-calibration-harness.md`.
+See `docs/phase-7-private-corpus-runner.md` and `ResolverBenchmarks/README.md`.
 
 ## Do not implement list
 
@@ -151,7 +153,7 @@ Do not add these unless the active phase explicitly requests them:
 - AI Music Video Director proposal generation.
 - Preference learning / edit-delta learning.
 
-Do not remove or regress already-merged functionality such as import/record flow, WAV import, manual song-start markers, trim, manual offset, validation, deterministic Short editing, Song Memory, Resolver Evidence, Tonal Evidence, Elastic Alignment, or single-screen export unless explicitly requested.
+Do not remove or regress already-merged functionality such as import/record flow, WAV import, manual song-start markers, trim, manual offset, validation, deterministic Short editing, Song Memory, Resolver Evidence, Tonal Evidence, Elastic Alignment, Calibration Harness, or single-screen export unless explicitly requested.
 
 ## Future AI Director references
 
