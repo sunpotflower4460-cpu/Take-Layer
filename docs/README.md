@@ -13,14 +13,16 @@ Read these first when working on the active TakeLayer implementation.
 7. `phase-7-tonal-evidence.md`
 8. `phase-7-elastic-tonal-alignment.md`
 9. `phase-7-resolver-calibration-harness.md`
-10. `architecture.md`
-11. `mvp-scope.md`
-12. `data-model.md`
-13. `non-goals.md`
-14. `testing-cases.md`
-15. `codex-instructions.md`
-16. `glossary.md`
-17. `../README.md` — historical integrated v1.2 design; use `phases.md` for current implementation status.
+10. `phase-7-private-corpus-runner.md`
+11. `../ResolverBenchmarks/README.md`
+12. `architecture.md`
+13. `mvp-scope.md`
+14. `data-model.md`
+15. `non-goals.md`
+16. `testing-cases.md`
+17. `codex-instructions.md`
+18. `glossary.md`
+19. `../README.md` — historical integrated v1.2 design; use `phases.md` for current implementation status.
 
 ## Reliability and deterministic editing foundations
 
@@ -92,7 +94,7 @@ Merged structural-tolerance foundation:
 
 ### `phase-7-resolver-calibration-harness.md`
 
-Active measurement gate:
+Merged measurement foundation:
 
 - labeled same-Arrangement / same-song-different-Arrangement / different-song cases
 - real completed-WAV URLs converted into deterministic benchmark evidence
@@ -102,6 +104,21 @@ Active measurement gate:
 - threshold confusion matrix and precision / recall / specificity / F1 / balanced accuracy
 - deterministic inspectable JSON datasets and reports
 - no automatic threshold or Resolver weight changes
+
+### `phase-7-private-corpus-runner.md`
+
+Active local real-audio workflow gate:
+
+- schema-versioned manifest with relative WAV paths
+- corpus-root confinement and traversal / symlink escape rejection
+- stable benchmark case identity
+- private WAVs kept under gitignored `ResolverBenchmarks/Private/`
+- one-command macOS calibration runner
+- generated derived dataset + report only
+- developer CLI compiled by CI
+- production Resolver behavior remains unchanged
+
+See `../ResolverBenchmarks/README.md` for the local directory layout and command examples.
 
 ## Future AI Music Video Director
 
