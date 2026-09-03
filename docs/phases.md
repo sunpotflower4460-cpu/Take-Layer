@@ -2,9 +2,9 @@
 
 ## Repository status
 
-As of 2026-09-02, `main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, **Phase 1.5 Short Foundation**, the first **Phase 7 Song Intelligence Foundation** with human-confirmed Song Memory, **Phase 7 Song Resolver Evidence Foundation**, **Phase 7 Tonal Evidence Foundation**, and **Phase 7 Elastic Tonal Alignment**. Phase 0.5A and Phase 0.5B are also merged.
+As of 2026-09-03, `main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, **Phase 1.5 Short Foundation**, the first **Phase 7 Song Intelligence Foundation** with human-confirmed Song Memory, **Phase 7 Song Resolver Evidence Foundation**, **Phase 7 Tonal Evidence Foundation**, **Phase 7 Elastic Tonal Alignment**, and **Phase 7 Resolver Calibration Harness**. Phase 0.5A and Phase 0.5B are also merged.
 
-**Phase 7 Resolver Calibration Harness** is now the active implementation gate. The current sub-scope adds labeled real-WAV-derived benchmark cases, deterministic confidence distributions, and threshold-sweep metrics without automatically changing Resolver weights or production thresholds. Song-section labeling, melody / lyrics evidence, external metadata, automatic identity adoption, and AI Director generation remain later gates.
+**Phase 7 Private Corpus Runner** is now the active implementation gate. The current sub-scope makes real local-WAV calibration repeatable through a safe relative-path manifest, gitignored private corpus root, deterministic derived dataset/report generation, and a macOS developer CLI. It does not automatically change Resolver weights, production thresholds, identity adoption, synchronization, or editing behavior.
 
 This file is a roadmap. A later phase is not active merely because it appears here. Implement only the phase or scope explicitly requested.
 
@@ -141,7 +141,7 @@ The phases below describe the long-term AI Music Video Director direction. They 
 
 ## Phase 7: Song Intelligence Foundation
 
-Status: active resolver-calibration-harness gate. Human-confirmed Song Memory, deterministic Resolver Evidence, Tonal Evidence, and Elastic Tonal Alignment are merged on `main`.
+Status: active private-corpus-runner gate. Human-confirmed Song Memory, deterministic Resolver Evidence, Tonal Evidence, Elastic Tonal Alignment, and Resolver Calibration Harness are merged on `main`.
 
 Goal: TakeLayer begins to understand and remember the musical work itself.
 
@@ -200,10 +200,10 @@ See `phase-7-tonal-evidence.md`.
 
 See `phase-7-elastic-tonal-alignment.md`.
 
-### Active Resolver Calibration Harness sub-scope
+### Merged Resolver Calibration Harness
 
 - Explicit labeled relationships: same Arrangement, same Song / different Arrangement, different Song.
-- Build benchmark cases from two real completed-WAV URLs using the existing `AudioEvidenceExtractor`.
+- Build benchmark cases from real completed-WAV URLs using the existing `AudioEvidenceExtractor`.
 - Store derived `AudioEvidenceVector` data instead of raw WAV bytes.
 - Evaluate every case through existing `SongResolver.compare` and `combinedConfidence`.
 - Per-label confidence distributions.
@@ -214,11 +214,28 @@ See `phase-7-elastic-tonal-alignment.md`.
 
 See `phase-7-resolver-calibration-harness.md`.
 
+### Active Private Corpus Runner sub-scope
+
+- Schema-versioned local manifest for labeled WAV pairs.
+- Private audio paths are relative to one corpus root.
+- Absolute paths, `~`, traversal, and symlink escapes outside that root are rejected.
+- WAV-only input for this gate.
+- Stable deterministic case IDs when no explicit UUID is supplied.
+- Duplicate effective case IDs fail explicitly.
+- `ResolverBenchmarks/Private/` remains gitignored.
+- macOS developer CLI builds from the same Resolver / Evidence source files used by the app.
+- One command generates a derived evidence dataset and calibration report.
+- CI compiles the developer CLI even though private WAVs are unavailable in CI.
+- No production threshold, weight, identity, synchronization, or editing changes.
+
+See `phase-7-private-corpus-runner.md` and `../ResolverBenchmarks/README.md`.
+
 ### Later Phase 7 gates
 
 - Real benchmark corpus collection large enough to support a reviewed calibration decision.
-- Stronger audio landmark fingerprinting if the benchmark exposes a need.
-- Melody contour evidence if the benchmark exposes a need.
+- Failure-case classification before adding another evidence source.
+- Stronger audio landmark fingerprinting if empirical reports expose a need.
+- Melody contour evidence if empirical reports expose a need.
 - Lyrics evidence and known-text alignment.
 - Metadata Provider Adapter layer.
 - Song sections and highlight candidates.
@@ -305,4 +322,5 @@ No future phase may weaken these core guarantees:
 - User-confirmed Song Memory must not be silently overwritten by provider or AI estimates.
 - Song Resolver confidence must not become an implicit synchronization or identity authority.
 - Calibration reports must not silently become production thresholds or weights.
+- Private benchmark media must not be uploaded or committed by calibration tooling.
 - Generative AI must not become the source of truth for synchronization.
