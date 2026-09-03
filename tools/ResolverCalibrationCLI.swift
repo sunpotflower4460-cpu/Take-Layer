@@ -14,7 +14,7 @@ private enum ResolverCalibrationCLIError: LocalizedError {
         case .missingManifest:
             return "--manifest is required."
         case .invalidThreshold(let value):
-            return "Invalid threshold list: \(value)"
+            return "Invalid threshold list (each value must be finite and between 0 and 1): \(value)"
         case .unknownArgument(let argument):
             return "Unknown argument: \(argument)"
         }
@@ -82,8 +82,11 @@ struct ResolverCalibrationCLI {
                 reportPath = try nextValue()
             case "--thresholds":
                 let raw = try nextValue()
-                let parsed = raw.split(separator: ",").compactMap { Double($0.trimmingCharacters(in: .whitespaces)) }
-                guard !parsed.isEmpty, parsed.count == raw.split(separator: ",").count else {
+                let pieces = raw.split(separator: ",", omittingEmptySubsequences: false)
+                let parsed = pieces.compactMap { Double($0.trimmingCharacters(in: .whitespaces)) }
+                guard !parsed.isEmpty,
+                      parsed.count == pieces.count,
+                      parsed.allSatisfy({ $0.isFinite && $0 >= 0 && $0 <= 1 }) else {
                     throw ResolverCalibrationCLIError.invalidThreshold(raw)
                 }
                 thresholds = parsed
@@ -148,7 +151,7 @@ struct ResolverCalibrationCLI {
           --root <directory>          Corpus root. Defaults to the manifest directory.
           --dataset <path>            Derived evidence dataset JSON output.
           --report <path>             Calibration report JSON output.
-          --thresholds <csv>          Diagnostic thresholds, e.g. 0.60,0.70,0.80,0.90
+          --thresholds <csv>          Diagnostic thresholds from 0 through 1, e.g. 0.60,0.70,0.80,0.90
           --help                      Show this help.
 
         Raw WAV files remain local. This tool does not change production Resolver thresholds,
