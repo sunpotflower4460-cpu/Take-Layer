@@ -2,7 +2,7 @@
 
 ## Status
 
-Active branch: `phase-7-resolver-calibration-harness`.
+Merged on `main` via PR #12.
 
 Prerequisites merged on `main`:
 
@@ -175,6 +175,6 @@ The benchmark should include both easy and adversarial negatives.
 
 ## Next gate
 
-After enough real labeled pairs are collected, use the report to decide whether Resolver weights / thresholds need calibration.
+The merged harness is now consumed by `phase-7-private-corpus-runner`, which makes repeated local real-WAV measurement practical without committing raw media.
 
-Only after empirical calibration should Phase 7 move deeper into section / hook understanding or additional evidence sources.
+Only after meaningful private-corpus reports exist should a separate reviewed gate consider Resolver threshold / weight calibration or another evidence source.
