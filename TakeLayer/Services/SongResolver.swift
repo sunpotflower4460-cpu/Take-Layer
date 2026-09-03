@@ -1,6 +1,8 @@
 import Foundation
 
 enum SongResolver {
+    private static let legacyEvidenceConfidenceCeiling = 0.95
+
     private struct TonalComparison {
         var score: Double
         var semitones: Int
@@ -74,15 +76,31 @@ enum SongResolver {
 
     static func compare(_ lhs: AudioEvidenceVector, _ rhs: AudioEvidenceVector) -> SongMatchEvidence {
         if lhs.signature == rhs.signature {
-            let hasTonalEvidence = lhs.tonalEvidence != nil && rhs.tonalEvidence != nil
+            // The legacy signature contains duration + energy/transient shapes,
+            // but intentionally does not contain tonal evidence. It may safely
+            // short-circuit those three components, never the tonal component.
+            if let lhsTonal = lhs.tonalEvidence,
+               let rhsTonal = rhs.tonalEvidence {
+                let tonalComparison = compareTonal(lhsTonal, rhsTonal)
+                return SongMatchEvidence(
+                    duration: 1,
+                    energyEnvelope: 1,
+                    transientEnvelope: 1,
+                    tonal: tonalComparison.score,
+                    transpositionSemitones: tonalComparison.semitones,
+                    tonalAlignmentCoverage: tonalComparison.coverage,
+                    tonalWarpFraction: tonalComparison.warpFraction
+                )
+            }
+
             return SongMatchEvidence(
                 duration: 1,
                 energyEnvelope: 1,
                 transientEnvelope: 1,
-                tonal: hasTonalEvidence ? 1 : nil,
-                transpositionSemitones: hasTonalEvidence ? 0 : nil,
-                tonalAlignmentCoverage: hasTonalEvidence ? 1 : nil,
-                tonalWarpFraction: hasTonalEvidence ? 0 : nil
+                tonal: nil,
+                transpositionSemitones: nil,
+                tonalAlignmentCoverage: nil,
+                tonalWarpFraction: nil
             )
         }
 
@@ -106,19 +124,21 @@ enum SongResolver {
     }
 
     static func combinedConfidence(_ evidence: SongMatchEvidence) -> Double {
-        let weighted: Double
         if let tonal = evidence.tonal {
-            weighted = evidence.duration * 0.15
+            let weighted = evidence.duration * 0.15
                 + evidence.energyEnvelope * 0.20
                 + evidence.transientEnvelope * 0.15
                 + tonal * 0.50
-        } else {
-            // Preserve the merged Resolver Evidence behavior for legacy fingerprints.
-            weighted = evidence.duration * 0.25
-                + evidence.energyEnvelope * 0.45
-                + evidence.transientEnvelope * 0.30
+            return min(1, max(0, weighted))
         }
-        return min(1, max(0, weighted))
+
+        // Legacy evidence is useful for ranking, but because its signature has
+        // no tonal identity it must not express certainty. Re-registering the
+        // WAV enriches it with tonal evidence and removes this ceiling.
+        let weighted = evidence.duration * 0.25
+            + evidence.energyEnvelope * 0.45
+            + evidence.transientEnvelope * 0.30
+        return min(legacyEvidenceConfidenceCeiling, max(0, weighted))
     }
 
     private static func durationSimilarity(_ lhs: Double, _ rhs: Double) -> Double {
@@ -302,8 +322,6 @@ enum SongResolver {
                         let storedCoverage = Double(storedEnd - storedStart + 1) / Double(frameCount)
                         let coverage = min(queryCoverage, storedCoverage)
 
-                        // Coverage and warp penalties are deliberately modest. Their main role is
-                        // to prevent a tiny or heavily stretched subsequence from looking perfect.
                         let score = min(
                             1,
                             max(
