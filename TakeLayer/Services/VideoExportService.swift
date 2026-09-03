@@ -87,24 +87,24 @@ enum VideoExportService {
             throw VideoExportServiceError.missingAudioTrack
         }
 
-        let outputDuration = CMTime(seconds: mapping.outputDurationSec, preferredTimescale: 600)
+        let outputDuration = MediaTime.make(mapping.outputDurationSec)
         try compositionVideoTrack.insertTimeRange(
             CMTimeRange(
-                start: CMTime(seconds: mapping.videoSourceStartSec, preferredTimescale: 600),
+                start: MediaTime.make(mapping.videoSourceStartSec),
                 duration: outputDuration
             ),
             of: sourceVideoTrack,
             at: .zero
         )
 
-        let audioInsertDuration = CMTime(seconds: mapping.audioInsertDurationSec, preferredTimescale: 600)
+        let audioInsertDuration = MediaTime.make(mapping.audioInsertDurationSec)
         try compositionAudioTrack.insertTimeRange(
             CMTimeRange(
-                start: CMTime(seconds: mapping.audioSourceStartSec, preferredTimescale: 600),
+                start: MediaTime.make(mapping.audioSourceStartSec),
                 duration: audioInsertDuration
             ),
             of: sourceAudioTrack,
-            at: CMTime(seconds: mapping.audioInsertionTimeSec, preferredTimescale: 600)
+            at: MediaTime.make(mapping.audioInsertionTimeSec)
         )
 
         let videoComposition = try await makeVideoComposition(
