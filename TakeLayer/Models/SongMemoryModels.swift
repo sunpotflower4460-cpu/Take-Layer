@@ -148,6 +148,18 @@ struct SongMemoryLibrary: Codable, Equatable {
             .first
     }
 
+    /// Repairs a persisted Project link against the current Song Memory library.
+    /// Missing songs invalidate the whole link. A missing/wrong Arrangement keeps
+    /// the confirmed Song association but drops only the stale Arrangement ID.
+    func repairedProjectLink(_ link: ProjectSongMemoryLink?) -> ProjectSongMemoryLink? {
+        guard let link, identity(for: link.songID) != nil else { return nil }
+        guard let arrangementID = link.arrangementID else { return link }
+        guard let arrangement = arrangement(for: arrangementID), arrangement.songID == link.songID else {
+            return ProjectSongMemoryLink(songID: link.songID, arrangementID: nil, linkedAt: link.linkedAt)
+        }
+        return link
+    }
+
     @discardableResult
     mutating func upsertConfirmedSong(
         _ input: ConfirmedSongMemoryInput,
@@ -250,7 +262,10 @@ struct SongMemoryLibrary: Codable, Equatable {
                    let lyricsIndex = formalLyrics.firstIndex(where: { $0.id == existingLyricsID }),
                    formalLyrics[lyricsIndex].source == .userConfirmed {
                     formalLyrics.remove(at: lyricsIndex)
-                    profiles[profileIndex].formalLyricsID = nil
+                    // Restore the best remaining permitted source instead of
+                    // leaving the profile pointer stale/empty when provider
+                    // lyrics are still present.
+                    profiles[profileIndex].formalLyricsID = lyrics(for: songID)?.id
                 }
             } else if let existingLyricsID = profiles[profileIndex].formalLyricsID,
                       let lyricsIndex = formalLyrics.firstIndex(where: { $0.id == existingLyricsID }),
