@@ -161,13 +161,12 @@ enum ResolverPrivateCorpusRunner {
         ].joined(separator: "\u{1F}")
         let digest = SHA256.hash(data: Data(payload.utf8))
         let hex = digest.prefix(16).map { String(format: "%02x", $0) }.joined()
-        let uuidString = [
-            String(hex.prefix(8)),
-            String(hex.dropFirst(8).prefix(4)),
-            String(hex.dropFirst(12).prefix(4)),
-            String(hex.dropFirst(16).prefix(4)),
-            String(hex.dropFirst(20).prefix(12))
-        ].joined(separator: "-")
+        let part1 = String(hex.prefix(8))
+        let part2 = String(hex.dropFirst(8).prefix(4))
+        let part3 = String(hex.dropFirst(12).prefix(4))
+        let part4 = String(hex.dropFirst(16).prefix(4))
+        let part5 = String(hex.dropFirst(20).prefix(12))
+        let uuidString = part1 + "-" + part2 + "-" + part3 + "-" + part4 + "-" + part5
         return UUID(uuidString: uuidString)!
     }
 
