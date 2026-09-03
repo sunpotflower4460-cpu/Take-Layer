@@ -53,18 +53,9 @@ enum ResolverPrivateCorpusRunner {
         cases.reserveCapacity(manifest.cases.count)
 
         for manifestCase in manifest.cases {
-            let queryURL = try resolveWAV(
-                relativePath: manifestCase.queryPath,
-                corpusRoot: root
-            )
-            let referenceURL = try resolveWAV(
-                relativePath: manifestCase.referencePath,
-                corpusRoot: root
-            )
-            let caseID = manifestCase.id ?? stableCaseID(
-                manifestName: manifest.name,
-                manifestCase: manifestCase
-            )
+            let queryURL = try resolveWAV(relativePath: manifestCase.queryPath, corpusRoot: root)
+            let referenceURL = try resolveWAV(relativePath: manifestCase.referencePath, corpusRoot: root)
+            let caseID = manifestCase.id ?? stableCaseID(manifestName: manifest.name, manifestCase: manifestCase)
             guard seenCaseIDs.insert(caseID).inserted else {
                 throw ResolverPrivateCorpusRunnerError.duplicateCaseID(caseID)
             }
@@ -134,10 +125,7 @@ enum ResolverPrivateCorpusRunner {
             throw ResolverPrivateCorpusRunnerError.absolutePathNotAllowed(relativePath)
         }
 
-        let candidate = corpusRoot
-            .appendingPathComponent(trimmed, isDirectory: false)
-            .standardizedFileURL
-
+        let candidate = corpusRoot.appendingPathComponent(trimmed, isDirectory: false).standardizedFileURL
         var isDirectory: ObjCBool = false
         guard FileManager.default.fileExists(atPath: candidate.path, isDirectory: &isDirectory),
               !isDirectory.boolValue else {
@@ -149,7 +137,6 @@ enum ResolverPrivateCorpusRunner {
         guard isDescendant(resolvedCandidate, of: resolvedRoot) else {
             throw ResolverPrivateCorpusRunnerError.pathEscapesCorpusRoot(relativePath)
         }
-
         guard resolvedCandidate.pathExtension.lowercased() == "wav" else {
             throw ResolverPrivateCorpusRunnerError.unsupportedAudioExtension(relativePath)
         }
@@ -173,14 +160,15 @@ enum ResolverPrivateCorpusRunner {
             manifestCase.referencePath
         ].joined(separator: "\u{1F}")
         let digest = SHA256.hash(data: Data(payload.utf8))
-        let bytes = Array(digest.prefix(16))
-        let uuid = uuid_t(
-            bytes[0], bytes[1], bytes[2], bytes[3],
-            bytes[4], bytes[5], bytes[6], bytes[7],
-            bytes[8], bytes[9], bytes[10], bytes[11],
-            bytes[12], bytes[13], bytes[14], bytes[15]
-        )
-        return UUID(uuid: uuid)
+        let hex = digest.prefix(16).map { String(format: "%02x", $0) }.joined()
+        let uuidString = [
+            String(hex.prefix(8)),
+            String(hex.dropFirst(8).prefix(4)),
+            String(hex.dropFirst(12).prefix(4)),
+            String(hex.dropFirst(16).prefix(4)),
+            String(hex.dropFirst(20).prefix(12))
+        ].joined(separator: "-")
+        return UUID(uuidString: uuidString)!
     }
 
     private static func ensureParentDirectory(for url: URL) throws {
