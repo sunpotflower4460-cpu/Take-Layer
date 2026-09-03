@@ -2,9 +2,9 @@
 
 ## Repository status
 
-As of 2026-09-03, `main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, **Phase 1.5 Short Foundation**, the first **Phase 7 Song Intelligence Foundation** with human-confirmed Song Memory, **Phase 7 Song Resolver Evidence Foundation**, **Phase 7 Tonal Evidence Foundation**, **Phase 7 Elastic Tonal Alignment**, and **Phase 7 Resolver Calibration Harness**. Phase 0.5A and Phase 0.5B are also merged.
+As of 2026-09-03, `main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, **Phase 1.5 Short Foundation**, the first **Phase 7 Song Intelligence Foundation** with human-confirmed Song Memory, **Phase 7 Song Resolver Evidence Foundation**, **Phase 7 Tonal Evidence Foundation**, **Phase 7 Elastic Tonal Alignment**, **Phase 7 Resolver Calibration Harness**, and **Phase 7 Private Corpus Runner**. Phase 0.5A and Phase 0.5B are also merged.
 
-**Phase 7 Private Corpus Runner** is now the active implementation gate. The current sub-scope makes real local-WAV calibration repeatable through a safe relative-path manifest, gitignored private corpus root, deterministic derived dataset/report generation, and a macOS developer CLI. It does not automatically change Resolver weights, production thresholds, identity adoption, synchronization, or editing behavior.
+**Phase 7 Real Corpus Measurement** is now the active operational gate. The current scope is to collect a meaningful private real-audio benchmark, run the merged calibration tooling, inspect false positives / false negatives, and choose the next technical Resolver gate from observed failures rather than adding complexity speculatively.
 
 This file is a roadmap. A later phase is not active merely because it appears here. Implement only the phase or scope explicitly requested.
 
@@ -141,7 +141,7 @@ The phases below describe the long-term AI Music Video Director direction. They 
 
 ## Phase 7: Song Intelligence Foundation
 
-Status: active private-corpus-runner gate. Human-confirmed Song Memory, deterministic Resolver Evidence, Tonal Evidence, Elastic Tonal Alignment, and Resolver Calibration Harness are merged on `main`.
+Status: active real-corpus-measurement gate. Human-confirmed Song Memory, deterministic Resolver Evidence, Tonal Evidence, Elastic Tonal Alignment, Resolver Calibration Harness, and Private Corpus Runner are merged on `main`.
 
 Goal: TakeLayer begins to understand and remember the musical work itself.
 
@@ -214,7 +214,7 @@ See `phase-7-elastic-tonal-alignment.md`.
 
 See `phase-7-resolver-calibration-harness.md`.
 
-### Active Private Corpus Runner sub-scope
+### Merged Private Corpus Runner
 
 - Schema-versioned local manifest for labeled WAV pairs.
 - Private audio paths are relative to one corpus root.
@@ -230,16 +230,28 @@ See `phase-7-resolver-calibration-harness.md`.
 
 See `phase-7-private-corpus-runner.md` and `../ResolverBenchmarks/README.md`.
 
+### Active Real Corpus Measurement
+
+- Collect a meaningful real private corpus rather than relying on synthetic fixtures.
+- Include multiple same-Arrangement positives.
+- Include studio / acoustic / live / different-key / changed-structure same-song positives.
+- Include easy and adversarial different-song negatives.
+- Run the merged Private Corpus Runner and inspect the resulting report.
+- Review minimum positive confidence, maximum negative confidence, confidence gap, and threshold metrics.
+- Inspect per-case evidence and classify meaningful false positives / false negatives.
+- Do not choose a production threshold from a tiny corpus or a single aggregate metric.
+- Do not add another Resolver algorithm until repeated real failure classes justify it.
+
+See `phase-7-real-corpus-measurement.md`.
+
 ### Later Phase 7 gates
 
-- Real benchmark corpus collection large enough to support a reviewed calibration decision.
-- Failure-case classification before adding another evidence source.
+- Reviewed Resolver weight / threshold calibration if real evidence supports it.
 - Stronger audio landmark fingerprinting if empirical reports expose a need.
-- Melody contour evidence if empirical reports expose a need.
+- Melody contour evidence if harmony-similar different songs collide.
 - Lyrics evidence and known-text alignment.
 - Metadata Provider Adapter layer.
 - Song sections and highlight candidates.
-- Reviewed Resolver weight / threshold calibration based on empirical reports.
 
 Success criterion for full Phase 7:
 
