@@ -20,6 +20,9 @@ jobs:
       - name: Generate Xcode project
         run: xcodegen generate
 
+      - name: Compile resolver calibration CLI
+        run: bash tools/run-resolver-calibration.sh --help
+
       - name: Build
         run: |
           xcodebuild \
