@@ -14,15 +14,16 @@ Read these first when working on the active TakeLayer implementation.
 8. `phase-7-elastic-tonal-alignment.md`
 9. `phase-7-resolver-calibration-harness.md`
 10. `phase-7-private-corpus-runner.md`
-11. `../ResolverBenchmarks/README.md`
-12. `architecture.md`
-13. `mvp-scope.md`
-14. `data-model.md`
-15. `non-goals.md`
-16. `testing-cases.md`
-17. `codex-instructions.md`
-18. `glossary.md`
-19. `../README.md` — historical integrated v1.2 design; use `phases.md` for current implementation status.
+11. `phase-7-real-corpus-measurement.md`
+12. `../ResolverBenchmarks/README.md`
+13. `architecture.md`
+14. `mvp-scope.md`
+15. `data-model.md`
+16. `non-goals.md`
+17. `testing-cases.md`
+18. `codex-instructions.md`
+19. `glossary.md`
+20. `../README.md` — historical integrated v1.2 design; use `phases.md` for current implementation status.
 
 ## Reliability and deterministic editing foundations
 
@@ -107,7 +108,7 @@ Merged measurement foundation:
 
 ### `phase-7-private-corpus-runner.md`
 
-Active local real-audio workflow gate:
+Merged local real-audio workflow foundation:
 
 - schema-versioned manifest with relative WAV paths
 - corpus-root confinement and traversal / symlink escape rejection
@@ -117,6 +118,17 @@ Active local real-audio workflow gate:
 - generated derived dataset + report only
 - developer CLI compiled by CI
 - production Resolver behavior remains unchanged
+
+### `phase-7-real-corpus-measurement.md`
+
+Active operational gate:
+
+- collect a meaningful private corpus of real same-song / different-song relationships
+- include adversarial negatives, not only easy unrelated songs
+- generate calibration reports with the merged private runner
+- inspect per-case evidence and confidence overlap
+- classify false positives / false negatives before adding another algorithm
+- choose the next technical gate from observed failure modes rather than speculation
 
 See `../ResolverBenchmarks/README.md` for the local directory layout and command examples.
 
