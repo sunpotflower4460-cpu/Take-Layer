@@ -16,6 +16,7 @@ targets:
       - path: TakeLayer
         excludes:
           - Resources/Info.plist
+          - Features/ImportExportPoC
     info:
       path: TakeLayer/Resources/Info.plist
     settings:
