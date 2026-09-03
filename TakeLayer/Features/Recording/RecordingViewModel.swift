@@ -19,6 +19,9 @@ final class RecordingViewModel: ObservableObject {
 
     private var elapsedTimer: Timer?
     private var recordingStartedAt: Date?
+    private var countdownTask: Task<Void, Never>?
+    private var zenModeTask: Task<Void, Never>?
+    private var isStoppingRecording = false
 
     func prepare() async {
         isPreparing = true
@@ -47,29 +50,50 @@ final class RecordingViewModel: ObservableObject {
             return
         }
 
+        countdownTask?.cancel()
         recordedTake = nil
         errorMessage = nil
         isCountingDown = true
         countdownValue = 3
 
-        Task {
+        countdownTask = Task { @MainActor [weak self] in
+            guard let self else { return }
+
             for value in stride(from: 3, through: 1, by: -1) {
-                countdownValue = value
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                self.countdownValue = value
+                do {
+                    try await Task.sleep(nanoseconds: 1_000_000_000)
+                } catch {
+                    self.countdownValue = nil
+                    self.isCountingDown = false
+                    self.countdownTask = nil
+                    return
+                }
+                guard !Task.isCancelled else {
+                    self.countdownValue = nil
+                    self.isCountingDown = false
+                    self.countdownTask = nil
+                    return
+                }
             }
-            countdownValue = nil
-            isCountingDown = false
-            startRecordingNow()
+
+            self.countdownValue = nil
+            self.isCountingDown = false
+            self.countdownTask = nil
+            await self.startRecordingNow()
         }
     }
 
     func stopRecording() {
-        guard isRecording else { return }
-        do {
-            try cameraService.stopRecording()
-        } catch {
-            errorMessage = error.localizedDescription
-            finishRecordingUI()
+        guard isRecording, !isStoppingRecording else { return }
+        isStoppingRecording = true
+        Task { @MainActor in
+            do {
+                try await cameraService.stopRecording()
+            } catch {
+                errorMessage = error.localizedDescription
+                finishRecordingUI()
+            }
         }
     }
 
@@ -91,19 +115,26 @@ final class RecordingViewModel: ObservableObject {
     }
 
     func stopPreview() {
+        countdownTask?.cancel()
+        countdownTask = nil
+        isCountingDown = false
+        countdownValue = nil
+        zenModeTask?.cancel()
+        zenModeTask = nil
         cameraService.stopPreview()
     }
 
-    private func startRecordingNow() {
+    private func startRecordingNow() async {
         do {
             let outputURL = try RecordingFileStore.makeRecordingURL()
-            try cameraService.startRecording(to: outputURL) { [weak self] result in
+            try await cameraService.startRecording(to: outputURL) { [weak self] result in
                 Task { @MainActor in
                     self?.handleRecordingResult(result)
                 }
             }
             recordingStartedAt = Date()
             isRecording = true
+            isStoppingRecording = false
             isZenModeActive = false
             startElapsedTimer()
             scheduleZenMode()
@@ -125,7 +156,7 @@ final class RecordingViewModel: ObservableObject {
 
     private func readRecordedTake(from url: URL) {
         isReadingTake = true
-        Task {
+        Task { @MainActor in
             do {
                 recordedTake = try await MediaInfoReader.readRecordedTake(from: url)
             } catch {
@@ -147,20 +178,28 @@ final class RecordingViewModel: ObservableObject {
     }
 
     private func scheduleZenMode() {
-        Task {
-            try? await Task.sleep(nanoseconds: 5_000_000_000)
-            if isRecording {
-                isZenModeActive = true
+        zenModeTask?.cancel()
+        zenModeTask = Task { @MainActor [weak self] in
+            do {
+                try await Task.sleep(nanoseconds: 5_000_000_000)
+            } catch {
+                return
             }
+            guard let self, !Task.isCancelled, self.isRecording else { return }
+            self.isZenModeActive = true
+            self.zenModeTask = nil
         }
     }
 
     private func finishRecordingUI() {
         isRecording = false
+        isStoppingRecording = false
         isZenModeActive = false
         recordingStartedAt = nil
         elapsedTimer?.invalidate()
         elapsedTimer = nil
+        zenModeTask?.cancel()
+        zenModeTask = nil
         availableCapacityBytes = RecordingFileStore.availableCapacityBytes()
     }
 }
