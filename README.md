@@ -12,7 +12,7 @@ TakeLayerは、DAWで仕上げた完成WAVをReference Performance Anchorとし�
 
 ## Current status
 
-As of 2026-09-04, `main` already contains:
+As of 2026-09-04, `main` contains:
 
 - Phase 0.5A Import-first Export PoC
 - Phase 0.5B Recording PoC
@@ -25,15 +25,16 @@ As of 2026-09-04, `main` already contains:
 - Phase 7 Elastic Tonal Alignment
 - Phase 7 Resolver Calibration Harness
 - Phase 7 Private Corpus Runner
+- Phase 7 Consistency Stabilization
 
-The active reliability gate is **Phase 7 Consistency Stabilization** on `phase-7-consistency-stabilization` / PR #15.
+Phase 7 Consistency Stabilization was squash-merged via PR #15. Its merged `main` commit passed post-merge CI #93 including Resolver CLI compilation, iOS build, and the full XCTest suite.
 
-Real Corpus Measurement is intentionally paused until this cross-cutting gate is green. The purpose is to make export timing, Song Memory, Resolver evidence, persistence, recording, calibration tooling, shared UI, and CI agree on the same invariants before real-audio benchmark results are used to choose the next Resolver step.
+The active operational gate is now **Phase 7 Real Corpus Measurement**. The goal is to measure the current Resolver on a meaningful private real-audio corpus, inspect failure classes, and let observed evidence—not speculative complexity—choose the next Resolver step.
 
 See:
 
 - `docs/phases.md`
-- `docs/phase-7-consistency-stabilization.md`
+- `docs/phase-7-real-corpus-measurement.md`
 - `docs/README.md`
 
 ---
@@ -97,7 +98,7 @@ AVFoundation time conversion should use the shared microsecond-resolution `Media
 
 Song Resolver produces candidates and evidence. It does **not** silently adopt a Song or Arrangement.
 
-User-confirmed song metadata and formal lyrics outrank analysis estimates and future provider candidates.
+User-confirmed song metadata and formal lyrics outrank licensed-provider candidates, and licensed-provider lyrics outrank transcription estimates.
 
 ### Non-destructive by default
 
@@ -137,25 +138,25 @@ The camera audio is retained as useful evidence, while the completed WAV is the 
 
 ---
 
-## Current stabilization gate
+## Completed consistency gate
 
-Phase 7 Consistency Stabilization repairs cross-cutting defects without adding new AI behavior.
+Phase 7 Consistency Stabilization repaired cross-cutting defects without adding new AI behavior.
 
-Current scope includes:
+Completed scope includes:
 
-- shared microsecond AVFoundation time conversion for normal and Short exports;
+- shared microsecond AVFoundation time conversion for normal and Short exports and Short preview seeking;
 - stale async export / Resolver result rejection;
 - legacy coarse Resolver signature correctness;
 - tonal fingerprint collision handling;
 - persisted Song Memory link repair;
 - persisted media-file existence validation;
-- licensed-lyrics pointer recovery after confirmed-lyrics removal;
+- lyrics authority and licensed-lyrics recovery after confirmed-lyrics removal;
 - serialized camera recording operations and cancellable delayed tasks;
 - strict calibration threshold validation;
 - active UI extraction from the historical ImportExportPoC folder;
 - regression tests and repository-status synchronization.
 
-Completion requires a clean XcodeGen generation, CLI compile, iOS simulator build, full XCTest suite, review, merge, and green post-merge CI.
+PR #15 was merged only after clean XcodeGen generation, CLI compile, iOS simulator build, full XCTest, and review checks. The merge commit then passed post-merge `main` CI #93.
 
 See `docs/phase-7-consistency-stabilization.md`.
 
@@ -203,19 +204,17 @@ Generative AI must never become the source of truth for synchronization.
 
 ## Near-term roadmap
 
-### Now — Phase 7 Consistency Stabilization
-
-Make the already-merged system internally consistent and fully green.
-
-### Next — Phase 7 Real Corpus Measurement
-
-After stabilization merges:
+### Now — Phase 7 Real Corpus Measurement
 
 - collect meaningful private real-audio relationships;
 - include same Arrangement, same Song / different Arrangement, and adversarial different-Song negatives;
 - run the merged calibration tooling;
 - inspect per-case false positives / false negatives;
 - choose the next Resolver gate from observed failure classes rather than speculative complexity.
+
+### Completed — Phase 7 Consistency Stabilization
+
+The cross-cutting reliability gate is merged and post-merge CI is green.
 
 ### Later — AI Short Director
 
@@ -251,7 +250,8 @@ Start here:
 - `AGENTS.md` — coding-agent rules and active-gate discipline
 - `docs/README.md` — documentation map
 - `docs/phases.md` — implementation roadmap and current status
-- `docs/phase-7-consistency-stabilization.md` — active reliability gate
+- `docs/phase-7-real-corpus-measurement.md` — active operational gate
+- `docs/phase-7-consistency-stabilization.md` — completed cross-cutting reliability gate
 - `docs/architecture.md` — current core architecture
 - `docs/phase-1.1-core-stabilization.md` — deterministic core foundation
 - `docs/phase-1.5-short-foundation.md` — one-video Short substrate
@@ -261,7 +261,6 @@ Start here:
 - `docs/phase-7-elastic-tonal-alignment.md` — structural tonal alignment
 - `docs/phase-7-resolver-calibration-harness.md` — calibration measurement
 - `docs/phase-7-private-corpus-runner.md` — private real-audio runner
-- `docs/phase-7-real-corpus-measurement.md` — next operational gate after stabilization
 - `docs/ai-director-vision.md` — long-term AI Director architecture
 - `docs/song-memory-feedback.md` — future approval/edit-delta learning design
 - `docs/ai-director-data-model.md` — future AI data model
