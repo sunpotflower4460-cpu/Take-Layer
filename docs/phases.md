@@ -2,9 +2,11 @@
 
 ## Repository status
 
-As of 2026-09-03, `main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, **Phase 1.5 Short Foundation**, the first **Phase 7 Song Intelligence Foundation** with human-confirmed Song Memory, **Phase 7 Song Resolver Evidence Foundation**, **Phase 7 Tonal Evidence Foundation**, **Phase 7 Elastic Tonal Alignment**, **Phase 7 Resolver Calibration Harness**, and **Phase 7 Private Corpus Runner**. Phase 0.5A and Phase 0.5B are also merged.
+As of 2026-09-04, `main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, **Phase 1.5 Short Foundation**, the first **Phase 7 Song Intelligence Foundation** with human-confirmed Song Memory, **Phase 7 Song Resolver Evidence Foundation**, **Phase 7 Tonal Evidence Foundation**, **Phase 7 Elastic Tonal Alignment**, **Phase 7 Resolver Calibration Harness**, and **Phase 7 Private Corpus Runner**. Phase 0.5A and Phase 0.5B are also merged.
 
-**Phase 7 Real Corpus Measurement** is now the active operational gate. The current scope is to collect a meaningful private real-audio benchmark, run the merged calibration tooling, inspect false positives / false negatives, and choose the next technical Resolver gate from observed failures rather than adding complexity speculatively.
+**Phase 7 Consistency Stabilization** is the active reliability gate on PR #15. Real Corpus Measurement is paused until the already-merged Core, Short, Song Memory, Resolver, persistence, recording, calibration tooling, shared UI, and CI agree on the same invariants and the stabilization PR is green on `main`.
+
+After this gate merges and post-merge CI passes, **Phase 7 Real Corpus Measurement** becomes the next operational gate again.
 
 This file is a roadmap. A later phase is not active merely because it appears here. Implement only the phase or scope explicitly requested.
 
@@ -141,7 +143,7 @@ The phases below describe the long-term AI Music Video Director direction. They 
 
 ## Phase 7: Song Intelligence Foundation
 
-Status: active real-corpus-measurement gate. Human-confirmed Song Memory, deterministic Resolver Evidence, Tonal Evidence, Elastic Tonal Alignment, Resolver Calibration Harness, and Private Corpus Runner are merged on `main`.
+Status: **active consistency-stabilization gate**. Human-confirmed Song Memory, deterministic Resolver Evidence, Tonal Evidence, Elastic Tonal Alignment, Resolver Calibration Harness, and Private Corpus Runner are merged on `main`. Real Corpus Measurement is the next gate after stabilization.
 
 Goal: TakeLayer begins to understand and remember the musical work itself.
 
@@ -163,7 +165,7 @@ See `phase-7-song-intelligence-foundation.md`.
 
 - Deterministic completed-WAV evidence extraction.
 - Fixed-size energy and transient envelopes.
-- Local evidence signatures for exact deduplication.
+- Local evidence signatures for coarse deterministic deduplication evidence.
 - Per-Arrangement evidence registration and persistence.
 - `ArrangementProfile.fingerprintIDs` references.
 - Deterministic candidate scores with component evidence.
@@ -181,7 +183,7 @@ See `phase-7-song-resolver-evidence.md`.
 - Robust sampling around semitone centers to tolerate modest tuning differences.
 - All-12 transposition search.
 - Tonal / Chroma score and estimated semitone shift exposed in candidate evidence.
-- Existing same-signature fingerprints upgraded in place instead of duplicated.
+- Legacy signature equality does not itself prove tonal identity.
 - Human confirmation remains mandatory.
 
 See `phase-7-tonal-evidence.md`.
@@ -230,7 +232,30 @@ See `phase-7-resolver-calibration-harness.md`.
 
 See `phase-7-private-corpus-runner.md` and `../ResolverBenchmarks/README.md`.
 
-### Active Real Corpus Measurement
+### Active Consistency Stabilization
+
+This gate repairs cross-cutting boundary defects before benchmark output is trusted for future technical decisions.
+
+- Shared microsecond-resolution AVFoundation time conversion for normal and Short export.
+- Preserve 1 ms user offset corrections across renderers.
+- Reject stale async export and Resolver results after relevant state changes.
+- Repair dangling persisted Project ↔ Song / Arrangement links.
+- Validate that persisted video/WAV files still exist before export.
+- Restore retained licensed lyrics when user-confirmed lyrics are removed.
+- Keep legacy coarse Resolver signatures from fabricating tonal certainty.
+- Keep distinct tonal fingerprints when coarse signatures collide.
+- Serialize camera recording transitions and cancel delayed recording UI tasks safely.
+- Reject invalid diagnostic calibration thresholds instead of silently clamping them.
+- Move production workflow UI out of the historical ImportExportPoC folder.
+- Add regression tests and synchronize repository status documentation.
+
+Completion requires clean CLI compilation, XcodeGen generation, iOS build, full XCTest, clean review, merge, and green post-merge CI.
+
+See `phase-7-consistency-stabilization.md`.
+
+### Next Real Corpus Measurement
+
+After consistency stabilization merges:
 
 - Collect a meaningful real private corpus rather than relying on synthetic fixtures.
 - Include multiple same-Arrangement positives.
