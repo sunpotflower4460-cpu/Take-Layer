@@ -2,11 +2,13 @@
 
 ## Status
 
-Active reliability gate before Phase 7 Real Corpus Measurement resumes.
+**Completed and merged on `main` via PR #15 on 2026-09-04. Post-merge `main` CI #93 is green.**
 
-This gate does not add a new Resolver algorithm or AI feature. Its purpose is to make the already-merged TakeLayer Core, Short Foundation, Song Memory, Resolver, calibration tooling, persistence, recording, and CI agree on the same invariants.
+Phase 7 Real Corpus Measurement is now the active operational gate again.
 
-## Why this gate exists
+This gate did not add a new Resolver algorithm or AI feature. Its purpose was to make the already-merged TakeLayer Core, Short Foundation, Song Memory, Resolver, calibration tooling, persistence, recording, and CI agree on the same invariants.
+
+## Why this gate existed
 
 The repository had reached a point where individually correct features could still disagree at their boundaries. Examples found during the cross-cutting review included:
 
@@ -19,14 +21,14 @@ The repository had reached a point where individually correct features could sti
 - camera recording operations split across different execution contexts;
 - diagnostic calibration thresholds being silently changed by clamping.
 
-These are boundary-consistency defects, so they must be repaired before real-corpus measurements are trusted as evidence for the next Resolver gate.
+These were boundary-consistency defects, so they were repaired before real-corpus measurements were trusted as evidence for the next Resolver gate.
 
-## Active fixes
+## Completed fixes
 
 ### Time and export consistency
 
 - Use shared microsecond-resolution `MediaTime` conversion for AVFoundation `CMTime` creation.
-- Preserve 1 ms manual offset steps in both normal and Short export paths.
+- Preserve 1 ms manual offset steps in both normal and Short export paths and Short preview seeking.
 - Keep `TimelineMapper` as the only synchronization arithmetic authority.
 - Reject stale export completion when Project timing/media changed during rendering.
 
@@ -38,14 +40,15 @@ These are boundary-consistency defects, so they must be repaired before real-cor
 - Keep separate tonal fingerprints when a coarse signature collides.
 - Discard stale async Resolver evidence after WAV or Project linkage changes.
 - Repair dangling Project Song Memory links when persisted data is restored.
-- Restore a retained licensed-provider lyric pointer when user-confirmed lyrics are removed.
+- Restore the highest-authority retained permitted lyrics source when user-confirmed lyrics are removed.
+- Preserve lyrics authority order: user-confirmed > licensed provider > transcription estimate.
 - Human confirmation remains mandatory for Resolver-derived identity links.
 
 ### Persistence and validation consistency
 
 - Export validation verifies that persisted video and WAV URLs still exist on disk.
 - Validation item identity is stable across recomputation.
-- Decode compatibility may retain historical fields, but inactive settings must not be presented as configurable behavior.
+- Decode compatibility may retain historical fields, but inactive settings are not presented as configurable behavior.
 
 ### Recording consistency
 
@@ -58,13 +61,13 @@ These are boundary-consistency defects, so they must be repaired before real-cor
 - Reject non-finite and out-of-range calibration thresholds instead of silently clamping them.
 - Keep `ImportExportPoC` outside the active Xcode target.
 - Move workflow UI used by production screens into `TakeLayer/Features/Shared/`.
-- Keep the historical PoC source as reference only; active code must not depend on it.
+- Keep the historical PoC source as reference only; active code does not depend on it.
 - Remove obsolete CI branch-specific triggers.
 - Add regression tests for repaired invariants.
 
-## Guardrails
+## Guardrails preserved
 
-This gate must not:
+This gate did not:
 
 - change the `TimelineMapper` formula without a demonstrated synchronization regression;
 - auto-link a Song or Arrangement from Resolver confidence;
@@ -73,16 +76,16 @@ This gate must not:
 - upload private benchmark audio;
 - destructively modify raw media by default.
 
-## Completion criteria
+## Completion evidence
 
-The gate is complete only when the latest PR head satisfies all of the following:
+PR #15 and the merged `main` commit satisfied all completion criteria:
 
-1. Resolver calibration CLI compiles.
-2. XcodeGen generates the project from a clean checkout.
-3. iOS simulator build succeeds.
-4. Full XCTest suite succeeds.
-5. No unresolved review thread identifies a correctness defect.
-6. Repository status documentation describes the actual active gate.
-7. The merged `main` commit receives a green post-merge CI run.
+1. Resolver calibration CLI compiled.
+2. XcodeGen generated the project from a clean checkout.
+3. iOS simulator build succeeded.
+4. Full XCTest suite succeeded.
+5. No unresolved review thread identified a correctness defect.
+6. Repository status documentation described the reliability gate before merge.
+7. Squash merge commit `5bde5a41d2aedaefcae43e616bc130e38731a8ad` received green post-merge `main` CI run #93.
 
-After these criteria are met, Phase 7 Real Corpus Measurement becomes the next operational gate again.
+The stabilization gate is closed. Continue with `phase-7-real-corpus-measurement.md` unless a new correctness regression is found.
