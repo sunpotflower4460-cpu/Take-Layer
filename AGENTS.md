@@ -10,9 +10,11 @@ Long-term direction: TakeLayer Core may support an AI Music Video Director that 
 
 ## Repository implementation baseline
 
-`main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, **Phase 1.5 Short Foundation**, **Phase 7 Song Intelligence Foundation**, **Phase 7 Song Resolver Evidence Foundation**, **Phase 7 Tonal Evidence Foundation**, **Phase 7 Elastic Tonal Alignment**, **Phase 7 Resolver Calibration Harness**, and **Phase 7 Private Corpus Runner**.
+`main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, **Phase 1.5 Short Foundation**, **Phase 7 Song Intelligence Foundation**, **Phase 7 Song Resolver Evidence Foundation**, **Phase 7 Tonal Evidence Foundation**, **Phase 7 Elastic Tonal Alignment**, **Phase 7 Resolver Calibration Harness**, **Phase 7 Private Corpus Runner**, and **Phase 7 Consistency Stabilization**.
 
-`phase-7-consistency-stabilization` / PR #15 is the active reliability gate as of 2026-09-04. Its scope is cross-cutting correctness across export timing, Resolver evidence semantics, persistence references, recording concurrency, calibration tooling, shared UI ownership, CI, and documentation. **Phase 7 Real Corpus Measurement is paused until this gate is merged and post-merge CI is green.**
+PR #15 (`phase-7-consistency-stabilization`) was squash-merged on 2026-09-04, and its merged `main` commit passed post-merge CI #93 including Resolver CLI compilation, iOS build, and the full XCTest suite.
+
+**Phase 7 Real Corpus Measurement is the active operational gate.** Its scope is collecting and measuring a meaningful private real-audio corpus with the merged runner, reviewing false positives / false negatives, and choosing the next technical Resolver gate from observed failures rather than speculative complexity.
 
 For every task, implement only the explicitly requested phase or scope and preserve already-merged behavior.
 
@@ -70,6 +72,12 @@ For song identity, arrangement metadata, and formal lyrics, use this precedence:
 5. Unknown
 ```
 
+For formal lyrics specifically, the retained source order is:
+
+```text
+user-confirmed > licensed provider > transcription estimate
+```
+
 Song Memory is not a synchronization authority. It must not mutate `songStartRawSec`, `songStartAudioSec`, `offsetMs`, trim ranges, or renderer mapping.
 
 Song Resolver may read completed-WAV evidence and Song Memory to produce candidates, but it must not silently promote analysis evidence into user-confirmed identity.
@@ -102,33 +110,31 @@ Tonal / Chroma, elastic alignment, calibration metrics, and private-corpus repor
 - Phase 7 Elastic Tonal Alignment is merged into `main`.
 - Phase 7 Resolver Calibration Harness is merged into `main`.
 - Phase 7 Private Corpus Runner is merged into `main`.
-- The active gate is documented in `docs/phase-7-consistency-stabilization.md`.
-- `docs/phase-7-real-corpus-measurement.md` is the next operational gate after stabilization, not the current implementation scope.
+- Phase 7 Consistency Stabilization is merged into `main` via PR #15 and passed post-merge CI #93.
+- The active gate is documented in `docs/phase-7-real-corpus-measurement.md`.
+- `docs/phase-7-consistency-stabilization.md` is a completed reliability record, not the current implementation scope.
 - `docs/ai-director-vision.md`, `docs/song-memory-feedback.md`, and `docs/ai-director-data-model.md` are architecture references; they do not automatically activate all described capabilities.
 - Do not infer that Phase 8, Phase 9, Phase 10, or unactivated Phase 7 sub-gates are active.
 
-## Active Phase 7 consistency-stabilization gates
+## Completed Phase 7 consistency-stabilization invariants
 
-Before Real Corpus Measurement resumes:
+The following repairs are merged and must not regress:
 
-- Keep `TimelineMapper` arithmetic unchanged unless a regression proves the formula itself is wrong.
-- Preserve 1 ms manual offset precision through every active export path.
+- Keep `TimelineMapper` arithmetic authoritative unless a regression proves the formula itself is wrong.
+- Preserve 1 ms manual offset precision through every active export path and Short preview seeking.
 - Reject stale async export and Resolver results after relevant Project/WAV/link changes.
 - Repair or reject dangling persisted Song Memory/media references instead of trusting them silently.
 - Keep Resolver legacy signature semantics coarse; do not fabricate tonal certainty.
+- Preserve lyrics source authority rather than letting a newer transcription estimate outrank licensed or user-confirmed lyrics.
 - Keep human confirmation mandatory for Song/Arrangement adoption.
 - Keep capture-session operations serialized through one service execution boundary.
 - Keep production UI independent from `Features/ImportExportPoC/`.
 - Reject invalid calibration configuration rather than silently changing requested values.
-- Add regression tests for every repaired invariant when practical.
-- Latest PR head must pass CLI compilation, XcodeGen generation, iOS build, and full XCTest.
-- Merge only after review is clean; then verify green post-merge `main` CI.
+- Add regression tests for repaired invariants when practical.
 
 See `docs/phase-7-consistency-stabilization.md`.
 
-## Next Phase 7 real-corpus-measurement gates
-
-After consistency stabilization is merged and green:
+## Active Phase 7 real-corpus-measurement gates
 
 - Collect real user-owned / permitted WAV relationships under the gitignored private corpus root.
 - Include same Arrangement, same Song / different Arrangement, and difficult different-Song negatives.
@@ -175,7 +181,7 @@ Do not add these unless the active phase explicitly requests them:
 - AI Music Video Director proposal generation.
 - Preference learning / edit-delta learning.
 
-Do not remove or regress already-merged functionality such as import/record flow, WAV import, manual song-start markers, trim, manual offset, validation, deterministic Short editing, Song Memory, Resolver Evidence, Tonal Evidence, Elastic Alignment, Calibration Harness, Private Corpus Runner, or single-screen export unless explicitly requested.
+Do not remove or regress already-merged functionality such as import/record flow, WAV import, manual song-start markers, trim, manual offset, validation, deterministic Short editing, Song Memory, Resolver Evidence, Tonal Evidence, Elastic Alignment, Calibration Harness, Private Corpus Runner, Consistency Stabilization repairs, or single-screen export unless explicitly requested.
 
 ## Future AI Director references
 
