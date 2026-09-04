@@ -71,6 +71,16 @@ enum FormalLyricsSource: String, Codable {
     case userConfirmed = "user_confirmed"
     case licensedProvider = "licensed_provider"
     case transcriptionEstimate = "transcription_estimate"
+
+    /// Song-information authority order. A newer estimate must never outrank a
+    /// permitted provider record, and neither may outrank user-confirmed lyrics.
+    var authorityPriority: Int {
+        switch self {
+        case .userConfirmed: return 3
+        case .licensedProvider: return 2
+        case .transcriptionEstimate: return 1
+        }
+    }
 }
 
 struct FormalLyrics: Identifiable, Codable, Equatable {
@@ -140,10 +150,16 @@ struct SongMemoryLibrary: Codable, Equatable {
         return formalLyrics
             .filter { $0.songID == songID }
             .sorted { lhs, rhs in
+                if lhs.source.authorityPriority != rhs.source.authorityPriority {
+                    return lhs.source.authorityPriority > rhs.source.authorityPriority
+                }
                 if lhs.userConfirmed != rhs.userConfirmed {
                     return lhs.userConfirmed && !rhs.userConfirmed
                 }
-                return lhs.version > rhs.version
+                if lhs.version != rhs.version {
+                    return lhs.version > rhs.version
+                }
+                return lhs.updatedAt > rhs.updatedAt
             }
             .first
     }
@@ -262,9 +278,8 @@ struct SongMemoryLibrary: Codable, Equatable {
                    let lyricsIndex = formalLyrics.firstIndex(where: { $0.id == existingLyricsID }),
                    formalLyrics[lyricsIndex].source == .userConfirmed {
                     formalLyrics.remove(at: lyricsIndex)
-                    // Restore the best remaining permitted source instead of
-                    // leaving the profile pointer stale/empty when provider
-                    // lyrics are still present.
+                    // Restore the highest-authority remaining permitted source instead of
+                    // leaving the profile pointer stale/empty when provider lyrics exist.
                     profiles[profileIndex].formalLyricsID = lyrics(for: songID)?.id
                 }
             } else if let existingLyricsID = profiles[profileIndex].formalLyricsID,
@@ -299,6 +314,14 @@ struct SongMemoryLibrary: Codable, Equatable {
         }
 
         return ProjectSongMemoryLink(songID: songID, arrangementID: arrangementID, linkedAt: now)
+    }
+
+    mutating func attachFingerprintID(_ fingerprintID: UUID, to arrangementID: UUID) {
+        guard let index = arrangements.firstIndex(where: { $0.id == arrangementID }) else { return }
+        let value = fingerprintID.uuidString
+        guard !arrangements[index].fingerprintIDs.contains(value) else { return }
+        arrangements[index].fingerprintIDs.append(value)
+        arrangements[index].updatedAt = Date()
     }
 
     private func optionalTrimmed(_ value: String) -> String? {
