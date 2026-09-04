@@ -34,6 +34,15 @@ enum ResolverPrivateCorpusRunnerError: LocalizedError, Equatable {
 }
 
 enum ResolverPrivateCorpusRunner {
+    private struct PreparedCase {
+        var id: UUID
+        var name: String
+        var relationship: ResolverCalibrationRelationship
+        var queryURL: URL
+        var referenceURL: URL
+        var notes: String?
+    }
+
     static func loadManifest(from url: URL) throws -> ResolverPrivateCorpusManifest {
         let data = try Data(contentsOf: url)
         let manifest = try JSONDecoder().decode(ResolverPrivateCorpusManifest.self, from: data)
@@ -43,32 +52,38 @@ enum ResolverPrivateCorpusRunner {
 
     static func buildDataset(
         manifest: ResolverPrivateCorpusManifest,
-        corpusRoot: URL
+        corpusRoot: URL,
+        evidenceExtractor: (URL) throws -> AudioEvidenceVector = { try AudioEvidenceExtractor.extract(from: $0) }
     ) throws -> ResolverCalibrationDataset {
         try validateManifest(manifest)
 
         let root = corpusRoot.standardizedFileURL.resolvingSymlinksInPath()
-        var seenCaseIDs = Set<UUID>()
-        var cases: [ResolverCalibrationCase] = []
-        cases.reserveCapacity(manifest.cases.count)
+        let preparedCases = try prepareCases(manifest: manifest, corpusRoot: root)
 
-        for manifestCase in manifest.cases {
-            let queryURL = try resolveWAV(relativePath: manifestCase.queryPath, corpusRoot: root)
-            let referenceURL = try resolveWAV(relativePath: manifestCase.referencePath, corpusRoot: root)
-            let caseID = manifestCase.id ?? stableCaseID(manifestName: manifest.name, manifestCase: manifestCase)
-            guard seenCaseIDs.insert(caseID).inserted else {
-                throw ResolverPrivateCorpusRunnerError.duplicateCaseID(caseID)
+        var evidenceCache: [URL: AudioEvidenceVector] = [:]
+        func evidence(for url: URL) throws -> AudioEvidenceVector {
+            if let cached = evidenceCache[url] {
+                return cached
             }
+            let extracted = try evidenceExtractor(url)
+            evidenceCache[url] = extracted
+            return extracted
+        }
 
-            var benchmarkCase = try ResolverCalibrationHarness.makeCase(
-                name: manifestCase.name.trimmingCharacters(in: .whitespacesAndNewlines),
-                relationship: manifestCase.relationship,
-                queryWAVURL: queryURL,
-                referenceWAVURL: referenceURL,
-                notes: manifestCase.notes
+        var cases: [ResolverCalibrationCase] = []
+        cases.reserveCapacity(preparedCases.count)
+
+        for preparedCase in preparedCases {
+            cases.append(
+                ResolverCalibrationCase(
+                    id: preparedCase.id,
+                    name: preparedCase.name,
+                    relationship: preparedCase.relationship,
+                    queryEvidence: try evidence(for: preparedCase.queryURL),
+                    referenceEvidence: try evidence(for: preparedCase.referenceURL),
+                    notes: preparedCase.notes
+                )
             )
-            benchmarkCase.id = caseID
-            cases.append(benchmarkCase)
         }
 
         return ResolverCalibrationDataset(name: manifest.name, cases: cases)
@@ -102,6 +117,42 @@ enum ResolverPrivateCorpusRunner {
             datasetURL: datasetOutputURL,
             reportURL: reportOutputURL
         )
+    }
+
+    private static func prepareCases(
+        manifest: ResolverPrivateCorpusManifest,
+        corpusRoot: URL
+    ) throws -> [PreparedCase] {
+        var seenCaseIDs = Set<UUID>()
+        var identifiedCases: [(manifestCase: ResolverPrivateCorpusManifestCase, id: UUID)] = []
+        identifiedCases.reserveCapacity(manifest.cases.count)
+
+        for manifestCase in manifest.cases {
+            let caseID = manifestCase.id ?? stableCaseID(manifestName: manifest.name, manifestCase: manifestCase)
+            guard seenCaseIDs.insert(caseID).inserted else {
+                throw ResolverPrivateCorpusRunnerError.duplicateCaseID(caseID)
+            }
+            identifiedCases.append((manifestCase, caseID))
+        }
+
+        var preparedCases: [PreparedCase] = []
+        preparedCases.reserveCapacity(identifiedCases.count)
+
+        for identifiedCase in identifiedCases {
+            let manifestCase = identifiedCase.manifestCase
+            preparedCases.append(
+                PreparedCase(
+                    id: identifiedCase.id,
+                    name: manifestCase.name.trimmingCharacters(in: .whitespacesAndNewlines),
+                    relationship: manifestCase.relationship,
+                    queryURL: try resolveWAV(relativePath: manifestCase.queryPath, corpusRoot: corpusRoot),
+                    referenceURL: try resolveWAV(relativePath: manifestCase.referencePath, corpusRoot: corpusRoot),
+                    notes: manifestCase.notes
+                )
+            )
+        }
+
+        return preparedCases
     }
 
     private static func validateManifest(_ manifest: ResolverPrivateCorpusManifest) throws {
