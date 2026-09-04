@@ -163,7 +163,7 @@ final class ResolverCalibrationHarnessTests: XCTestCase {
     func testEmptyDatasetProducesInspectableEmptyReport() throws {
         let report = try ResolverCalibrationHarness.evaluate(
             ResolverCalibrationDataset(name: "empty", cases: []),
-            thresholds: [-1, 0.5, 2, 0.5]
+            thresholds: [0, 0.5, 1, 0.5]
         )
 
         XCTAssertEqual(report.totalCases, 0)
@@ -173,6 +173,18 @@ final class ResolverCalibrationHarnessTests: XCTestCase {
         XCTAssertNil(report.maximumNegativeConfidence)
         XCTAssertNil(report.confidenceGap)
         XCTAssertEqual(report.thresholdMetrics.map(\.threshold), [0, 0.5, 1])
+    }
+
+    func testInvalidThresholdsAreRejectedInsteadOfSilentlyClamped() {
+        let dataset = ResolverCalibrationDataset(name: "invalid-threshold", cases: [])
+
+        for invalid in [-0.01, 1.01, Double.nan, Double.infinity] {
+            XCTAssertThrowsError(try ResolverCalibrationHarness.evaluate(dataset, thresholds: [invalid])) { error in
+                guard case ResolverCalibrationHarnessError.invalidThreshold = error else {
+                    return XCTFail("Unexpected error: \(error)")
+                }
+            }
+        }
     }
 
     private func makeVector(

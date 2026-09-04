@@ -71,6 +71,16 @@ enum FormalLyricsSource: String, Codable {
     case userConfirmed = "user_confirmed"
     case licensedProvider = "licensed_provider"
     case transcriptionEstimate = "transcription_estimate"
+
+    /// Song-information authority order. A newer estimate must never outrank a
+    /// permitted provider record, and neither may outrank user-confirmed lyrics.
+    var authorityPriority: Int {
+        switch self {
+        case .userConfirmed: return 3
+        case .licensedProvider: return 2
+        case .transcriptionEstimate: return 1
+        }
+    }
 }
 
 struct FormalLyrics: Identifiable, Codable, Equatable {
@@ -140,12 +150,30 @@ struct SongMemoryLibrary: Codable, Equatable {
         return formalLyrics
             .filter { $0.songID == songID }
             .sorted { lhs, rhs in
+                if lhs.source.authorityPriority != rhs.source.authorityPriority {
+                    return lhs.source.authorityPriority > rhs.source.authorityPriority
+                }
                 if lhs.userConfirmed != rhs.userConfirmed {
                     return lhs.userConfirmed && !rhs.userConfirmed
                 }
-                return lhs.version > rhs.version
+                if lhs.version != rhs.version {
+                    return lhs.version > rhs.version
+                }
+                return lhs.updatedAt > rhs.updatedAt
             }
             .first
+    }
+
+    /// Repairs a persisted Project link against the current Song Memory library.
+    /// Missing songs invalidate the whole link. A missing/wrong Arrangement keeps
+    /// the confirmed Song association but drops only the stale Arrangement ID.
+    func repairedProjectLink(_ link: ProjectSongMemoryLink?) -> ProjectSongMemoryLink? {
+        guard let link, identity(for: link.songID) != nil else { return nil }
+        guard let arrangementID = link.arrangementID else { return link }
+        guard let arrangement = arrangement(for: arrangementID), arrangement.songID == link.songID else {
+            return ProjectSongMemoryLink(songID: link.songID, arrangementID: nil, linkedAt: link.linkedAt)
+        }
+        return link
     }
 
     @discardableResult
@@ -250,7 +278,9 @@ struct SongMemoryLibrary: Codable, Equatable {
                    let lyricsIndex = formalLyrics.firstIndex(where: { $0.id == existingLyricsID }),
                    formalLyrics[lyricsIndex].source == .userConfirmed {
                     formalLyrics.remove(at: lyricsIndex)
-                    profiles[profileIndex].formalLyricsID = nil
+                    // Restore the highest-authority remaining permitted source instead of
+                    // leaving the profile pointer stale/empty when provider lyrics exist.
+                    profiles[profileIndex].formalLyricsID = lyrics(for: songID)?.id
                 }
             } else if let existingLyricsID = profiles[profileIndex].formalLyricsID,
                       let lyricsIndex = formalLyrics.firstIndex(where: { $0.id == existingLyricsID }),

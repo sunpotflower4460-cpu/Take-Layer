@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - phase-1.1-core-stabilization
 
 jobs:
   build-and-test:

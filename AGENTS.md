@@ -12,7 +12,7 @@ Long-term direction: TakeLayer Core may support an AI Music Video Director that 
 
 `main` contains the merged **Phase 1 (MVP-α)**, **Phase 1.1 Core Stabilization**, **Phase 1.5 Short Foundation**, **Phase 7 Song Intelligence Foundation**, **Phase 7 Song Resolver Evidence Foundation**, **Phase 7 Tonal Evidence Foundation**, **Phase 7 Elastic Tonal Alignment**, **Phase 7 Resolver Calibration Harness**, and **Phase 7 Private Corpus Runner**.
 
-`phase-7-real-corpus-measurement` is the active operational branch. Its scope is collecting and measuring a meaningful private real-audio corpus with the merged runner, reviewing false positives / false negatives, and choosing the next technical gate from observed failures. This gate must not add Resolver complexity merely because another algorithm is available.
+`phase-7-consistency-stabilization` / PR #15 is the active reliability gate as of 2026-09-04. Its scope is cross-cutting correctness across export timing, Resolver evidence semantics, persistence references, recording concurrency, calibration tooling, shared UI ownership, CI, and documentation. **Phase 7 Real Corpus Measurement is paused until this gate is merged and post-merge CI is green.**
 
 For every task, implement only the explicitly requested phase or scope and preserve already-merged behavior.
 
@@ -31,6 +31,7 @@ For every task, implement only the explicitly requested phase or scope and prese
 - Generative AI must never become the source of truth for synchronization.
 - User-confirmed song metadata and lyrics must not be silently overwritten by external metadata or AI estimates.
 - Resolver confidence alone must not create or replace a Project Song Memory link.
+- Active production code must not depend on the historical `Features/ImportExportPoC/` folder.
 
 ## Timeline authority
 
@@ -53,6 +54,8 @@ offsetMs > 0  = completed WAV is delayed relative to video
 offsetMs < 0  = completed WAV is advanced relative to video
 ```
 
+AVFoundation `CMTime` conversion for user-visible synchronization/rendering should go through the shared microsecond-resolution `MediaTime` boundary so millisecond correction steps are not rounded differently between renderers.
+
 Any sync defect must first be expressed as a TimelineMapper regression test before changing the mapping implementation when practical.
 
 ## Song-information authority
@@ -71,6 +74,8 @@ Song Memory is not a synchronization authority. It must not mutate `songStartRaw
 
 Song Resolver may read completed-WAV evidence and Song Memory to produce candidates, but it must not silently promote analysis evidence into user-confirmed identity.
 
+The legacy deterministic evidence `signature` is based on coarse duration / energy / transient evidence and must not be treated as proof of tonal identity. When Tonal Evidence exists, use the actual tonal comparison. Legacy evidence without Tonal Evidence must not be represented as certainty.
+
 Tonal / Chroma, elastic alignment, calibration metrics, and private-corpus reports are analysis evidence. Even perfect benchmark separation is not equivalent to user confirmation or permission for automatic adoption.
 
 ## Tech direction
@@ -82,13 +87,14 @@ Tonal / Chroma, elastic alignment, calibration metrics, and private-corpus repor
 - CryptoKit is acceptable for deterministic local evidence signatures and benchmark identifiers.
 - SwiftData is a future persistence target; current persistence uses small JSON store boundaries.
 - Xcode project generation is defined by `project.yml` using XcodeGen.
+- Shared production workflow UI belongs outside historical PoC folders.
 - Do not make FFmpegKit a core dependency.
 - Android and Mac Companion are future phases.
 
 ## Phase discipline
 
 - Implement only the requested phase.
-- Do not implement multiple phases in one pass.
+- Do not implement multiple future phases in one pass.
 - Phase 0.5A, Phase 0.5B, Phase 1, Phase 1.1, and Phase 1.5 are merged into `main`.
 - Phase 7 Song Intelligence Foundation is merged into `main`.
 - Phase 7 Song Resolver Evidence Foundation is merged into `main`.
@@ -96,13 +102,33 @@ Tonal / Chroma, elastic alignment, calibration metrics, and private-corpus repor
 - Phase 7 Elastic Tonal Alignment is merged into `main`.
 - Phase 7 Resolver Calibration Harness is merged into `main`.
 - Phase 7 Private Corpus Runner is merged into `main`.
-- The active Phase 7 operational gate is documented in `docs/phase-7-real-corpus-measurement.md`.
+- The active gate is documented in `docs/phase-7-consistency-stabilization.md`.
+- `docs/phase-7-real-corpus-measurement.md` is the next operational gate after stabilization, not the current implementation scope.
 - `docs/ai-director-vision.md`, `docs/song-memory-feedback.md`, and `docs/ai-director-data-model.md` are architecture references; they do not automatically activate all described capabilities.
 - Do not infer that Phase 8, Phase 9, Phase 10, or unactivated Phase 7 sub-gates are active.
 
-## Active Phase 7 real-corpus-measurement gates
+## Active Phase 7 consistency-stabilization gates
 
-Before choosing the next technical Resolver gate:
+Before Real Corpus Measurement resumes:
+
+- Keep `TimelineMapper` arithmetic unchanged unless a regression proves the formula itself is wrong.
+- Preserve 1 ms manual offset precision through every active export path.
+- Reject stale async export and Resolver results after relevant Project/WAV/link changes.
+- Repair or reject dangling persisted Song Memory/media references instead of trusting them silently.
+- Keep Resolver legacy signature semantics coarse; do not fabricate tonal certainty.
+- Keep human confirmation mandatory for Song/Arrangement adoption.
+- Keep capture-session operations serialized through one service execution boundary.
+- Keep production UI independent from `Features/ImportExportPoC/`.
+- Reject invalid calibration configuration rather than silently changing requested values.
+- Add regression tests for every repaired invariant when practical.
+- Latest PR head must pass CLI compilation, XcodeGen generation, iOS build, and full XCTest.
+- Merge only after review is clean; then verify green post-merge `main` CI.
+
+See `docs/phase-7-consistency-stabilization.md`.
+
+## Next Phase 7 real-corpus-measurement gates
+
+After consistency stabilization is merged and green:
 
 - Collect real user-owned / permitted WAV relationships under the gitignored private corpus root.
 - Include same Arrangement, same Song / different Arrangement, and difficult different-Song negatives.

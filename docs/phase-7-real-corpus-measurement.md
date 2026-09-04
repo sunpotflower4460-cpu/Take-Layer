@@ -2,7 +2,9 @@
 
 ## Status
 
-Active operational gate after the merged Private Corpus Runner.
+**Next operational gate after Phase 7 Consistency Stabilization. Currently paused.**
+
+The Private Corpus Runner is already merged on `main`, but real-corpus measurement is intentionally paused while PR #15 repairs cross-cutting correctness and repository consistency. Resume this gate only after consistency stabilization is merged and the post-merge `main` CI run is green.
 
 This gate is intentionally **data collection and measurement**, not a new Resolver algorithm implementation.
 
@@ -22,6 +24,18 @@ The question for this gate is not "How can Resolver become more complex?" It is:
 - Elastic Tonal Alignment,
 - Resolver Calibration Harness,
 - Private Corpus Runner.
+
+## Additional resume prerequisite
+
+Before collecting evidence that will influence the next Resolver gate:
+
+- Phase 7 Consistency Stabilization must be merged,
+- CLI compilation must be green,
+- iOS build must be green,
+- full XCTest must be green,
+- post-merge `main` CI must be green.
+
+See `phase-7-consistency-stabilization.md`.
 
 ## Private corpus location
 
@@ -83,7 +97,7 @@ The adversarial negatives are especially important because easy negatives can ma
 Before discussing production thresholds, aim for at least:
 
 ```text
-same Arrangement                 >= 10 cases
+same Arrangement                  >= 10 cases
 same Song / different Arrangement >= 20 cases
 different Song                    >= 30 cases
 ```
@@ -98,88 +112,85 @@ bash tools/run-resolver-calibration.sh \
   --thresholds 0.50,0.60,0.65,0.70,0.75,0.80,0.85,0.90,0.95
 ```
 
-The runner produces derived evidence and an inspectable report while leaving production Resolver behavior unchanged.
+The runner generates derived evidence and a calibration report while raw WAV files stay local.
 
-## Review order
+## What to inspect
 
-When a report is produced, review in this order:
+Do not evaluate the Resolver from one headline accuracy number.
 
-1. `minimumPositiveConfidence`
-2. `maximumNegativeConfidence`
-3. `confidenceGap`
-4. false positives at candidate thresholds
-5. false negatives at candidate thresholds
-6. per-case duration / energy / transient / tonal evidence
-7. estimated transposition
-8. tonal structure coverage
-9. elastic warp fraction
+Review:
 
-Do not choose a threshold solely because one F1 value is numerically highest on a small corpus.
+- minimum positive confidence,
+- maximum negative confidence,
+- observed confidence gap,
+- per-threshold confusion matrix,
+- precision,
+- recall,
+- specificity,
+- F1,
+- balanced accuracy,
+- individual false-positive cases,
+- individual false-negative cases,
+- duration / energy / transient / tonal evidence,
+- tonal transposition,
+- tonal alignment coverage,
+- tonal warp fraction.
 
 ## Failure classification
 
-Every important false positive / false negative should be assigned a likely failure class before adding another algorithm.
+For every meaningful failure, classify the likely missing evidence before changing production logic.
 
-Suggested classes:
+Examples:
 
-- `exact_signature_weakness`
-- `similar_harmony_collision`
-- `arrangement_structure_change`
-- `tempo_or_section_change`
-- `energy_transient_mismatch`
-- `melody_needed`
-- `landmark_fingerprint_needed`
-- `lyrics_or_vocal_identity_may_help`
-- `label_or_source_quality_problem`
-- `unknown`
+### Harmony-similar different songs collide
 
-The classification is a human review note at this gate. It is not an automatic model diagnosis.
+Possible next gate:
 
-## Decision rules after measurement
+- melody contour / vocal melody evidence.
 
-Only choose a new technical gate after inspecting repeated real failures.
+### Same song with strong arrangement changes scores too low
 
-### If harmony-similar different songs collide
+Possible next gate:
 
-Consider Melody Contour Evidence before simply increasing tonal weight.
+- stronger section-aware structure representation,
+- selective melody evidence,
+- improved landmark evidence.
 
-### If the same recording / mix family is not stable enough
+### Same master with intro/outro silence differences scores too low
 
-Consider stronger audio landmark fingerprinting.
+Possible next gate:
 
-### If live / acoustic structures still miss despite good tonal content
+- revisit evidence normalization or alignment boundaries before adding a new model.
 
-Inspect Elastic Alignment coverage / warp and consider section-aware evidence.
+### Different songs by the same artist collide
 
-### If components separate well but total confidence is poorly calibrated
+Possible next gate:
 
-Consider a separately reviewed Resolver weight / threshold calibration gate.
+- melody contour,
+- stronger audio landmarks,
+- later permitted lyrics identity evidence if justified.
 
-### If the current Resolver already separates the corpus well
+The measured failure class should choose the next technical gate, not the reverse.
 
-Do not add complexity merely because another algorithm exists. Move toward song sections / highlights or the next product-facing gate.
+## Calibration guardrails
 
-## Safety boundaries
+- Do not choose a production threshold from a tiny corpus.
+- Do not optimize weights against one user's easiest examples.
+- Do not hide false positives behind an aggregate score.
+- Do not turn report output into automatic production configuration.
+- Do not auto-link Song Memory from benchmark confidence.
+- Do not change TimelineMapper or synchronization fields from calibration work.
+- Do not commit private WAVs or private benchmark datasets.
+- Keep all candidate identity decisions inspectable and user-confirmed.
 
-This gate must not:
-
-- automatically alter production thresholds,
-- automatically alter Resolver weights,
-- auto-link Song Memory,
-- treat benchmark labels as synchronization truth,
-- modify TimelineMapper,
-- upload private WAVs,
-- commit private benchmark media,
-- introduce AI Director editing decisions.
-
-## Completion criterion
+## Exit criteria
 
 This gate is complete when:
 
-- a meaningful private corpus has been collected,
-- a report has been generated using the merged runner,
-- notable false positives and false negatives have been reviewed,
-- failure classes are documented,
-- the next technical gate is chosen from observed evidence rather than speculation.
+1. the private corpus is large/diverse enough to expose meaningful overlap rather than only easy separation;
+2. per-case failures have been reviewed;
+3. repeated failure classes are documented;
+4. the next Resolver technical gate can be justified from those observed failures;
+5. any proposed production threshold/weight change is supported by evidence rather than convenience.
 
-Until real audio exists, further Resolver-complexity work should remain paused.
+If the current Resolver already separates the real corpus well, the correct next action may be **not** to add another Resolver algorithm and instead move to the next product-value gate.

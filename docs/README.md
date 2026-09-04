@@ -6,24 +6,45 @@ Read these first when working on the active TakeLayer implementation.
 
 1. `../AGENTS.md`
 2. `phases.md`
-3. `phase-1.1-core-stabilization.md`
-4. `phase-1.5-short-foundation.md`
-5. `phase-7-song-intelligence-foundation.md`
-6. `phase-7-song-resolver-evidence.md`
-7. `phase-7-tonal-evidence.md`
-8. `phase-7-elastic-tonal-alignment.md`
-9. `phase-7-resolver-calibration-harness.md`
-10. `phase-7-private-corpus-runner.md`
-11. `phase-7-real-corpus-measurement.md`
-12. `../ResolverBenchmarks/README.md`
-13. `architecture.md`
-14. `mvp-scope.md`
-15. `data-model.md`
-16. `non-goals.md`
-17. `testing-cases.md`
-18. `codex-instructions.md`
-19. `glossary.md`
-20. `../README.md` — historical integrated v1.2 design; use `phases.md` for current implementation status.
+3. `phase-7-consistency-stabilization.md` — **active reliability gate**
+4. `phase-1.1-core-stabilization.md`
+5. `phase-1.5-short-foundation.md`
+6. `phase-7-song-intelligence-foundation.md`
+7. `phase-7-song-resolver-evidence.md`
+8. `phase-7-tonal-evidence.md`
+9. `phase-7-elastic-tonal-alignment.md`
+10. `phase-7-resolver-calibration-harness.md`
+11. `phase-7-private-corpus-runner.md`
+12. `phase-7-real-corpus-measurement.md` — next gate after stabilization
+13. `../ResolverBenchmarks/README.md`
+14. `architecture.md`
+15. `mvp-scope.md`
+16. `data-model.md`
+17. `non-goals.md`
+18. `testing-cases.md`
+19. `codex-instructions.md`
+20. `glossary.md`
+21. `../README.md`
+
+## Active reliability gate
+
+### `phase-7-consistency-stabilization.md`
+
+Cross-cutting correctness before Real Corpus Measurement resumes:
+
+- shared microsecond AVFoundation time conversion;
+- stale async export / Resolver result rejection;
+- legacy Resolver signature correctness;
+- tonal fingerprint collision handling;
+- persisted Song Memory link repair;
+- persisted media-file existence validation;
+- licensed lyrics pointer recovery;
+- serialized camera recording transitions;
+- strict calibration threshold validation;
+- production UI ownership outside the historical ImportExportPoC folder;
+- regression tests, CI, and documentation synchronization.
+
+Completion requires clean CLI compilation, XcodeGen generation, iOS build, full XCTest, review, merge, and green post-merge CI.
 
 ## Reliability and deterministic editing foundations
 
@@ -81,6 +102,8 @@ Merged tonal matching foundation:
 - backwards-compatible fingerprint enrichment
 - explainable tonal score and key-shift evidence
 
+Legacy duration / energy / transient signature equality is not tonal proof.
+
 ### `phase-7-elastic-tonal-alignment.md`
 
 Merged structural-tolerance foundation:
@@ -121,7 +144,7 @@ Merged local real-audio workflow foundation:
 
 ### `phase-7-real-corpus-measurement.md`
 
-Active operational gate:
+**Next operational gate after consistency stabilization:**
 
 - collect a meaningful private corpus of real same-song / different-song relationships
 - include adversarial negatives, not only easy unrelated songs
@@ -203,4 +226,4 @@ TimelineMapper
 TakeLayer Core media processing
 ```
 
-The current implementation phase remains authoritative. Future design documents are not permission to implement later-phase features early.
+The current implementation gate remains authoritative. Future design documents are not permission to implement later-phase features early.

@@ -87,11 +87,23 @@ struct SongResolverEvidenceLibrary: Codable, Equatable, Sendable {
         sourceFileName: String?,
         now: Date = Date()
     ) -> ArrangementAudioFingerprint {
-        if let index = fingerprints.firstIndex(where: {
-            $0.arrangementID == arrangementID && $0.evidence.signature == evidence.signature
+        if let index = fingerprints.firstIndex(where: { existing in
+            guard existing.arrangementID == arrangementID,
+                  existing.evidence.signature == evidence.signature else {
+                return false
+            }
+
+            // The legacy signature intentionally excludes tonal evidence. It is
+            // therefore only safe as a deduplication key when at least one side
+            // is legacy (no tonal data) or both tonal vectors are actually equal.
+            switch (existing.evidence.tonalEvidence, evidence.tonalEvidence) {
+            case (nil, _), (_, nil):
+                return true
+            case (let existingTonal?, let newTonal?):
+                return existingTonal == newTonal
+            }
         }) {
-            // Phase 7 Tonal Evidence upgrades existing local fingerprints in place when
-            // the deterministic legacy signature identifies the same WAV evidence.
+            // Tonal Evidence upgrades a legacy local fingerprint in place.
             if fingerprints[index].evidence.tonalEvidence == nil,
                evidence.tonalEvidence != nil {
                 fingerprints[index].evidence.tonalEvidence = evidence.tonalEvidence

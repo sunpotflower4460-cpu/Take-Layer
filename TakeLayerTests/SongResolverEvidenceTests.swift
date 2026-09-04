@@ -3,7 +3,7 @@ import XCTest
 @testable import TakeLayer
 
 final class SongResolverEvidenceTests: XCTestCase {
-    func testExactFingerprintProducesPerfectEvidenceButDoesNotAutoResolve() throws {
+    func testLegacyExactFingerprintIsHighConfidenceButNotCertainAndDoesNotAutoResolve() throws {
         var songMemory = SongMemoryLibrary()
         let link = songMemory.upsertConfirmedSong(makeSongInput(title: "Re:trip"))
         let vector = makeVector(signature: "exact")
@@ -25,10 +25,58 @@ final class SongResolverEvidenceTests: XCTestCase {
         let candidate = try XCTUnwrap(result.candidates.first)
         XCTAssertEqual(candidate.songID, link.songID)
         XCTAssertEqual(candidate.arrangementID, link.arrangementID)
+        XCTAssertEqual(candidate.confidence, 0.95, accuracy: 0.000_001)
+        XCTAssertNil(result.resolvedSongID)
+        XCTAssertNil(result.resolvedArrangementID)
+        XCTAssertTrue(result.needsUserConfirmation)
+    }
+
+    func testExactFingerprintWithTonalEvidenceCanReachPerfectConfidenceWithoutAutoResolve() throws {
+        var songMemory = SongMemoryLibrary()
+        let link = songMemory.upsertConfirmedSong(makeSongInput(title: "Re:trip"))
+        let vector = makeVector(
+            signature: "exact-tonal",
+            tonal: makeTonalEvidence(baseKey: 0, progression: [0, 5, 7, 0])
+        )
+
+        var evidenceLibrary = SongResolverEvidenceLibrary()
+        let fingerprint = evidenceLibrary.register(
+            arrangementID: try XCTUnwrap(link.arrangementID),
+            evidence: vector,
+            sourceFileName: "retrip.wav"
+        )
+        songMemory.attachFingerprintID(fingerprint.id, to: try XCTUnwrap(link.arrangementID))
+
+        let result = SongResolver.resolve(
+            query: vector,
+            songMemory: songMemory,
+            evidenceLibrary: evidenceLibrary
+        )
+
+        let candidate = try XCTUnwrap(result.candidates.first)
         XCTAssertEqual(candidate.confidence, 1, accuracy: 0.000_001)
         XCTAssertNil(result.resolvedSongID)
         XCTAssertNil(result.resolvedArrangementID)
         XCTAssertTrue(result.needsUserConfirmation)
+    }
+
+    func testSameCoarseSignatureStillComparesTonalEvidence() throws {
+        let stored = makeVector(
+            signature: "coarse-collision",
+            tonal: makeTonalEvidence(baseKey: 0, progression: [0, 5, 7, 0])
+        )
+        let different = makeVector(
+            signature: "coarse-collision",
+            tonal: makeTonalEvidence(baseKey: 0, progression: [0, 3, 8, 10])
+        )
+
+        let evidence = SongResolver.compare(different, stored)
+
+        XCTAssertEqual(evidence.duration, 1, accuracy: 0.000_001)
+        XCTAssertEqual(evidence.energyEnvelope, 1, accuracy: 0.000_001)
+        XCTAssertEqual(evidence.transientEnvelope, 1, accuracy: 0.000_001)
+        XCTAssertLessThan(try XCTUnwrap(evidence.tonal), 1)
+        XCTAssertLessThan(SongResolver.combinedConfidence(evidence), 1)
     }
 
     func testResolverRanksCloserArrangementFirst() throws {
@@ -143,6 +191,33 @@ final class SongResolverEvidenceTests: XCTestCase {
         XCTAssertEqual(library.fingerprints.count, 1)
         XCTAssertNotNil(library.fingerprints.first?.evidence.tonalEvidence)
         XCTAssertEqual(library.fingerprints.first?.sourceFileName, "enriched.wav")
+    }
+
+    func testSameCoarseSignatureWithDifferentTonalEvidenceDoesNotDeduplicate() {
+        let arrangementID = UUID()
+        let firstVector = makeVector(
+            signature: "coarse-collision",
+            tonal: makeTonalEvidence(baseKey: 0, progression: [0, 5, 7, 0])
+        )
+        let secondVector = makeVector(
+            signature: "coarse-collision",
+            tonal: makeTonalEvidence(baseKey: 0, progression: [0, 3, 8, 10])
+        )
+        var library = SongResolverEvidenceLibrary()
+
+        let first = library.register(
+            arrangementID: arrangementID,
+            evidence: firstVector,
+            sourceFileName: "first.wav"
+        )
+        let second = library.register(
+            arrangementID: arrangementID,
+            evidence: secondVector,
+            sourceFileName: "second.wav"
+        )
+
+        XCTAssertNotEqual(first.id, second.id)
+        XCTAssertEqual(library.fingerprints.count, 2)
     }
 
     func testLegacyAudioEvidenceJSONWithoutTonalFieldStillDecodes() throws {

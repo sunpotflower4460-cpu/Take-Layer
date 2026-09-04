@@ -81,18 +81,51 @@ final class CameraRecordingService: NSObject, ObservableObject {
         }
     }
 
-    func startRecording(to url: URL, completion: @escaping (Result<URL, Error>) -> Void) throws {
-        guard isConfigured else { throw CameraRecordingServiceError.sessionNotConfigured }
-        guard !movieFileOutput.isRecording else { throw CameraRecordingServiceError.recordingAlreadyInProgress }
-        guard movieFileOutput.connection(with: .video) != nil else { throw CameraRecordingServiceError.recordingOutputMissing }
+    func startRecording(
+        to url: URL,
+        completion: @escaping (Result<URL, Error>) -> Void
+    ) async throws {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            sessionQueue.async { [weak self] in
+                guard let self else {
+                    continuation.resume(throwing: CameraRecordingServiceError.sessionNotConfigured)
+                    return
+                }
+                guard self.isConfigured else {
+                    continuation.resume(throwing: CameraRecordingServiceError.sessionNotConfigured)
+                    return
+                }
+                guard !self.movieFileOutput.isRecording else {
+                    continuation.resume(throwing: CameraRecordingServiceError.recordingAlreadyInProgress)
+                    return
+                }
+                guard self.movieFileOutput.connection(with: .video) != nil else {
+                    continuation.resume(throwing: CameraRecordingServiceError.recordingOutputMissing)
+                    return
+                }
 
-        finishHandler = completion
-        movieFileOutput.startRecording(to: url, recordingDelegate: self)
+                self.finishHandler = completion
+                self.movieFileOutput.startRecording(to: url, recordingDelegate: self)
+                continuation.resume(returning: ())
+            }
+        }
     }
 
-    func stopRecording() throws {
-        guard movieFileOutput.isRecording else { throw CameraRecordingServiceError.recordingNotInProgress }
-        movieFileOutput.stopRecording()
+    func stopRecording() async throws {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            sessionQueue.async { [weak self] in
+                guard let self else {
+                    continuation.resume(throwing: CameraRecordingServiceError.sessionNotConfigured)
+                    return
+                }
+                guard self.movieFileOutput.isRecording else {
+                    continuation.resume(throwing: CameraRecordingServiceError.recordingNotInProgress)
+                    return
+                }
+                self.movieFileOutput.stopRecording()
+                continuation.resume(returning: ())
+            }
+        }
     }
 
     private func configureSessionOnQueue() throws {
@@ -147,23 +180,26 @@ extension CameraRecordingService: AVCaptureFileOutputRecordingDelegate {
         from connections: [AVCaptureConnection],
         error: Error?
     ) {
-        let completion = finishHandler
-        finishHandler = nil
+        sessionQueue.async { [weak self] in
+            guard let self else { return }
+            let completion = self.finishHandler
+            self.finishHandler = nil
 
-        if let error {
-            let nsError = error as NSError
-            let finishedSuccessfully = nsError.userInfo[AVErrorRecordingSuccessfullyFinishedKey] as? Bool ?? false
-            if !finishedSuccessfully {
-                completion?(.failure(CameraRecordingServiceError.recordingFailed(error.localizedDescription)))
+            if let error {
+                let nsError = error as NSError
+                let finishedSuccessfully = nsError.userInfo[AVErrorRecordingSuccessfullyFinishedKey] as? Bool ?? false
+                if !finishedSuccessfully {
+                    completion?(.failure(CameraRecordingServiceError.recordingFailed(error.localizedDescription)))
+                    return
+                }
+            }
+
+            guard FileManager.default.fileExists(atPath: outputFileURL.path) else {
+                completion?(.failure(CameraRecordingServiceError.savedFileMissing))
                 return
             }
-        }
 
-        guard FileManager.default.fileExists(atPath: outputFileURL.path) else {
-            completion?(.failure(CameraRecordingServiceError.savedFileMissing))
-            return
+            completion?(.success(outputFileURL))
         }
-
-        completion?(.success(outputFileURL))
     }
 }

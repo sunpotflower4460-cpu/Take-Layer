@@ -45,10 +45,6 @@ enum ShortVideoExportError: LocalizedError {
 }
 
 enum ShortVideoExportService {
-    // Microsecond ticks make millisecond user offsets exactly representable
-    // while leaving ample headroom for normal project durations.
-    static let mediaTimescale: CMTimeScale = 1_000_000
-
     static func export(project: ProjectDraft, draft: ShortEditDraft) async throws -> ExportResult {
         guard draft.durationSec > 0, draft.durationSec.isFinite else {
             throw ShortVideoExportError.invalidDraft
@@ -96,24 +92,24 @@ enum ShortVideoExportService {
             throw ShortVideoExportError.missingAudioTrack
         }
 
-        let outputDuration = mediaTime(mapping.outputDurationSec)
+        let outputDuration = MediaTime.make(mapping.outputDurationSec)
         try videoTrack.insertTimeRange(
             CMTimeRange(
-                start: mediaTime(mapping.videoSourceStartSec),
+                start: MediaTime.make(mapping.videoSourceStartSec),
                 duration: outputDuration
             ),
             of: sourceVideoTrack,
             at: .zero
         )
 
-        let audioDuration = mediaTime(mapping.audioInsertDurationSec)
+        let audioDuration = MediaTime.make(mapping.audioInsertDurationSec)
         try audioTrack.insertTimeRange(
             CMTimeRange(
-                start: mediaTime(mapping.audioSourceStartSec),
+                start: MediaTime.make(mapping.audioSourceStartSec),
                 duration: audioDuration
             ),
             of: sourceAudioTrack,
-            at: mediaTime(mapping.audioInsertionTimeSec)
+            at: MediaTime.make(mapping.audioInsertionTimeSec)
         )
 
         let videoComposition = try await makeVideoComposition(
@@ -142,13 +138,6 @@ enum ShortVideoExportService {
         }
 
         return ExportResult(outputURL: outputURL, durationSec: mapping.outputDurationSec)
-    }
-
-    static func mediaTime(_ seconds: Double) -> CMTime {
-        guard seconds.isFinite else { return .invalid }
-        let ticks = (seconds * Double(mediaTimescale)).rounded()
-        guard ticks >= Double(Int64.min), ticks <= Double(Int64.max) else { return .invalid }
-        return CMTime(value: Int64(ticks), timescale: mediaTimescale)
     }
 
     private static func makeVideoComposition(

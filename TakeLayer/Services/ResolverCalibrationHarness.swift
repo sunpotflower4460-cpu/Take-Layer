@@ -2,11 +2,14 @@ import Foundation
 
 enum ResolverCalibrationHarnessError: LocalizedError {
     case unsupportedSchemaVersion(Int)
+    case invalidThreshold(Double)
 
     var errorDescription: String? {
         switch self {
         case .unsupportedSchemaVersion(let version):
             return "Resolver calibration dataset schema version \(version) is not supported."
+        case .invalidThreshold(let threshold):
+            return "Resolver calibration threshold must be finite and between 0 and 1: \(threshold)"
         }
     }
 }
@@ -40,6 +43,11 @@ enum ResolverCalibrationHarness {
         guard dataset.schemaVersion == ResolverCalibrationDataset.currentSchemaVersion else {
             throw ResolverCalibrationHarnessError.unsupportedSchemaVersion(dataset.schemaVersion)
         }
+        for threshold in thresholds {
+            guard threshold.isFinite, threshold >= 0, threshold <= 1 else {
+                throw ResolverCalibrationHarnessError.invalidThreshold(threshold)
+            }
+        }
 
         let observations = dataset.cases.map { benchmarkCase -> ResolverCalibrationObservation in
             let evidence = SongResolver.compare(
@@ -70,9 +78,7 @@ enum ResolverCalibrationHarness {
             confidenceGap = nil
         }
 
-        let normalizedThresholds = Array(
-            Set(thresholds.map { min(1, max(0, $0)) })
-        ).sorted()
+        let normalizedThresholds = Array(Set(thresholds)).sorted()
 
         return ResolverCalibrationReport(
             datasetName: dataset.name,

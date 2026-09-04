@@ -4,27 +4,36 @@ DAWで音を作る人のための、演奏動画アセンブラー。
 
 **スマホで撮った演奏を、DAW完成音源つきの動画に整える。**
 
-TakeLayerは、DAWで仕上げた完成WAVをReference Performance Anchorとして、撮りっぱなしの演奏動画を共通のProject Timelineへ並べ、同期・トリム・書き出しを安全に行うiOS-firstアプリです。
+TakeLayerは、DAWで仕上げた完成WAVをReference Performance Anchorとして、撮りっぱなしの演奏動画を共通のProject Timelineへ並べ、同期・トリム・ショート編集・書き出しを安全に行うiOS-firstアプリです。
 
-将来的には、この同期コアの上に、曲を覚え、歌詞や見せ場を理解し、複数のショート動画編集案を提案し、ユーザーの承認や修正から好みを学ぶ **AI Music Video Director** を構築します。
+将来的には、この決定論的な同期・レンダリングコアの上に、曲を覚え、歌詞や見せ場を理解し、複数のショート動画編集案を提案し、ユーザーの承認や修正から好みを学ぶ **AI Music Video Director** を構築します。
 
 ---
 
 ## Current status
 
-As of 2026-08-31:
+As of 2026-09-04, `main` already contains:
 
-- Phase 0.5A Import-first Export PoC: merged
-- Phase 0.5B Recording PoC: merged
-- Phase 1 MVP-α: merged on `main`
-- **Phase 1.1 Core Stabilization: current reliability gate**
+- Phase 0.5A Import-first Export PoC
+- Phase 0.5B Recording PoC
+- Phase 1 MVP-α
+- Phase 1.1 Core Stabilization
+- Phase 1.5 Short Foundation
+- Phase 7 Song Intelligence Foundation
+- Phase 7 Song Resolver Evidence Foundation
+- Phase 7 Tonal Evidence Foundation
+- Phase 7 Elastic Tonal Alignment
+- Phase 7 Resolver Calibration Harness
+- Phase 7 Private Corpus Runner
 
-Phase 1.1 exists before further feature expansion because the TakeLayer Core must be deterministic, buildable, testable, and persistent before AI or multi-part editing depends on it.
+The active reliability gate is **Phase 7 Consistency Stabilization** on `phase-7-consistency-stabilization` / PR #15.
+
+Real Corpus Measurement is intentionally paused until this cross-cutting gate is green. The purpose is to make export timing, Song Memory, Resolver evidence, persistence, recording, calibration tooling, shared UI, and CI agree on the same invariants before real-audio benchmark results are used to choose the next Resolver step.
 
 See:
 
 - `docs/phases.md`
-- `docs/phase-1.1-core-stabilization.md`
+- `docs/phase-7-consistency-stabilization.md`
 - `docs/README.md`
 
 ---
@@ -62,7 +71,7 @@ completed WAV
  ↓
 TakeLayer
  ↓
-performance video
+performance video / short video
 ```
 
 ### TimelineMapper is authoritative
@@ -73,7 +82,7 @@ All raw-video ↔ Project Timeline ↔ completed-WAV mapping goes through:
 TakeLayer/Services/TimelineMapper.swift
 ```
 
-Do not duplicate synchronization arithmetic inside rendering, UI, short-video logic, or future AI code.
+Do not duplicate synchronization arithmetic inside rendering, UI, short-video logic, Resolver logic, or future AI code.
 
 Manual offset convention:
 
@@ -81,6 +90,14 @@ Manual offset convention:
 offsetMs > 0  = completed WAV delayed relative to video
 offsetMs < 0  = completed WAV advanced relative to video
 ```
+
+AVFoundation time conversion should use the shared microsecond-resolution `MediaTime` boundary so millisecond user corrections survive rendering.
+
+### Human confirmation remains authoritative
+
+Song Resolver produces candidates and evidence. It does **not** silently adopt a Song or Arrangement.
+
+User-confirmed song metadata and formal lyrics outrank analysis estimates and future provider candidates.
 
 ### Non-destructive by default
 
@@ -90,45 +107,7 @@ TakeLayer must not remove musical silence merely because a section is quiet.
 
 ---
 
-## Phase 1.1
-
-Phase 1.1 stabilizes the merged MVP-α.
-
-Implemented direction:
-
-- authoritative `TimelineMapper`
-- real `offsetMs` application during export
-- trim-aware completed-WAV mapping
-- pre-roll handling without silent sync breakage
-- shared mapping for validation and rendering
-- XcodeGen project definition
-- GitHub Actions iOS build + XCTest
-- timeline regression tests
-- local Project persistence
-- serialized camera-session configuration/start/stop
-- current async AVAssetExportSession export path
-
-No AI features are introduced in this phase.
-
----
-
-## Generate the Xcode project
-
-The repository uses `project.yml` as the reproducible project definition.
-
-```bash
-brew install xcodegen
-xcodegen generate
-open TakeLayer.xcodeproj
-```
-
-The generated `TakeLayer.xcodeproj` is intentionally not committed.
-
-CI performs the same generation step before building and testing.
-
----
-
-## Current Phase 1 workflow
+## Implemented workflow
 
 ```text
 Create / restore Project
@@ -148,9 +127,55 @@ Adjust manual offset
 TimelineMapper validation
         ↓
 Single-screen MP4 export
+        ↓
+Optional deterministic 9:16 Short editing
+        ↓
+Song Memory / Resolver evidence reuse with human confirmation
 ```
 
-The camera audio remains useful as future synchronization evidence, while the completed WAV is the primary program audio for the Phase 1 export.
+The camera audio is retained as useful evidence, while the completed WAV is the program audio for the current deterministic export path.
+
+---
+
+## Current stabilization gate
+
+Phase 7 Consistency Stabilization repairs cross-cutting defects without adding new AI behavior.
+
+Current scope includes:
+
+- shared microsecond AVFoundation time conversion for normal and Short exports;
+- stale async export / Resolver result rejection;
+- legacy coarse Resolver signature correctness;
+- tonal fingerprint collision handling;
+- persisted Song Memory link repair;
+- persisted media-file existence validation;
+- licensed-lyrics pointer recovery after confirmed-lyrics removal;
+- serialized camera recording operations and cancellable delayed tasks;
+- strict calibration threshold validation;
+- active UI extraction from the historical ImportExportPoC folder;
+- regression tests and repository-status synchronization.
+
+Completion requires a clean XcodeGen generation, CLI compile, iOS simulator build, full XCTest suite, review, merge, and green post-merge CI.
+
+See `docs/phase-7-consistency-stabilization.md`.
+
+---
+
+## Generate the Xcode project
+
+The repository uses `project.yml` as the reproducible project definition.
+
+```bash
+brew install xcodegen
+xcodegen generate
+open TakeLayer.xcodeproj
+```
+
+The generated `TakeLayer.xcodeproj` is intentionally not committed.
+
+CI performs the same generation step before building and testing.
+
+The historical `TakeLayer/Features/ImportExportPoC/` source remains in the repository for reference but is excluded from the active app target. Production workflow components live outside that legacy folder.
 
 ---
 
@@ -178,61 +203,42 @@ Generative AI must never become the source of truth for synchronization.
 
 ## Near-term roadmap
 
-### Phase 1.1 — Core Stabilization
+### Now — Phase 7 Consistency Stabilization
 
-Make the existing one-video core reliable.
+Make the already-merged system internally consistent and fully green.
 
-### Phase 1.5 — Short Foundation
+### Next — Phase 7 Real Corpus Measurement
 
-Before adding multi-part complexity, prove the primitives required for a high-quality one-video short:
+After stabilization merges:
 
-- 9:16 canvas
-- manual short extraction
-- title layer
-- user-supplied lyric layer
-- subtitle renderer
-- deterministic crop / zoom / pan plan
-- preview → micro-adjustment → export
+- collect meaningful private real-audio relationships;
+- include same Arrangement, same Song / different Arrangement, and adversarial different-Song negatives;
+- run the merged calibration tooling;
+- inspect per-case false positives / false negatives;
+- choose the next Resolver gate from observed failure classes rather than speculative complexity.
 
-### Song Intelligence
+### Later — AI Short Director
 
-Later:
+- 3–5 meaningful edit proposals;
+- performer-aware crop;
+- lyric alignment;
+- title / effect / zoom proposals;
+- Natural / Cinematic / Lyric Focus / Social Hook / Minimal variants;
+- deterministic EditingPlan renderer.
 
-- SongIdentity / SongProfile
-- same-song recognition
-- formal lyrics memory
-- metadata candidates
-- section / hook understanding
+### Later — Preference Learning
 
-### AI Short Director
+- approval / rejection;
+- edit-delta learning;
+- song-specific and context-aware user preferences;
+- explainable memory and reset controls.
 
-Later:
+### Later — Multi-part AI Director
 
-- 3–5 meaningful edit proposals
-- performer-aware crop
-- lyric alignment
-- title / effect / zoom proposals
-- Natural / Cinematic / Lyric Focus / Social Hook / Minimal variants
-- deterministic EditingPlan renderer
-
-### Preference Learning
-
-Later:
-
-- approval / rejection
-- edit-delta learning
-- song-specific preferences
-- context-aware user-wide preferences
-- explainable memory
-
-### Multi-part AI Director
-
-Later:
-
-- multiple synchronized performance videos
-- Part Salience
-- musically sensible camera switching
-- section-aware layouts
+- multiple synchronized performance videos;
+- Part Salience;
+- musically sensible camera switching;
+- section-aware layouts.
 
 See `docs/phases.md` for the detailed roadmap.
 
@@ -242,15 +248,22 @@ See `docs/phases.md` for the detailed roadmap.
 
 Start here:
 
-- `AGENTS.md` — rules for coding agents and phase discipline
+- `AGENTS.md` — coding-agent rules and active-gate discipline
 - `docs/README.md` — documentation map
+- `docs/phases.md` — implementation roadmap and current status
+- `docs/phase-7-consistency-stabilization.md` — active reliability gate
 - `docs/architecture.md` — current core architecture
-- `docs/phases.md` — implementation roadmap
-- `docs/phase-1.1-core-stabilization.md` — current reliability phase
-- `docs/data-model.md` — core conceptual data model
-- `docs/testing-cases.md` — important musical edge cases
-- `docs/ai-director-vision.md` — long-term AI Director product architecture
-- `docs/song-memory-feedback.md` — approval/edit-delta learning design
+- `docs/phase-1.1-core-stabilization.md` — deterministic core foundation
+- `docs/phase-1.5-short-foundation.md` — one-video Short substrate
+- `docs/phase-7-song-intelligence-foundation.md` — Song Memory foundation
+- `docs/phase-7-song-resolver-evidence.md` — Resolver evidence foundation
+- `docs/phase-7-tonal-evidence.md` — tonal evidence
+- `docs/phase-7-elastic-tonal-alignment.md` — structural tonal alignment
+- `docs/phase-7-resolver-calibration-harness.md` — calibration measurement
+- `docs/phase-7-private-corpus-runner.md` — private real-audio runner
+- `docs/phase-7-real-corpus-measurement.md` — next operational gate after stabilization
+- `docs/ai-director-vision.md` — long-term AI Director architecture
+- `docs/song-memory-feedback.md` — future approval/edit-delta learning design
 - `docs/ai-director-data-model.md` — future AI data model
 
 ---
@@ -259,17 +272,15 @@ Start here:
 
 Current core:
 
-- Swift
-- SwiftUI
+- Swift / SwiftUI
 - AVFoundation
-- Accelerate / vDSP for later deterministic audio analysis
-- local Project persistence
+- local JSON persistence boundaries
 - XcodeGen
 - XCTest / GitHub Actions
+- deterministic audio evidence extraction
+- CryptoKit for local evidence signatures / benchmark identifiers
 
-Future persistence may move toward SwiftData as Song Memory and richer project relationships are introduced.
-
-FFmpegKit is not a core dependency.
+Accelerate / vDSP may be used when stronger signal processing is explicitly justified. SwiftData remains a future persistence target. FFmpegKit is not a core dependency.
 
 ---
 
