@@ -2,9 +2,9 @@
 
 ## Status
 
-**Next operational gate after Phase 7 Consistency Stabilization. Currently paused.**
+**Active operational gate as of 2026-09-04.**
 
-The Private Corpus Runner is already merged on `main`, but real-corpus measurement is intentionally paused while PR #15 repairs cross-cutting correctness and repository consistency. Resume this gate only after consistency stabilization is merged and the post-merge `main` CI run is green.
+Phase 7 Consistency Stabilization was merged via PR #15, and the squash-merged `main` commit `5bde5a41d2aedaefcae43e616bc130e38731a8ad` passed post-merge CI #93 including Resolver CLI compilation, iOS build, and the full XCTest suite.
 
 This gate is intentionally **data collection and measurement**, not a new Resolver algorithm implementation.
 
@@ -16,26 +16,18 @@ The question for this gate is not "How can Resolver become more complex?" It is:
 
 > Where does the current Resolver actually fail on real music?
 
-## Prerequisites merged on `main`
+## Prerequisites merged and green on `main`
 
 - human-confirmed Song Memory,
 - Resolver Evidence Foundation,
 - Tonal Evidence Foundation,
 - Elastic Tonal Alignment,
 - Resolver Calibration Harness,
-- Private Corpus Runner.
+- Private Corpus Runner,
+- Phase 7 Consistency Stabilization,
+- green post-merge `main` CI after PR #15.
 
-## Additional resume prerequisite
-
-Before collecting evidence that will influence the next Resolver gate:
-
-- Phase 7 Consistency Stabilization must be merged,
-- CLI compilation must be green,
-- iOS build must be green,
-- full XCTest must be green,
-- post-merge `main` CI must be green.
-
-See `phase-7-consistency-stabilization.md`.
+See `phase-7-consistency-stabilization.md` for the completed reliability gate.
 
 ## Private corpus location
 

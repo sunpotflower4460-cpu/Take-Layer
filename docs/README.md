@@ -6,16 +6,16 @@ Read these first when working on the active TakeLayer implementation.
 
 1. `../AGENTS.md`
 2. `phases.md`
-3. `phase-7-consistency-stabilization.md` — **active reliability gate**
-4. `phase-1.1-core-stabilization.md`
-5. `phase-1.5-short-foundation.md`
-6. `phase-7-song-intelligence-foundation.md`
-7. `phase-7-song-resolver-evidence.md`
-8. `phase-7-tonal-evidence.md`
-9. `phase-7-elastic-tonal-alignment.md`
-10. `phase-7-resolver-calibration-harness.md`
-11. `phase-7-private-corpus-runner.md`
-12. `phase-7-real-corpus-measurement.md` — next gate after stabilization
+3. `phase-7-real-corpus-measurement.md` — **active operational gate**
+4. `phase-7-consistency-stabilization.md` — completed reliability gate
+5. `phase-1.1-core-stabilization.md`
+6. `phase-1.5-short-foundation.md`
+7. `phase-7-song-intelligence-foundation.md`
+8. `phase-7-song-resolver-evidence.md`
+9. `phase-7-tonal-evidence.md`
+10. `phase-7-elastic-tonal-alignment.md`
+11. `phase-7-resolver-calibration-harness.md`
+12. `phase-7-private-corpus-runner.md`
 13. `../ResolverBenchmarks/README.md`
 14. `architecture.md`
 15. `mvp-scope.md`
@@ -26,11 +26,30 @@ Read these first when working on the active TakeLayer implementation.
 20. `glossary.md`
 21. `../README.md`
 
-## Active reliability gate
+## Active operational gate
+
+### `phase-7-real-corpus-measurement.md`
+
+Measure the current merged Resolver on a meaningful private real-audio corpus:
+
+- same Arrangement positives;
+- same Song / different Arrangement positives;
+- difficult different-Song negatives;
+- adversarial negatives with similar artist/instrumentation/key/BPM/chord movement;
+- per-case evidence review;
+- false-positive / false-negative classification;
+- confidence-gap and threshold-metric inspection;
+- next technical gate chosen from repeated observed failures.
+
+Do not auto-select production thresholds, auto-link Song Memory, upload private WAVs, or add Resolver complexity without empirical justification.
+
+See `../ResolverBenchmarks/README.md` for the local corpus layout and runner command.
+
+## Completed reliability gate
 
 ### `phase-7-consistency-stabilization.md`
 
-Cross-cutting correctness before Real Corpus Measurement resumes:
+Merged cross-cutting correctness repairs:
 
 - shared microsecond AVFoundation time conversion;
 - stale async export / Resolver result rejection;
@@ -38,13 +57,13 @@ Cross-cutting correctness before Real Corpus Measurement resumes:
 - tonal fingerprint collision handling;
 - persisted Song Memory link repair;
 - persisted media-file existence validation;
-- licensed lyrics pointer recovery;
+- formal-lyrics authority and licensed lyrics recovery;
 - serialized camera recording transitions;
 - strict calibration threshold validation;
 - production UI ownership outside the historical ImportExportPoC folder;
 - regression tests, CI, and documentation synchronization.
 
-Completion requires clean CLI compilation, XcodeGen generation, iOS build, full XCTest, review, merge, and green post-merge CI.
+PR #15 was squash-merged and its merged `main` commit passed post-merge CI #93 including CLI compilation, iOS build, and full XCTest.
 
 ## Reliability and deterministic editing foundations
 
@@ -144,7 +163,7 @@ Merged local real-audio workflow foundation:
 
 ### `phase-7-real-corpus-measurement.md`
 
-**Next operational gate after consistency stabilization:**
+**Active operational gate:**
 
 - collect a meaningful private corpus of real same-song / different-song relationships
 - include adversarial negatives, not only easy unrelated songs
