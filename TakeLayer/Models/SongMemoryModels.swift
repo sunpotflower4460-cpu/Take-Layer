@@ -316,14 +316,6 @@ struct SongMemoryLibrary: Codable, Equatable {
         return ProjectSongMemoryLink(songID: songID, arrangementID: arrangementID, linkedAt: now)
     }
 
-    mutating func attachFingerprintID(_ fingerprintID: UUID, to arrangementID: UUID) {
-        guard let index = arrangements.firstIndex(where: { $0.id == arrangementID }) else { return }
-        let value = fingerprintID.uuidString
-        guard !arrangements[index].fingerprintIDs.contains(value) else { return }
-        arrangements[index].fingerprintIDs.append(value)
-        arrangements[index].updatedAt = Date()
-    }
-
     private func optionalTrimmed(_ value: String) -> String? {
         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.isEmpty ? nil : trimmed
