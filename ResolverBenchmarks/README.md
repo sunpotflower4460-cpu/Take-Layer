@@ -44,12 +44,16 @@ bash tools/run-resolver-calibration.sh \
   --thresholds 0.50,0.60,0.70,0.80,0.90,0.95
 ```
 
+Before any audio evidence extraction begins, the runner preflights the full manifest: effective case IDs, path confinement, file existence, and WAV extension are validated for every case. A later bad path therefore fails before earlier valid cases spend time on signal analysis.
+
+Within one dataset build, each resolved WAV URL is analyzed at most once. If the same studio/master/live file appears in many labeled pairs, its `AudioEvidenceVector` is cached in memory and reused for every case in that run.
+
 The command compiles a small macOS developer CLI from the same Resolver / Evidence code used by the app, then writes:
 
 - `derived-dataset.json` — derived `AudioEvidenceVector` values only,
 - `report.json` — labeled confidence distributions, evidence components, and threshold metrics.
 
-Raw WAV bytes are never serialized into either output.
+Raw WAV bytes are never serialized into either output. The in-memory evidence cache is per run only; it does not create a persistent audio cache outside the private benchmark workflow.
 
 ## Manifest labels
 

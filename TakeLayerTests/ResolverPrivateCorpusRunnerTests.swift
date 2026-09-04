@@ -111,6 +111,97 @@ final class ResolverPrivateCorpusRunnerTests: XCTestCase {
         }
     }
 
+    func testAllCasePathsArePreflightedBeforeEvidenceExtractionStarts() throws {
+        let root = try makeTemporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+        try Data([0]).write(to: root.appendingPathComponent("a.wav"))
+        try Data([0]).write(to: root.appendingPathComponent("b.wav"))
+
+        let manifest = ResolverPrivateCorpusManifest(
+            name: "preflight",
+            cases: [
+                ResolverPrivateCorpusManifestCase(
+                    name: "valid first case",
+                    relationship: .sameArrangement,
+                    queryPath: "a.wav",
+                    referencePath: "b.wav"
+                ),
+                ResolverPrivateCorpusManifestCase(
+                    name: "missing later case",
+                    relationship: .differentSong,
+                    queryPath: "a.wav",
+                    referencePath: "missing.wav"
+                )
+            ]
+        )
+
+        var extractionCount = 0
+        XCTAssertThrowsError(
+            try ResolverPrivateCorpusRunner.buildDataset(
+                manifest: manifest,
+                corpusRoot: root,
+                evidenceExtractor: { url in
+                    extractionCount += 1
+                    return stubEvidence(for: url)
+                }
+            )
+        ) { error in
+            guard case ResolverPrivateCorpusRunnerError.missingFile(let path) = error else {
+                return XCTFail("Unexpected error: \(error)")
+            }
+            XCTAssertEqual(path, "missing.wav")
+        }
+        XCTAssertEqual(extractionCount, 0)
+    }
+
+    func testRepeatedWAVReferencesAreExtractedOnlyOncePerDatasetBuild() throws {
+        let root = try makeTemporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+        for name in ["a.wav", "b.wav", "c.wav"] {
+            try Data([0]).write(to: root.appendingPathComponent(name))
+        }
+
+        let manifest = ResolverPrivateCorpusManifest(
+            name: "cache",
+            cases: [
+                ResolverPrivateCorpusManifestCase(
+                    name: "a vs b",
+                    relationship: .sameArrangement,
+                    queryPath: "a.wav",
+                    referencePath: "b.wav"
+                ),
+                ResolverPrivateCorpusManifestCase(
+                    name: "a vs c",
+                    relationship: .sameSongDifferentArrangement,
+                    queryPath: "a.wav",
+                    referencePath: "c.wav"
+                ),
+                ResolverPrivateCorpusManifestCase(
+                    name: "b vs a",
+                    relationship: .differentSong,
+                    queryPath: "b.wav",
+                    referencePath: "a.wav"
+                )
+            ]
+        )
+
+        var extractionCounts: [String: Int] = [:]
+        let dataset = try ResolverPrivateCorpusRunner.buildDataset(
+            manifest: manifest,
+            corpusRoot: root,
+            evidenceExtractor: { url in
+                extractionCounts[url.lastPathComponent, default: 0] += 1
+                return stubEvidence(for: url)
+            }
+        )
+
+        XCTAssertEqual(dataset.cases.count, 3)
+        XCTAssertEqual(extractionCounts["a.wav"], 1)
+        XCTAssertEqual(extractionCounts["b.wav"], 1)
+        XCTAssertEqual(extractionCounts["c.wav"], 1)
+        XCTAssertEqual(extractionCounts.values.reduce(0, +), 3)
+    }
+
     private func manifestWith(queryPath: String, referencePath: String) -> ResolverPrivateCorpusManifest {
         ResolverPrivateCorpusManifest(
             name: "paths",
@@ -122,6 +213,18 @@ final class ResolverPrivateCorpusRunnerTests: XCTestCase {
                     referencePath: referencePath
                 )
             ]
+        )
+    }
+
+    private func stubEvidence(for url: URL) -> AudioEvidenceVector {
+        AudioEvidenceVector(
+            durationSec: 1,
+            sampleRate: 48_000,
+            channelCount: 1,
+            energyEnvelope: Array(repeating: 0.0, count: AudioEvidenceVector.bucketCount),
+            transientEnvelope: Array(repeating: 0.0, count: AudioEvidenceVector.bucketCount),
+            signature: url.lastPathComponent,
+            tonalEvidence: nil
         )
     }
 
