@@ -321,7 +321,7 @@ struct ShortFoundationView: View {
             songStartRawSec: songStartRawSec
         )
         player.seek(
-            to: CMTime(seconds: max(0, rawSec), preferredTimescale: 600),
+            to: MediaTime.make(max(0, rawSec)),
             toleranceBefore: .zero,
             toleranceAfter: .zero
         )
