@@ -1,0 +1,17 @@
+name: Core Boundary
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  core-boundary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Core import boundary and TimelineMapper authority
+        run: bash tools/check-core-boundary.sh

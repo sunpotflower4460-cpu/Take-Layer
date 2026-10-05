@@ -1,0 +1,20 @@
+# TakeLayerCore: single source of truth for the Core file list.
+# One repo-relative path per line. Referenced by Package.swift (sources must
+# match this list minus the "TakeLayer/" prefix) and tools/check-core-boundary.sh.
+# Rule: imports limited to Foundation / CryptoKit; no UI/AV/render type names;
+# every type referenced must be declared inside this list.
+# See docs/artist-os-core-boundary.md.
+TakeLayer/Models/ExportSettings.swift
+TakeLayer/Models/ImportedMasterAudio.swift
+TakeLayer/Models/ImportedVideo.swift
+TakeLayer/Models/ProjectDraft.swift
+TakeLayer/Models/RecordedTake.swift
+TakeLayer/Models/ResolverCalibrationModels.swift
+TakeLayer/Models/ResolverPrivateCorpusModels.swift
+TakeLayer/Models/ShortEditDraft.swift
+TakeLayer/Models/SongMemoryModels.swift
+TakeLayer/Models/SongResolverEvidenceModels.swift
+TakeLayer/Services/ExportValidationService.swift
+TakeLayer/Services/SongResolver.swift
+TakeLayer/Services/TimelineMapper.swift
+TakeLayer/Utilities/TimeFormatting.swift
