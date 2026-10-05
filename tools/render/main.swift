@@ -13,6 +13,7 @@ usage:
   take-layer-render --help
   take-layer-render render --request <request.json> --result <result.json>
   take-layer-render self-test --workdir <dir> [--result <result.json>]
+  take-layer-render make-fixtures --workdir <dir> --result <fixtures.json>   (synthetic 8 s video + 10 s WAV, for integration tests)
 """
 
 func argValue(_ flag: String, in args: [String]) -> String? {
@@ -57,6 +58,26 @@ Task {
         let result = await RenderPipeline.selfTest(workDir: URL(fileURLWithPath: workdir, isDirectory: true))
         emit(result, to: argValue("--result", in: args))
         code = result.status == "completed" ? 0 : 3
+    case "make-fixtures":
+        guard let workdir = argValue("--workdir", in: args), let resultPath = argValue("--result", in: args) else { print(usage); exit(2) }
+        do {
+            let dir = URL(fileURLWithPath: workdir, isDirectory: true)
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            let video = dir.appendingPathComponent("fixture-video.mp4")
+            let wav = dir.appendingPathComponent("fixture-master.wav")
+            try await SelfTestMedia.makeVideo(at: video, seconds: 8, width: 640, height: 360, fps: 30)
+            try SelfTestMedia.makeWav(at: wav, seconds: 10)
+            let info: [String: Any] = [
+                "videoPath": video.path, "wavPath": wav.path,
+                "videoSha256": try Hashing.sha256Hex(of: video), "wavSha256": try Hashing.sha256Hex(of: wav),
+                "videoDurationSec": 8, "wavDurationSec": 10, "videoWidth": 640, "videoHeight": 360, "wavSampleRate": 48000,
+            ]
+            try JSONSerialization.data(withJSONObject: info, options: [.sortedKeys]).write(to: URL(fileURLWithPath: resultPath), options: .atomic)
+            code = 0
+        } catch {
+            FileHandle.standardError.write(Data("make-fixtures failed: \(error.localizedDescription)\n".utf8))
+            code = 3
+        }
     default:
         print(usage)
     }
