@@ -256,6 +256,8 @@ enum ShortVideoExportService {
         layer.shadowOffset = CGSize(width: 0, height: 3)
         layer.contentsScale = 2
         layer.isWrapped = true
+        // The headless renderer has no run loop to commit/display layers, so rasterise the text now.
+        layer.displayIfNeeded()
         return layer
     }
 

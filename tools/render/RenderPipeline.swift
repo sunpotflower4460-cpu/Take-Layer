@@ -124,7 +124,19 @@ enum RenderPipeline {
                 timeline: .init(songStartRawSec: 1, songStartAudioSec: 0, offsetMs: 0),
                 outputPath: workDir.appendingPathComponent("selftest-output-\(key).mp4").path
             )
-            return await run(request)
+            var result = await run(request)
+            // The self-test edit has a title, so text that is missing from the pixels is a render failure.
+            if result.status == "completed", let output = result.outputPath {
+                let spread = try await RenderValidator.titleBandContrast(URL(fileURLWithPath: output), atSec: 1.0)
+                let ok = spread >= 60
+                result.checks.append(RenderCheck(name: "title_text_rendered", ok: ok, detail: "title band luminance spread \(spread) (>= 60 when text is burned in)"))
+                if !ok {
+                    result.status = "failed"
+                    result.errorCode = "RENDER_QUALITY_FAILED"
+                    result.errorMessage = "title_text_rendered: the title text is not present in the rendered frames"
+                }
+            }
+            return result
         } catch {
             return failure(nil, key: key, code: "SELF_TEST_SETUP_FAILED", error.localizedDescription)
         }

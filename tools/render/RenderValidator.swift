@@ -1,4 +1,5 @@
 import AVFoundation
+import CoreGraphics
 import CryptoKit
 import Foundation
 
@@ -50,6 +51,27 @@ enum RenderValidator {
         return OutputFacts(durationSec: duration, width: width, height: height, fps: fps,
                            hasVideo: !videoTracks.isEmpty, hasAudio: !audioTracks.isEmpty,
                            audioTrackCount: audioTracks.count, sizeBytes: size)
+    }
+
+
+    /// Frame-level check that burned-in text is really in the pixels (an export can "complete" with the
+    /// text layers silently missing: valid duration, size and tracks, no title). Samples one frame and
+    /// measures the luminance spread inside the title band, which is flat when the source video is flat
+    /// (the synthetic self-test video) and is only wide when white title text with a shadow was drawn.
+    static func titleBandContrast(_ url: URL, atSec: Double) async throws -> Int {
+        let generator = AVAssetImageGenerator(asset: AVURLAsset(url: url))
+        generator.appliesPreferredTrackTransform = true
+        let image = try await generator.image(at: CMTime(seconds: atSec, preferredTimescale: 600)).image
+        let w = 270, h = 480                       // 1080x1920 scaled by 1/4
+        var pixels = [UInt8](repeating: 0, count: w * h)
+        guard let context = CGContext(data: &pixels, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w,
+                                      space: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGImageAlphaInfo.none.rawValue)
+        else { return 0 }
+        context.draw(image, in: CGRect(x: 0, y: 0, width: w, height: h))
+        // The title layer sits 120...300 px below the top edge: rows 30...75 in the scaled bitmap.
+        var lo = 255, hi = 0
+        for row in 30..<75 { for col in 0..<w { let v = Int(pixels[row * w + col]); lo = min(lo, v); hi = max(hi, v) } }
+        return hi - lo
     }
 
     static func checks(facts: OutputFacts, expectedDurationSec: Double, expectedSize: CGSize) -> [RenderCheck] {
