@@ -10,6 +10,16 @@ App/UI  ->  Rendering  ->  Analysis  ->  Core
 
 Core = Foundation / CryptoKit only. Analysis = AVFoundation, no UI. Rendering = AVFoundation + CoreAnimation/CoreGraphics (and today UIKit). UI = SwiftUI/UIKit/AppKit.
 
+> ## Update — Mac proof phase (supersedes the "UNVERIFIED / not done" parts below)
+>
+> Executed on GitHub-hosted macOS (`macos-latest`, Xcode 26.6, Swift 6.3.3) by `.github/workflows/macos-core.yml`; **this is `CI_MACOS`, not the user's own Mac** (see `docs/artist-os/mac-proof.md`).
+>
+> - `swift build --target TakeLayerCore`: **compiles** (15 files; `ExportResult` moved into Core).
+> - **UIKit is gone from the render path**: `import UIKit` removed from `ShortVideoExportService.swift` and `VideoExportService.swift`; the two `UIColor` uses are `CGColor(gray:alpha:)`. `tools/check-core-boundary.sh` now also fails if a Rendering file (`tools/rendering-files.txt`) mentions UIKit/SwiftUI/AppKit.
+> - **Layering is by file list**: Core = `tools/core-files.txt`; Rendering = `tools/rendering-files.txt` (+ `tools/render/*` CLI). Direction is UI → Rendering → Core. Types are still module-internal, so Rendering is compiled *together with* Core (`tools/build-render-cli.sh`), not as a separate SwiftPM module; making Core `public` is a separate migration.
+> - **TimelineMapper authority**: the headless renderer calls `TimelineMapper.makeMapping(project:projectTimelineStartSec:durationSec:)` from the same source file the iOS app compiles. The existing `TimelineMapperTests` + `ShortFoundationTests` run unchanged on macOS (22 tests) through `tools/swiftpm-short` (symlinks, no copies; the only edit is a `canImport(TakeLayer)` guard on the `@testable import`).
+> - **Headless renderer** `take-layer-render` (`render`, `self-test`, `make-fixtures`): `RenderEditPlanRequest` is a thin projection of `ShortEditDraft` (range, zoom, focusX/Y, title, lyric cues) + `songStartRawSec/songStartAudioSec/offsetMs`. Output is written as `<out>.partial.mp4` → validated → atomically renamed → `<out>.commit.json` last.
+
 ## 1. Layer map (all 44 Swift files)
 
 Method: imports by grep (`import` lines), then type-usage dependencies by scanning every capitalized identifier against all type declarations (struct/enum/class/protocol/typealias/actor) in the tree. Comments and string literals are ignored.
