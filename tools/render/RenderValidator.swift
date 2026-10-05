@@ -26,6 +26,10 @@ struct OutputFacts {
 /// Render Quality Validation v1: exists, non-zero, readable container, duration range,
 /// dimensions, fps, audio+video track, hash.
 enum RenderValidator {
+    static func probeDuration(_ url: URL) async throws -> Double {
+        try await AVURLAsset(url: url).load(.duration).seconds
+    }
+
     static func inspect(_ url: URL) async throws -> OutputFacts {
         let attrs = try FileManager.default.attributesOfItem(atPath: url.path)
         let size = (attrs[.size] as? NSNumber)?.int64Value ?? 0

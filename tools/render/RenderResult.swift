@@ -37,9 +37,22 @@ struct RenderCommitMarker: Codable, Equatable {
     var requestKey: String
     var contentHash: String
     var sizeBytes: Int64
+    var durationSec: Double
+    var width: Int
+    var height: Int
+    var fps: Double
+    var renderer: String
+    var rendererVersion: String
+    var audioSource: String
+    var checks: [RenderCheck]
+    var committedAt: String
 }
 
 let renderToolVersion = "1"
 
 func markerURL(forOutput path: String) -> URL { URL(fileURLWithPath: path + ".commit.json") }
-func partialURL(forOutput path: String) -> URL { URL(fileURLWithPath: path + ".partial") }
+/// AVFoundation infers the container from the extension, so the partial file must also end in ".mp4".
+func partialURL(forOutput path: String) -> URL {
+    let base = path.hasSuffix(".mp4") ? String(path.dropLast(4)) : path
+    return URL(fileURLWithPath: base + ".partial.mp4")
+}

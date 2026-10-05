@@ -28,6 +28,16 @@ enum RenderPipeline {
             }
         } catch { return failure(request, key: key, code: "SOURCE_MISSING", "cannot read source: \(error.localizedDescription)") }
 
+        // The declared durations feed TimelineMapper; refuse if the real files disagree.
+        do {
+            for (name, source) in [("video", request.video), ("masterAudio", request.masterAudio)] {
+                let actual = try await RenderValidator.probeDuration(URL(fileURLWithPath: source.localPath))
+                if abs(actual - source.durationSec) > 0.1 {
+                    return failure(request, key: key, code: "SOURCE_FACTS_MISMATCH", "\(name) duration \(actual)s differs from the declared \(source.durationSec)s")
+                }
+            }
+        } catch { return failure(request, key: key, code: "SOURCE_UNREADABLE", "cannot read source media: \(error.localizedDescription)") }
+
         let project = request.makeProject()
         let draft = request.edit.shortEditDraft
         let mapping: TimelineMapping
@@ -69,7 +79,12 @@ enum RenderPipeline {
             let hash = try Hashing.sha256Hex(of: partial)
             let final = URL(fileURLWithPath: request.outputPath)
             try fm.moveItem(at: partial, to: final)
-            let marker = RenderCommitMarker(requestKey: key, contentHash: hash, sizeBytes: facts.sizeBytes)
+            let marker = RenderCommitMarker(
+                requestKey: key, contentHash: hash, sizeBytes: facts.sizeBytes, durationSec: facts.durationSec,
+                width: facts.width, height: facts.height, fps: facts.fps, renderer: result.renderer,
+                rendererVersion: result.rendererVersion, audioSource: "master_wav", checks: checks,
+                committedAt: ISO8601DateFormatter().string(from: Date())
+            )
             let encoder = JSONEncoder()
             encoder.outputFormatting = [.sortedKeys]
             try encoder.encode(marker).write(to: markerURL(forOutput: request.outputPath), options: .atomic)
