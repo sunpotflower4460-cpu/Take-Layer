@@ -1,0 +1,6 @@
+# Rendering layer (above Core): AVFoundation / QuartzCore / CoreGraphics allowed; UIKit/SwiftUI forbidden.
+# Built together with tools/core-files.txt by tools/build-render-cli.sh.
+TakeLayer/Services/MediaTime.swift
+TakeLayer/Services/ShortRenderGeometry.swift
+TakeLayer/Services/ShortVideoExportService.swift
+TakeLayer/Services/RenderEditPlanRequest.swift

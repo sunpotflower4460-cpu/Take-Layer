@@ -1,6 +1,5 @@
 import AVFoundation
 import Foundation
-import UIKit
 
 enum VideoExportServiceError: LocalizedError {
     case missingVideo
@@ -41,11 +40,6 @@ enum VideoExportServiceError: LocalizedError {
             return "出力先に保存できませんでした。"
         }
     }
-}
-
-struct ExportResult {
-    var outputURL: URL
-    var durationSec: Double
 }
 
 enum VideoExportService {

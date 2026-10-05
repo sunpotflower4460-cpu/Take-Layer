@@ -1,7 +1,7 @@
 import AVFoundation
 import Foundation
+import CoreGraphics
 import QuartzCore
-import UIKit
 
 enum ShortVideoExportError: LocalizedError {
     case invalidDraft
@@ -45,7 +45,9 @@ enum ShortVideoExportError: LocalizedError {
 }
 
 enum ShortVideoExportService {
-    static func export(project: ProjectDraft, draft: ShortEditDraft) async throws -> ExportResult {
+    /// `destination == nil` keeps the historical iOS behaviour (Documents/TakeLayer-Short-<UUID>.mp4);
+    /// the headless renderer passes an explicit URL.
+    static func export(project: ProjectDraft, draft: ShortEditDraft, destination: URL? = nil) async throws -> ExportResult {
         guard draft.durationSec > 0, draft.durationSec.isFinite else {
             throw ShortVideoExportError.invalidDraft
         }
@@ -120,7 +122,7 @@ enum ShortVideoExportService {
             draft: draft
         )
 
-        let outputURL = try makeOutputURL()
+        let outputURL = try destination ?? makeOutputURL()
         guard let session = AVAssetExportSession(asset: composition, presetName: AVAssetExportPresetHighestQuality) else {
             throw ShortVideoExportError.cannotCreateExportSession
         }
@@ -247,8 +249,8 @@ enum ShortVideoExportService {
         layer.string = text
         layer.fontSize = fontSize
         layer.alignmentMode = alignment
-        layer.foregroundColor = UIColor.white.cgColor
-        layer.shadowColor = UIColor.black.cgColor
+        layer.foregroundColor = CGColor(gray: 1, alpha: 1)
+        layer.shadowColor = CGColor(gray: 0, alpha: 1)
         layer.shadowOpacity = 0.8
         layer.shadowRadius = 8
         layer.shadowOffset = CGSize(width: 0, height: 3)

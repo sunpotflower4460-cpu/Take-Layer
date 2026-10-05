@@ -57,8 +57,19 @@ rm -f /tmp/.core-dir.$$
 # 3. Package.swift sources must equal core-files.txt (minus TakeLayer/ prefix)
 if [ -f Package.swift ]; then
   want="$(printf '%s\n' "${CORE[@]}" | sed 's#^TakeLayer/##' | sort)"
-  have="$(grep -oE '"[A-Za-z0-9_/]+\.swift"' Package.swift | tr -d '"' | sort)"
+  have="$(awk '/name: "TakeLayerCore",/{f=1} f{print} f&&/^            \]/{exit}' Package.swift | grep -oE '"[A-Za-z0-9_/]+\.swift"' | tr -d '"' | sort)"
   [ "$want" = "$have" ] || fail "Package.swift sources differ from $LIST"
+fi
+
+# 3b. Rendering layer (above Core): no UIKit/SwiftUI/AppKit
+RLIST="tools/rendering-files.txt"
+if [ -f "$RLIST" ]; then
+  while IFS= read -r line; do
+    line="${line%%#*}"; line="$(echo "$line" | tr -d '[:space:]')"; [ -z "$line" ] && continue
+    [ -f "$line" ] || { fail "$line listed in $RLIST but missing"; continue; }
+    hits="$(strip_comments "$line" | grep -nwE 'UIKit|SwiftUI|AppKit|UIColor|UIImage|UIFont|UIScreen' || true)"
+    [ -n "$hits" ] && fail "$line (rendering layer) mentions UI token(s): $(echo "$hits" | head -3 | tr '\n' ' ')"
+  done < "$RLIST"
 fi
 
 # 4. TimelineMapper authority guard (heuristic, line-based; see docs)

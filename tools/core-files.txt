@@ -4,6 +4,7 @@
 # Rule: imports limited to Foundation / CryptoKit; no UI/AV/render type names;
 # every type referenced must be declared inside this list.
 # See docs/artist-os-core-boundary.md.
+TakeLayer/Models/ExportResult.swift
 TakeLayer/Models/ExportSettings.swift
 TakeLayer/Models/ImportedMasterAudio.swift
 TakeLayer/Models/ImportedVideo.swift

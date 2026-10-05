@@ -1,7 +1,7 @@
 // swift-tools-version:5.9
 //
 // TakeLayerCore: Foundation-only core (models, TimelineMapper, SongResolver).
-// MANIFEST UNVERIFIED LOCALLY (authored on a machine with no Swift toolchain).
+// Verified: `swift build --target TakeLayerCore` compiles on GitHub-hosted macOS (Xcode 26.6) via .github/workflows/macos-core.yml.
 //
 // Single source of truth for the file list: tools/core-files.txt
 // (tools/check-core-boundary.sh fails if this `sources:` list drifts from it).
@@ -25,6 +25,7 @@ let package = Package(
             name: "TakeLayerCore",
             path: "TakeLayer",
             sources: [
+                "Models/ExportResult.swift",
                 "Models/ExportSettings.swift",
                 "Models/ImportedMasterAudio.swift",
                 "Models/ImportedVideo.swift",

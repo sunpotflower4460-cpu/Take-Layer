@@ -1,8 +1,7 @@
 name: macOS Core
 
-# Additional macOS boundary CI. It does NOT replace "iOS Build" (ios-build.yml, untouched).
-# Runs on pushes to claude/** branches and on demand so the Core / headless boundary is compiled on a real macOS
-# toolchain (a GitHub-hosted macOS runner, not the developer's own Mac) before anything is called "working".
+# Additional to (not a replacement for) the iOS Build workflow.
+# GitHub-hosted macOS is NOT a user's real Mac: results here are labelled CI_MACOS, never REAL_MAC_VERIFIED.
 on:
   push:
     branches: ['claude/**']
@@ -13,6 +12,9 @@ jobs:
   macos-core:
     runs-on: macos-latest
     timeout-minutes: 40
+    defaults:
+      run:
+        shell: bash -eo pipefail {0}
     steps:
       - uses: actions/checkout@v4
 
@@ -26,4 +28,23 @@ jobs:
         run: bash tools/check-core-boundary.sh
 
       - name: Build TakeLayerCore (SwiftPM)
-        run: swift build --target TakeLayerCore -v 2>&1 | tail -80
+        run: swift build --target TakeLayerCore
+
+      - name: Build headless renderer (Core + Short renderer + CLI, no UIKit)
+        run: |
+          bin="$(bash tools/build-render-cli.sh | tail -1)"
+          echo "RENDER_BIN=$bin" >> "$GITHUB_ENV"
+          "$bin" --help
+
+      - name: Headless render self-test (synthetic video + master WAV -> MP4, validated)
+        run: |
+          mkdir -p "$RUNNER_TEMP/render-selftest"
+          "$RENDER_BIN" self-test --workdir "$RUNNER_TEMP/render-selftest" --result "$RUNNER_TEMP/render-selftest/result.json"
+          cat "$RUNNER_TEMP/render-selftest/result.json"
+
+      - name: Upload render result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: render-selftest-result
+          path: ${{ runner.temp }}/render-selftest/*.json
