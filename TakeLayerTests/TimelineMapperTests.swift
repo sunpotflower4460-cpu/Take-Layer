@@ -1,5 +1,9 @@
 import XCTest
+#if canImport(TakeLayer)
 @testable import TakeLayer
+#else
+@testable import TakeLayerShortKit
+#endif
 
 final class TimelineMapperTests: XCTestCase {
     func testSongStartMapsDirectlyToMasterSongStart() throws {

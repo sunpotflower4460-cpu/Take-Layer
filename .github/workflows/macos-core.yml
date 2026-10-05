@@ -30,6 +30,10 @@ jobs:
       - name: Build TakeLayerCore (SwiftPM)
         run: swift build --target TakeLayerCore
 
+      - name: XCTest on macOS (existing TimelineMapperTests + ShortFoundationTests, same sources as the app)
+        working-directory: tools/swiftpm-short
+        run: swift test 2>&1 | tail -60
+
       - name: Build headless renderer (Core + Short renderer + CLI, no UIKit)
         run: |
           bin="$(bash tools/build-render-cli.sh | tail -1)"
