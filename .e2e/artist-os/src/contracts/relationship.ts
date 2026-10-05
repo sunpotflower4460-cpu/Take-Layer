@@ -56,6 +56,12 @@ export const RelationshipEnrichmentReportSchema = z.object({
   service: z.literal('sns-providers'),
   generatedAt: IsoTimestampSchema,
   artifacts: z.array(ArtifactEnvelopeSchema).max(200),
+  /**
+   * true when the producer had more events than it enriched (its per-report cap). Optional for older producers: absent means
+   * "not reported", which a consumer must NOT read as "complete".
+   */
+  truncated: z.boolean().optional(),
+  hasMore: z.boolean().optional(),
 })
 export type RelationshipEnrichmentReport = z.infer<typeof RelationshipEnrichmentReportSchema>
 

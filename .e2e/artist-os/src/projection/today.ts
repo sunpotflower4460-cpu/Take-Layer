@@ -150,6 +150,8 @@ export async function buildToday(deps: TodayDeps): Promise<TodayProjection> {
           const { accepted, rejected } = acceptEnrichmentArtifacts(enr.value.artifacts)
           for (const a of accepted) enrichmentByKey.set(`${a.payload.subject.platform}:${a.payload.subject.externalEventId}`, a.payload)
           if (rejected > 0) unreadable.push({ system: 'sns-providers', reason: `${rejected} malformed enrichment artifact(s) ignored` })
+          // A capped report is partial, not wrong: events beyond the cap simply show no relationship context (never a guess).
+          if (enr.value.truncated || enr.value.hasMore) unreadable.push({ system: 'sns-providers', reason: 'relationship-enrichment is truncated: some inbound events have no relationship context' })
         } else if (enr.httpStatus !== 404 && enr.reason !== 'not_configured') {
           unreadable.push({ system: 'sns-providers', reason: `relationship-enrichment: ${enr.reason}` })
         }

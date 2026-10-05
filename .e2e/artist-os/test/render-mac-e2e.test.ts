@@ -1,10 +1,10 @@
 import { createHash } from 'node:crypto'
-import { copyFileSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterAll, describe, expect, it } from 'vitest'
 import {
-  HttpRunnerTransport, LocalAssetResolver, MacJobQueue, MacRunner, RenderedMediaArtifactV1Schema, Workspace, buildRenderEnqueue, computePlanHash, createApp, defaultExec, preflightRenderEditPlan, renderEditPlanHandler, validateJobResults,
+  HttpRunnerTransport, LocalAssetResolver, preflightResolverCalibration, resolverCalibrationHandler, ResolverCalibrationArtifactSchema, MacJobQueue, MacRunner, RenderedMediaArtifactV1Schema, Workspace, buildRenderEnqueue, computePlanHash, createApp, defaultExec, preflightRenderEditPlan, renderEditPlanHandler, validateJobResults,
 } from './shim.js'
 import { fixedClock } from './helpers.js'
 
@@ -109,5 +109,74 @@ describe.skipIf(!enabled)('REAL Mac render e2e (Take-Layer headless renderer)', 
     const rec = (await ws.queue.get(lost.job.jobId))!
     expect(rec).toMatchObject({ status: 'COMPLETED', reconcile: { outcome: 'completed' } })
     expect(validateJobResults('RENDER_EDIT_PLAN', rec.resultArtifacts)).toEqual({ ok: true })
+  }, 40 * 60_000)
+})
+
+/** Mono PCM16 WAV of a note sequence with a given number of harmonics (a stand-in "arrangement"). */
+function synthWav(notes: number[], opts: { noteSec: number; harmonics: number; rate?: number }): Buffer {
+  const rate = opts.rate ?? 16_000
+  const per = Math.floor(opts.noteSec * rate)
+  const data = Buffer.alloc(notes.length * per * 2)
+  notes.forEach((f, n) => {
+    for (let i = 0; i < per; i++) {
+      let v = 0
+      for (let h = 1; h <= opts.harmonics; h++) v += Math.sin((2 * Math.PI * f * h * i) / rate) / h
+      const env = Math.min(1, i / 400, (per - i) / 400)
+      data.writeInt16LE(Math.round(Math.max(-1, Math.min(1, v * 0.3 * env)) * 32767), (n * per + i) * 2)
+    }
+  })
+  const head = Buffer.alloc(44)
+  head.write('RIFF', 0); head.writeUInt32LE(36 + data.length, 4); head.write('WAVEfmt ', 8); head.writeUInt32LE(16, 16); head.writeUInt16LE(1, 20); head.writeUInt16LE(1, 22)
+  head.writeUInt32LE(rate, 24); head.writeUInt32LE(rate * 2, 28); head.writeUInt16LE(2, 32); head.writeUInt16LE(16, 34); head.write('data', 36); head.writeUInt32LE(data.length, 40)
+  return Buffer.concat([head, data])
+}
+
+/**
+ * REAL RESOLVER_CALIBRATION on a Mac: Take-Layer's own CLI (`tools/run-resolver-calibration.sh`, compiled by xcrun swiftc),
+ * launched by the Runner handler. The corpus is SYNTHETIC (generated here): this proves the plumbing — process launch,
+ * exit code, timeout wiring, report parsing, artifact validation, no path persistence, COMPLETED — NOT resolver quality.
+ */
+describe.skipIf(!enabled)('REAL Mac RESOLVER_CALIBRATION (Take-Layer CLI)', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'aos-cal-e2e-'))
+  afterAll(() => rmSync(dir, { recursive: true, force: true }))
+
+  it('preflight really compiles and runs the CLI (--help) on this machine', async () => {
+    expect(await preflightResolverCalibration({ platform: process.platform, repoDir: REPO!, exec: defaultExec })).toEqual({ ok: true })
+  }, 30 * 60_000)
+
+  it('one real calibration run through the Runner → COMPLETED with a valid summary artifact and no private paths stored', async () => {
+    const corpus = join(dir, 'private-corpus-folder')
+    mkdirSync(join(corpus, 'songs'), { recursive: true })
+    const A = [262, 330, 392, 523, 392, 330, 262, 330, 392, 523]
+    const B = [370, 466, 587, 740, 587, 466, 370, 466, 587, 740]
+    writeFileSync(join(corpus, 'songs', 'a-studio.wav'), synthWav(A, { noteSec: 2, harmonics: 4 }))
+    writeFileSync(join(corpus, 'songs', 'a-acoustic.wav'), synthWav(A, { noteSec: 2, harmonics: 2 }))
+    writeFileSync(join(corpus, 'songs', 'b-studio.wav'), synthWav(B, { noteSec: 2, harmonics: 4 }))
+    const manifest = join(dir, 'private-manifest-name.json')
+    writeFileSync(manifest, JSON.stringify({ schemaVersion: 1, name: 'SYNTHETIC-PLUMBING-CHECK', cases: [
+      { name: 'a acoustic vs studio', relationship: 'sameSongDifferentArrangement', queryPath: 'songs/a-acoustic.wav', referencePath: 'songs/a-studio.wav' },
+      { name: 'b vs a', relationship: 'differentSong', queryPath: 'songs/b-studio.wav', referencePath: 'songs/a-studio.wav' },
+    ] }))
+    const resolver = new LocalAssetResolver({ 'manifest-1': manifest, 'corpus-root': corpus })
+    const clk = fixedClock()
+    const ws = new Workspace({ workspaceRef: 'w', queue: new MacJobQueue(undefined, { clock: clk.clock }), clock: clk.clock })
+    const app = createApp(ws, { operatorToken: 'op', runnerToken: 'rn', specialistConfig: {}, environment: 'development', macJobsRequested: true })
+    const fetchImpl = (async (url: string, init: RequestInit) => {
+      const r = await app({ method: init.method ?? 'GET', path: new URL(String(url)).pathname, headers: Object.fromEntries(Object.entries((init.headers ?? {}) as Record<string, string>)), body: init.body ? JSON.parse(String(init.body)) : undefined })
+      return new Response(JSON.stringify(r.body), { status: r.status })
+    }) as typeof fetch
+    const handler = resolverCalibrationHandler({ platform: process.platform, repoDir: REPO!, exec: defaultExec, resolveDir: (id) => resolver.resolveAssetId(id), timeoutMs: 30 * 60_000 })
+    const runner = new MacRunner({ runnerId: 'mac1', architecture: process.arch, transport: new HttpRunnerTransport({ baseUrl: 'https://aos.test', token: 'rn', fetchImpl }), resolver, handlers: [handler] })
+    await runner.beat()
+    const q = await ws.queue.enqueue({ jobType: 'RESOLVER_CALIBRATION', workspaceRef: 'w', parameters: { corpusRootAssetId: 'corpus-root' }, inputAssetRefs: [{ schemaVersion: 1, assetRef: 'm1', ownerSystem: 'take-layer', kind: 'other', locationType: 'runner-local', runnerId: 'mac1', locationId: 'manifest-1', derivedFrom: [], createdAt: NOW }] })
+    if (!q.ok) throw new Error(q.detail)
+    expect(await runner.drain()).toEqual(['completed'])
+    const job = (await ws.queue.get(q.job.jobId))!
+    expect(job.status).toBe('COMPLETED')
+    expect(ResolverCalibrationArtifactSchema.safeParse(job.resultArtifacts[0]).success).toBe(true)
+    expect(validateJobResults('RESOLVER_CALIBRATION', job.resultArtifacts)).toEqual({ ok: true })
+    expect(job.resultArtifacts[0]!.payload).toMatchObject({ totalCases: 2 })
+    const wire = JSON.stringify(await ws.queue.list())
+    for (const secret of ['private-corpus-folder', 'private-manifest-name', 'SYNTHETIC-PLUMBING-CHECK', 'a-studio', dir]) expect(wire).not.toContain(secret)
   }, 40 * 60_000)
 })
