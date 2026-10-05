@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "take-layer/short-edit-draft.schema.json",
+  "title": "ShortEditDraft (current unversioned Swift Codable shape)",
+  "description": "Mirrors TakeLayer/Models/ShortEditDraft.swift as synthesized by Codable (JSONEncoder defaults: Double as number, UUID as string). There is NO schemaVersion in the Swift type; this file documents today's shape and is NOT a stable Artist OS contract. Derived by source inspection; not validated against a real Swift encode (no toolchain).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["rangeStartProjectSec", "rangeEndProjectSec", "titleText", "crop", "lyricCues"],
+  "properties": {
+    "rangeStartProjectSec": { "type": "number", "description": "Project Timeline seconds (0 = song start)." },
+    "rangeEndProjectSec": { "type": "number" },
+    "titleText": { "type": "string" },
+    "crop": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["zoom", "focusX", "focusY"],
+      "properties": {
+        "zoom": { "type": "number", "description": "normalize() clamps to 1.0...3.0" },
+        "focusX": { "type": "number", "description": "normalize() clamps to 0.0...1.0" },
+        "focusY": { "type": "number", "description": "normalize() clamps to 0.0...1.0" }
+      }
+    },
+    "lyricCues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "startProjectSec", "endProjectSec", "text"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid", "description": "Synthesized Codable requires this key (var with default value is still decoded)." },
+          "startProjectSec": { "type": "number" },
+          "endProjectSec": { "type": "number", "description": "isValid requires end > start, finite, non-blank text; invalid cues are persisted on purpose." },
+          "text": { "type": "string" }
+        }
+      }
+    }
+  }
+}

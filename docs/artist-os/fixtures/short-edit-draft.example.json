@@ -1,0 +1,9 @@
+{
+  "crop": { "focusX": 0.5, "focusY": 0.4, "zoom": 1.2 },
+  "lyricCues": [
+    { "endProjectSec": 14.0, "id": "11111111-2222-3333-4444-555555555555", "startProjectSec": 10.0, "text": "example lyric line" }
+  ],
+  "rangeEndProjectSec": 45.0,
+  "rangeStartProjectSec": 30.0,
+  "titleText": "Example title"
+}

@@ -31,11 +31,11 @@ Artist OS links a TakeLayer song to a release through **explicit, human-confirme
 
 ## 3. Layer map (for a future Mac worker)
 
-Derived from Swift `import`s at audit time (2026-10-05):
+Derived from Swift `import`s and type usage at audit time (2026-10-05). Full per-file audit, the `TakeLayerCore` SwiftPM closure (`Package.swift`, unverified locally) and the UIKit analysis of the export services: `docs/artist-os-core-boundary.md`. The boundary and the TimelineMapper-authority tripwire are enforced by `tools/check-core-boundary.sh` (CI: `.github/workflows/core-boundary.yml`):
 
-- **Core (Foundation-only, portable):** `Models/*`, `TimelineMapper`, `SongResolver`, `ProjectStore`, `SongMemoryStore`, `SongResolverEvidenceStore`, `ResolverCalibrationHarness`, `ExportValidationService`, `MediaImportStore`, `RecordingFileStore`. (`ResolverPrivateCorpusRunner` adds CryptoKit.)
+- **Core (Foundation-only, portable):** the 14 files in `tools/core-files.txt` (`Models/*`, `TimelineMapper`, `SongResolver`, `ExportValidationService`, `TimeFormatting`). Foundation-only but deferred (persist to iOS Documents): `ProjectStore`, `SongMemoryStore`, `SongResolverEvidenceStore`, `MediaImportStore`, `RecordingFileStore`. `ResolverCalibrationHarness` and `ResolverPrivateCorpusRunner` import only Foundation/CryptoKit but call `AudioEvidenceExtractor` (Analysis), so they are not Core by dependency.
 - **Analysis (AVFoundation, no UI):** `AudioEvidenceExtractor`, `TonalEvidenceExtractor`, `MediaInfoReader`.
-- **Rendering:** `VideoExportService`, `ShortVideoExportService` — import UIKit; **iOS-only**, cannot run headless today.
+- **Rendering:** `VideoExportService`, `ShortVideoExportService` — import UIKit; **iOS-only**, cannot run headless today. (Actual UIKit use is only `UIColor.white/.black` in the Short service; none in `VideoExportService`. Not yet changed: no compiler.)
 - **UI:** SwiftUI (with AVKit/UIKit in a few views). No AppKit.
 
 A Mac worker becomes feasible only after rendering is separated from UIKit. That is a TakeLayer-side decision and is out of scope here.
@@ -52,7 +52,7 @@ Artist OS Mac jobs are **typed** (no free-form commands). The table states which
 | `GENERATE_EDIT_PROPOSALS`, `MEDIA_QUALITY_GATE`, `GENERATE_SHORT_VARIANTS` | planned (AI Director / Quality Gate) |
 | `RENDER_EDIT_PLAN`, `EXTRACT_THUMBNAIL_CANDIDATES` | blocked: UIKit-bound rendering |
 
-`docs/artist-os/mac-runner-capabilities.json` is the static manifest: only `resolver_calibration` is listed as runnable. A Runner must report a job type as supported only if it has a real handler; Artist OS never queues work to a Runner that does not list it, and a stub must fail with `unsupported`, never a fake success.
+`docs/artist-os/mac-runner-capabilities.json` is the static manifest: only `resolver_calibration` is listed as runnable, with Artist OS job type `RESOLVER_CALIBRATION` (a separate name; per-song `SONG_RESOLUTION` and `RENDER_EXISTING_EDIT_PLAN` are unsupported). A Runner must report a job type as supported only if it has a real handler; Artist OS never queues work to a Runner that does not list it, and a stub must fail with `unsupported`, never a fake success.
 
 ## 5. Data and portability rules
 
