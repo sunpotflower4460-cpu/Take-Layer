@@ -1,0 +1,29 @@
+name: macOS Core
+
+# Additional macOS boundary CI. It does NOT replace "iOS Build" (ios-build.yml, untouched).
+# Runs on pushes to claude/** branches and on demand so the Core / headless boundary is compiled on a real macOS
+# toolchain (a GitHub-hosted macOS runner, not the developer's own Mac) before anything is called "working".
+on:
+  push:
+    branches: ['claude/**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  macos-core:
+    runs-on: macos-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Toolchain
+        run: |
+          swift --version
+          xcodebuild -version
+          sw_vers
+
+      - name: Static boundary checks (no Swift needed)
+        run: bash tools/check-core-boundary.sh
+
+      - name: Build TakeLayerCore (SwiftPM)
+        run: swift build --target TakeLayerCore -v 2>&1 | tail -80
