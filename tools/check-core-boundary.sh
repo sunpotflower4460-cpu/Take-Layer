@@ -39,7 +39,7 @@ while IFS= read -r g; do
   skip=0; for c in "${CORE[@]}"; do [ "$g" = "$c" ] && skip=1; done
   [ $skip = 1 ] && continue
   strip_comments "$g" | grep -oE "$DECL_RE" | awk '{print $NF}'
-done < <(find TakeLayer tools -name '*.swift' | sort) | sort -u > "$NONCORE_TYPES"
+done < <(find TakeLayer tools -type f -name '*.swift' | sort) | sort -u > "$NONCORE_TYPES"
 for f in "${CORE[@]}"; do
   [ -f "$f" ] || continue
   # remove types the Core file set declares itself (name clash safety)
@@ -92,7 +92,7 @@ while IFS= read -r g; do
       echo "FAIL: $g:$n redeclares TimelineMapper API: $l"
     fi
   done
-done < <(find TakeLayer tools -name '*.swift' | sort) > /tmp/.core-auth.$$ 2>&1
+done < <(find TakeLayer tools -type f -name '*.swift' | sort) > /tmp/.core-auth.$$ 2>&1
 if [ -s /tmp/.core-auth.$$ ]; then cat /tmp/.core-auth.$$; FAIL=1; fi
 rm -f /tmp/.core-auth.$$
 

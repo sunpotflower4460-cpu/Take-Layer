@@ -1,7 +1,11 @@
 import AVFoundation
 import CoreGraphics
 import XCTest
+#if canImport(TakeLayer)
 @testable import TakeLayer
+#else
+@testable import TakeLayerShortKit
+#endif
 
 final class ShortFoundationTests: XCTestCase {
     func testProjectTimeShortRangeUsesAuthoritativeTimelineMapper() throws {
