@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "service": "take-layer",
   "generatedFor": "artist-os-mac-runner",
-  "note": "Static manifest. A job type is listed only if a real headless handler exists today. Everything else is unsupported and must fail closed with `unsupported`. SONG_RESOLUTION (per-song) and RENDER_EXISTING_EDIT_PLAN have no headless handler; the corpus-level resolver is exposed as RESOLVER_CALIBRATION, not as SONG_RESOLUTION.",
+  "note": "Static manifest. A job type is listed only if a real headless handler exists today. Everything else is unsupported and must fail closed with `unsupported`. SONG_RESOLUTION (per-song) has no headless handler; the corpus-level resolver is exposed as RESOLVER_CALIBRATION, not as SONG_RESOLUTION. `verification` records WHERE each entry has actually been executed; a Runner must still earn the capability on its own machine (start-up preflight) before advertising it.",
   "runnable": [
     {
       "capability": "resolver_calibration",
@@ -24,7 +24,41 @@
       "platform": "macOS (xcrun swiftc)",
       "constraints": [
         "private corpus audio must not be uploaded or committed"
-      ]
+      ],
+      "verification": {
+        "level": "CI_MACOS",
+        "realMacVerified": false,
+        "detail": "see docs/artist-os/mac-proof.md"
+      }
+    },
+    {
+      "capability": "render_edit_plan",
+      "artistOsJobType": "RENDER_EDIT_PLAN",
+      "partial": true,
+      "entry": "tools/build-render-cli.sh (builds take-layer-render from the same Swift sources as the iOS app)",
+      "flags": [
+        "render --request <request.json> --result <result.json>",
+        "self-test --workdir <dir>",
+        "make-fixtures --workdir <dir> --result <json>"
+      ],
+      "input": "RenderEditPlanRequest JSON (schemaVersion 1): ShortEditDraft fields + timeline + local source paths resolved on the Mac",
+      "output": [
+        "<output>.mp4",
+        "<output>.mp4.commit.json (written after the atomic rename; the only proof of completion)",
+        "result.json"
+      ],
+      "platform": "macOS (AVFoundation)",
+      "constraints": [
+        "TimelineMapper is the only sync authority (no reimplementation)",
+        "output stays on the Mac",
+        "Short profile only: 1080x1920, 30 fps, H.264 MP4",
+        "master WAV is the only program audio"
+      ],
+      "verification": {
+        "level": "CI_MACOS",
+        "realMacVerified": false,
+        "detail": "see docs/artist-os/mac-proof.md"
+      }
     }
   ],
   "unsupported": [
@@ -35,7 +69,6 @@
     "AUDIO_ANALYSIS",
     "LYRICS_ALIGNMENT",
     "GENERATE_EDIT_PROPOSALS",
-    "RENDER_EDIT_PLAN",
     "MEDIA_QUALITY_GATE",
     "GENERATE_SHORT_VARIANTS",
     "EXTRACT_THUMBNAIL_CANDIDATES"
