@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "service": "take-layer",
+  "generatedFor": "artist-os-mac-runner",
+  "note": "Static manifest. A job type is listed only if a real headless handler exists today. Everything else is unsupported and must fail closed with `unsupported`.",
+  "runnable": [
+    {
+      "capability": "resolver_calibration",
+      "artistOsJobType": "SONG_RESOLUTION",
+      "partial": true,
+      "entry": "tools/run-resolver-calibration.sh",
+      "flags": ["--manifest", "--root", "--dataset", "--report", "--thresholds"],
+      "input": "corpus manifest JSON (schemaVersion 1)",
+      "output": ["derived-dataset.json", "report.json"],
+      "platform": "macOS (xcrun swiftc)",
+      "constraints": ["private corpus audio must not be uploaded or committed"]
+    }
+  ],
+  "unsupported": [
+    "MEDIA_ANALYSIS",
+    "VIDEO_ANALYSIS",
+    "AUDIO_ANALYSIS",
+    "LYRICS_ALIGNMENT",
+    "GENERATE_EDIT_PROPOSALS",
+    "RENDER_EDIT_PLAN",
+    "MEDIA_QUALITY_GATE",
+    "GENERATE_SHORT_VARIANTS",
+    "EXTRACT_THUMBNAIL_CANDIDATES"
+  ]
+}
