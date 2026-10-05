@@ -1,0 +1,30 @@
+name: Artist OS render e2e (throwaway evidence branch)
+
+# Runs Artist OS's REAL Mac-render e2e test (test/render-mac-e2e.test.ts) against THIS checkout's headless renderer.
+# .e2e/artist-os is a verbatim copy of the Artist-OS sources made for this evidence run only; it is never merged.
+# GitHub-hosted macOS = CI_MACOS evidence, not the user's own Mac.
+on:
+  push:
+    branches: ['ci/artist-os-render-e2e']
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash -eo pipefail {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Artist OS deps
+        working-directory: .e2e/artist-os
+        run: npm ci --no-audit --no-fund
+      - name: Real e2e (Node Runner -> Take-Layer headless renderer -> MP4 -> artifact -> COMPLETED)
+        working-directory: .e2e/artist-os
+        env:
+          TAKE_LAYER_REPO: ${{ github.workspace }}
+        run: npx vitest run test/render-mac-e2e.test.ts --reporter=verbose

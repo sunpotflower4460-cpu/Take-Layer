@@ -1,0 +1,32 @@
+{
+  "name": "artist-os",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Artist OS v2 \u2014 cross-domain coordination layer. Owns Goal/Release/Identity Graph/Today/Attention/Mac Jobs/Equipment; never a second source of truth for specialist repos.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "tsc -p tsconfig.build.json",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build",
+    "db:migrate": "node dist/server/migrate.js"
+  },
+  "dependencies": {
+    "pg": "^8.23.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.4.0",
+    "@types/pg": "^8.23.1",
+    "eslint": "^10.9.1",
+    "globals": "^17.11.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.68.0",
+    "vitest": "^4.1.11"
+  }
+}
