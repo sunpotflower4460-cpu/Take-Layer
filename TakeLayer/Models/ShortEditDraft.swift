@@ -26,12 +26,21 @@ struct ShortLyricCue: Identifiable, Codable, Equatable {
     }
 }
 
+/// Where lyric / timed-text cues are drawn. `nil` and `.bottom` are the historical position. `.upperMiddle` keeps the
+/// cues clear of captions already burned into the bottom of the source video.
+enum CuePlacement: String, Codable, Equatable {
+    case bottom
+    case upperMiddle = "upper-middle"
+}
+
 struct ShortEditDraft: Codable, Equatable {
     var rangeStartProjectSec: Double
     var rangeEndProjectSec: Double
     var titleText: String
     var crop: ShortCropPlan
     var lyricCues: [ShortLyricCue]
+    /// Optional so drafts saved before this field existed still decode.
+    var cuePlacement: CuePlacement? = nil
 
     var durationSec: Double {
         max(0, rangeEndProjectSec - rangeStartProjectSec)
@@ -63,13 +72,15 @@ struct ShortEditDraft: Codable, Equatable {
         rangeEndProjectSec: Double = 15,
         titleText: String = "",
         crop: ShortCropPlan = ShortCropPlan(),
-        lyricCues: [ShortLyricCue] = []
+        lyricCues: [ShortLyricCue] = [],
+        cuePlacement: CuePlacement? = nil
     ) {
         self.rangeStartProjectSec = rangeStartProjectSec
         self.rangeEndProjectSec = rangeEndProjectSec
         self.titleText = titleText
         self.crop = crop
         self.lyricCues = lyricCues
+        self.cuePlacement = cuePlacement
     }
 
     mutating func normalize(availableRange: ClosedRange<Double>) {

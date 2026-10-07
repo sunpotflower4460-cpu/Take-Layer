@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.build/master.swiftdeps"
+  },
+  "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.derived/runner.swift": {
+    "dependencies": "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.build/runner.d",
+    "object": "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.build/runner.swift.o",
+    "swiftmodule": "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.build/runner~partial.swiftmodule",
+    "swift-dependencies": "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.build/runner.swiftdeps",
+    "diagnostics": "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.build/runner.dia"
+  }
+}

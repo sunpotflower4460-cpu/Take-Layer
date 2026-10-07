@@ -214,9 +214,12 @@ enum ShortVideoExportService {
             let overlapEnd = min(cue.endProjectSec, shortEnd)
             guard overlapEnd > overlapStart else { continue }
 
+            // Core Animation's origin is bottom-left here: y 190 is the historical bottom caption position; the
+            // upper-middle position sits at 50% of the height (36-50% from the top), clear of the bottom caption area.
+            let cueY: CGFloat = draft.cuePlacement == .upperMiddle ? renderSize.height * 0.5 : 190
             let layer = textLayer(
                 text: cue.text,
-                frame: CGRect(x: 72, y: 190, width: renderSize.width - 144, height: 260),
+                frame: CGRect(x: 72, y: cueY, width: renderSize.width - 144, height: 260),
                 fontSize: 52,
                 alignment: .center
             )

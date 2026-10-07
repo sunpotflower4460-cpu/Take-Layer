@@ -36,6 +36,7 @@ struct RenderEditPlanRequest: Codable, Equatable {
         var titleText: String
         var crop: Crop
         var lyricCues: [Cue]
+        var cuePlacement: String? = nil   // "bottom" (default) | "upper-middle"
     }
 
     struct Source: Codable, Equatable {
@@ -74,7 +75,8 @@ extension RenderEditPlanRequest.Edit {
             rangeEndProjectSec: draft.rangeEndProjectSec,
             titleText: draft.titleText,
             crop: .init(zoom: draft.crop.zoom, focusX: draft.crop.focusX, focusY: draft.crop.focusY),
-            lyricCues: draft.lyricCues.map { .init(startProjectSec: $0.startProjectSec, endProjectSec: $0.endProjectSec, text: $0.text) }
+            lyricCues: draft.lyricCues.map { .init(startProjectSec: $0.startProjectSec, endProjectSec: $0.endProjectSec, text: $0.text) },
+            cuePlacement: draft.cuePlacement?.rawValue
         )
     }
 
@@ -84,7 +86,8 @@ extension RenderEditPlanRequest.Edit {
             rangeEndProjectSec: rangeEndProjectSec,
             titleText: titleText,
             crop: ShortCropPlan(zoom: crop.zoom, focusX: crop.focusX, focusY: crop.focusY),
-            lyricCues: lyricCues.map { ShortLyricCue(startProjectSec: $0.startProjectSec, endProjectSec: $0.endProjectSec, text: $0.text) }
+            lyricCues: lyricCues.map { ShortLyricCue(startProjectSec: $0.startProjectSec, endProjectSec: $0.endProjectSec, text: $0.text) },
+            cuePlacement: cuePlacement.flatMap(CuePlacement.init(rawValue:))
         )
     }
 }
@@ -95,6 +98,7 @@ enum RenderEditPlanRequestError: LocalizedError, Equatable {
     case notFinite(String)
     case relativePath(String)
     case invalidHash(String)
+    case unknownCuePlacement(String)
 
     var errorDescription: String? {
         switch self {
@@ -103,6 +107,7 @@ enum RenderEditPlanRequestError: LocalizedError, Equatable {
         case .notFinite(let f): return "non-finite number: \(f)"
         case .relativePath(let f): return "path must be absolute: \(f)"
         case .invalidHash(let f): return "sha256 must be 64 lower-case hex chars: \(f)"
+        case .unknownCuePlacement(let v): return "unknown edit.cuePlacement '\(v)' (expected bottom or upper-middle)"
         }
     }
 }
@@ -124,6 +129,8 @@ extension RenderEditPlanRequest {
             ("timeline.offsetMs", timeline.offsetMs),
         ]
         for (name, value) in numbers where !value.isFinite { throw RenderEditPlanRequestError.notFinite(name) }
+        // Fail closed: an unknown placement must not silently fall back to the bottom position.
+        if let placement = edit.cuePlacement, CuePlacement(rawValue: placement) == nil { throw RenderEditPlanRequestError.unknownCuePlacement(placement) }
         for (name, path) in [("video.localPath", video.localPath), ("masterAudio.localPath", masterAudio.localPath), ("outputPath", outputPath)] {
             guard !path.isEmpty else { throw RenderEditPlanRequestError.missingField(name) }
             guard path.hasPrefix("/") else { throw RenderEditPlanRequestError.relativePath(name) }

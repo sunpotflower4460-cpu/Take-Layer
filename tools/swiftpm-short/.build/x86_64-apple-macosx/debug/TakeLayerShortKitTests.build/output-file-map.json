@@ -1,0 +1,19 @@
+{
+  "": {
+    "swift-dependencies": "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build/master.swiftdeps"
+  },
+  "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Tests/TakeLayerShortKitTests/ShortFoundationTests.swift": {
+    "dependencies": "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build/ShortFoundationTests.d",
+    "object": "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build/ShortFoundationTests.swift.o",
+    "swiftmodule": "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build/ShortFoundationTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build/ShortFoundationTests.swiftdeps",
+    "diagnostics": "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build/ShortFoundationTests.dia"
+  },
+  "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Tests/TakeLayerShortKitTests/TimelineMapperTests.swift": {
+    "dependencies": "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build/TimelineMapperTests.d",
+    "object": "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build/TimelineMapperTests.swift.o",
+    "swiftmodule": "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build/TimelineMapperTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build/TimelineMapperTests.swiftdeps",
+    "diagnostics": "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build/TimelineMapperTests.dia"
+  }
+}

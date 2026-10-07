@@ -1,0 +1,999 @@
+{
+  "builtTestProducts" : [
+    {
+      "binaryPath" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.xctest/Contents/MacOS/TakeLayerShortKitPackageTests",
+      "packagePath" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short",
+      "productName" : "TakeLayerShortKitPackageTests"
+    }
+  ],
+  "copyCommands" : {
+
+  },
+  "explicitTargetDependencyImportCheckingMode" : {
+    "none" : {
+
+    }
+  },
+  "generatedSourceTargetSet" : [
+
+  ],
+  "pluginDescriptions" : [
+
+  ],
+  "swiftCommands" : {
+    "C.TakeLayerShortKit-x86_64-apple-macosx26.0-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/sources",
+      "importPath" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ExportResult.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ExportSettings.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ExportValidationService.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ImportedMasterAudio.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ImportedVideo.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/MediaTime.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ProjectDraft.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/RecordedTake.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/RenderEditPlanRequest.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ResolverCalibrationModels.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ResolverPrivateCorpusModels.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ShortEditDraft.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ShortRenderGeometry.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ShortVideoExportService.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/SongMemoryModels.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/SongResolver.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/SongResolverEvidenceModels.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/TimeFormatting.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/TimelineMapper.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "TakeLayerShortKit",
+      "moduleOutputPath" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/Modules/TakeLayerShortKit.swiftmodule",
+      "objects" : [
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ExportResult.swift.o",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ExportSettings.swift.o",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ExportValidationService.swift.o",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ImportedMasterAudio.swift.o",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ImportedVideo.swift.o",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/MediaTime.swift.o",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ProjectDraft.swift.o",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/RecordedTake.swift.o",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/RenderEditPlanRequest.swift.o",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ResolverCalibrationModels.swift.o",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ResolverPrivateCorpusModels.swift.o",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ShortEditDraft.swift.o",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ShortRenderGeometry.swift.o",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ShortVideoExportService.swift.o",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/SongMemoryModels.swift.o",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/SongResolver.swift.o",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/SongResolverEvidenceModels.swift.o",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/TimeFormatting.swift.o",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/TimelineMapper.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "x86_64-apple-macosx13.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j20",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/include/TakeLayerShortKit-Swift.h",
+        "-swift-version",
+        "5",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "swiftpm_short"
+      ],
+      "outputFileMapPath" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ExportResult.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ExportSettings.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ExportValidationService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ImportedMasterAudio.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ImportedVideo.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/MediaTime.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ProjectDraft.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/RecordedTake.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/RenderEditPlanRequest.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ResolverCalibrationModels.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ResolverPrivateCorpusModels.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ShortEditDraft.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ShortRenderGeometry.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ShortVideoExportService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/SongMemoryModels.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/SongResolver.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/SongResolverEvidenceModels.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/TimeFormatting.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/TimelineMapper.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/Modules/TakeLayerShortKit.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ExportResult.swift",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ExportSettings.swift",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ExportValidationService.swift",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ImportedMasterAudio.swift",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ImportedVideo.swift",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/MediaTime.swift",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ProjectDraft.swift",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/RecordedTake.swift",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/RenderEditPlanRequest.swift",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ResolverCalibrationModels.swift",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ResolverPrivateCorpusModels.swift",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ShortEditDraft.swift",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ShortRenderGeometry.swift",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ShortVideoExportService.swift",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/SongMemoryModels.swift",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/SongResolver.swift",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/SongResolverEvidenceModels.swift",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/TimeFormatting.swift",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/TimelineMapper.swift"
+      ],
+      "tempsPath" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.TakeLayerShortKitPackageTests-x86_64-apple-macosx26.0-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.build/sources",
+      "importPath" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.derived/runner.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/Modules/TakeLayerShortKitTests.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "TakeLayerShortKitPackageTests",
+      "moduleOutputPath" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/Modules/TakeLayerShortKitPackageTests.swiftmodule",
+      "objects" : [
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.build/runner.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "x86_64-apple-macosx13.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-Xfrontend",
+        "-enable-cross-import-overlays",
+        "-j20",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.build/include/TakeLayerShortKitPackageTests-Swift.h",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "swiftpm_short"
+      ],
+      "outputFileMapPath" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/Modules/TakeLayerShortKitPackageTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.derived/runner.swift"
+      ],
+      "tempsPath" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.TakeLayerShortKitTests-x86_64-apple-macosx26.0-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build/sources",
+      "importPath" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Tests/TakeLayerShortKitTests/ShortFoundationTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Tests/TakeLayerShortKitTests/TimelineMapperTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/Modules/TakeLayerShortKit.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "TakeLayerShortKitTests",
+      "moduleOutputPath" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/Modules/TakeLayerShortKitTests.swiftmodule",
+      "objects" : [
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build/ShortFoundationTests.swift.o",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build/TimelineMapperTests.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "x86_64-apple-macosx14.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-Xfrontend",
+        "-enable-cross-import-overlays",
+        "-j20",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-swift-version",
+        "5",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "swiftpm_short"
+      ],
+      "outputFileMapPath" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build/ShortFoundationTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build/TimelineMapperTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/Modules/TakeLayerShortKitTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Tests/TakeLayerShortKitTests/ShortFoundationTests.swift",
+        "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Tests/TakeLayerShortKitTests/TimelineMapperTests.swift"
+      ],
+      "tempsPath" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build",
+      "wholeModuleOptimization" : false
+    }
+  },
+  "swiftFrontendCommands" : {
+
+  },
+  "swiftTargetScanArgs" : {
+    "TakeLayerShortKit" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "TakeLayerShortKit",
+      "-package-name",
+      "swiftpm_short",
+      "-c",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ExportResult.swift",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ExportSettings.swift",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ExportValidationService.swift",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ImportedMasterAudio.swift",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ImportedVideo.swift",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/MediaTime.swift",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ProjectDraft.swift",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/RecordedTake.swift",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/RenderEditPlanRequest.swift",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ResolverCalibrationModels.swift",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ResolverPrivateCorpusModels.swift",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ShortEditDraft.swift",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ShortRenderGeometry.swift",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ShortVideoExportService.swift",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/SongMemoryModels.swift",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/SongResolver.swift",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/SongResolverEvidenceModels.swift",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/TimeFormatting.swift",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/TimelineMapper.swift",
+      "-I",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/Modules",
+      "-target",
+      "x86_64-apple-macosx13.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j20",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/include/TakeLayerShortKit-Swift.h",
+      "-swift-version",
+      "5",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "swiftpm_short",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "TakeLayerShortKitPackageTests" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "TakeLayerShortKitPackageTests",
+      "-package-name",
+      "swiftpm_short",
+      "-c",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.derived/runner.swift",
+      "-I",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/Modules",
+      "-target",
+      "x86_64-apple-macosx13.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-Xfrontend",
+      "-enable-cross-import-overlays",
+      "-j20",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.build/include/TakeLayerShortKitPackageTests-Swift.h",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "swiftpm_short",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "TakeLayerShortKitTests" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "TakeLayerShortKitTests",
+      "-package-name",
+      "swiftpm_short",
+      "-c",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Tests/TakeLayerShortKitTests/ShortFoundationTests.swift",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Tests/TakeLayerShortKitTests/TimelineMapperTests.swift",
+      "-I",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/Modules",
+      "-target",
+      "x86_64-apple-macosx14.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-Xfrontend",
+      "-enable-cross-import-overlays",
+      "-j20",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-swift-version",
+      "5",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "swiftpm_short",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ]
+  },
+  "targetDependencyMap" : {
+    "TakeLayerShortKit" : [
+
+    ],
+    "TakeLayerShortKitPackageTests" : [
+      "TakeLayerShortKitTests",
+      "TakeLayerShortKit"
+    ],
+    "TakeLayerShortKitTests" : [
+      "TakeLayerShortKit"
+    ]
+  },
+  "testDiscoveryCommands" : {
+
+  },
+  "testEntryPointCommands" : {
+    "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.derived/runner.swift" : {
+      "inputs" : [
+
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.derived/runner.swift"
+        }
+      ]
+    }
+  },
+  "traitConfiguration" : {
+    "default" : {
+
+    }
+  },
+  "writeCommands" : {
+    "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ExportResult.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ExportSettings.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ExportValidationService.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ImportedMasterAudio.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ImportedVideo.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/MediaTime.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ProjectDraft.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/RecordedTake.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/RenderEditPlanRequest.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ResolverCalibrationModels.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ResolverPrivateCorpusModels.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ShortEditDraft.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ShortRenderGeometry.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/ShortVideoExportService.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/SongMemoryModels.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/SongResolver.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/SongResolverEvidenceModels.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/TimeFormatting.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Sources/TakeLayerShortKit/TimelineMapper.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/sources"
+    },
+    "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.derived/runner.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.build/sources"
+    },
+    "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.product/Objects.LinkFileList" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<link-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ExportResult.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ExportSettings.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ExportValidationService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ImportedMasterAudio.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ImportedVideo.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/MediaTime.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ProjectDraft.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/RecordedTake.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/RenderEditPlanRequest.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ResolverCalibrationModels.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ResolverPrivateCorpusModels.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ShortEditDraft.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ShortRenderGeometry.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/ShortVideoExportService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/SongMemoryModels.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/SongResolver.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/SongResolverEvidenceModels.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/TimeFormatting.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKit.build/TimelineMapper.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build/ShortFoundationTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build/TimelineMapperTests.swift.o"
+        }
+      ],
+      "outputFilePath" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitPackageTests.product/Objects.LinkFileList"
+    },
+    "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Tests/TakeLayerShortKitTests/ShortFoundationTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/Tests/TakeLayerShortKitTests/TimelineMapperTests.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/TakeLayerShortKitTests.build/sources"
+    },
+    "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt" : {
+      "alwaysOutOfDate" : true,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<swift-get-version>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+        }
+      ],
+      "outputFilePath" : "/Users/uekiyoshirou/repos/Take-Layer/tools/swiftpm-short/.build/x86_64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+    }
+  }
+}
