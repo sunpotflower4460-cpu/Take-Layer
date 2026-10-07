@@ -26,9 +26,10 @@
         "private corpus audio must not be uploaded or committed"
       ],
       "verification": {
-        "level": "CI_MACOS",
+        "level": "REAL_MAC_PLUMBING_VERIFIED",
         "realMacVerified": false,
-        "detail": "see docs/artist-os/mac-proof.md"
+        "qualityMeasured": false,
+        "detail": "synthetic corpus: launch/exit/report/validation plumbing verified on the user's Mac; resolver quality is NOT_MEASURED. See docs/artist-os/mac-proof.md."
       }
     },
     {
@@ -55,9 +56,16 @@
         "master WAV is the only program audio"
       ],
       "verification": {
-        "level": "CI_MACOS",
+        "level": "REAL_MAC_PARTIAL",
         "realMacVerified": false,
-        "detail": "see docs/artist-os/mac-proof.md"
+        "parts": {
+          "RENDER_EDIT_PLAN_PIPELINE": "REAL_MAC_VERIFIED",
+          "RENDER_EDIT_PLAN_TEXT_OVERLAY": "REAL_MAC_VERIFIED",
+          "RENDER_EDIT_PLAN_TIMED_CUES": "REAL_MAC_VERIFIED",
+          "RENDER_EDIT_PLAN_SYNTHETIC_CROP": "REAL_MAC_VERIFIED (human-attested, no automated crop guard)",
+          "RENDER_EDIT_PLAN_REAL_MEDIA": "NOT_VERIFIED"
+        },
+        "detail": "RENDER_EDIT_PLAN stays NOT_VERIFIED until a real performance video + its completed WAV pass the real-media gate (same take, completed-WAV audio, human-confirmed sync, real-person crop). Timed cues are renderer timed text, not lyric alignment. See docs/artist-os/mac-proof.md and Artist-OS docs/audit/TAKE_LAYER_MAC_PROOF.md."
       }
     }
   ],
