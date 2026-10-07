@@ -100,6 +100,10 @@ enum RenderPipeline {
         }
     }
 
+    private static let selfTestCueStart = 0.5
+    private static let selfTestCueEnd = 2.5
+    private static let selfTestDuration = 4.0
+
     /// Generates synthetic media and renders it. Proves AVFoundation export works in this process.
     static func selfTest(workDir: URL) async -> RenderResult {
         let key = "self-test-\(UUID().uuidString.prefix(8))"
@@ -113,9 +117,9 @@ enum RenderPipeline {
                 schemaVersion: 1, requestKey: key,
                 plan: .init(planId: "self-test-plan", planVersion: 1, planHash: "self-test"),
                 edit: .init(draft: ShortEditDraft(
-                    rangeStartProjectSec: 0, rangeEndProjectSec: 4, titleText: "Self Test",
+                    rangeStartProjectSec: 0, rangeEndProjectSec: selfTestDuration, titleText: "自己診断 Self Test",
                     crop: ShortCropPlan(zoom: 1.5, focusX: 0.5, focusY: 0.5),
-                    lyricCues: [ShortLyricCue(startProjectSec: 0.5, endProjectSec: 2.5, text: "テスト")]
+                    lyricCues: [ShortLyricCue(startProjectSec: selfTestCueStart, endProjectSec: selfTestCueEnd, text: "テスト")]
                 )),
                 video: .init(runnerAssetId: "self-test-video", localPath: videoURL.path, sha256: try Hashing.sha256Hex(of: videoURL),
                              durationSec: 8, width: 640, height: 360, hasAudio: false, sampleRate: nil, channelCount: nil),
@@ -125,15 +129,16 @@ enum RenderPipeline {
                 outputPath: workDir.appendingPathComponent("selftest-output-\(key).mp4").path
             )
             var result = await run(request)
-            // The self-test edit has a title, so text that is missing from the pixels is a render failure.
+            // The self-test edit has a title for the whole Short and one lyric cue, so the EditingPlan semantics are
+            // guarded on the final MP4 frames: title always, lyric only inside its cue (see RenderValidator).
             if result.status == "completed", let output = result.outputPath {
-                let spread = try await RenderValidator.titleBandContrast(URL(fileURLWithPath: output), atSec: 1.0)
-                let ok = spread >= 60
-                result.checks.append(RenderCheck(name: "title_text_rendered", ok: ok, detail: "title band luminance spread \(spread) (>= 60 when text is burned in)"))
-                if !ok {
+                let checks = try await RenderValidator.overlaySemanticsChecks(
+                    URL(fileURLWithPath: output), cueStart: selfTestCueStart, cueEnd: selfTestCueEnd, duration: selfTestDuration)
+                result.checks.append(contentsOf: checks)
+                if let bad = checks.first(where: { !$0.ok }) {
                     result.status = "failed"
                     result.errorCode = "RENDER_QUALITY_FAILED"
-                    result.errorMessage = "title_text_rendered: the title text is not present in the rendered frames"
+                    result.errorMessage = "\(bad.name): \(bad.detail)"
                 }
             }
             return result
