@@ -39,14 +39,14 @@ while IFS= read -r g; do
   skip=0; for c in "${CORE[@]}"; do [ "$g" = "$c" ] && skip=1; done
   [ $skip = 1 ] && continue
   strip_comments "$g" | grep -oE "$DECL_RE" | awk '{print $NF}'
-done < <(find TakeLayer tools -type f -name '*.swift' | sort) | sort -u > "$NONCORE_TYPES"
+done < <(find TakeLayer tools -type f -name '*.swift' -not -path '*/.build/*' | sort) | sort -u > "$NONCORE_TYPES"
 for f in "${CORE[@]}"; do
   [ -f "$f" ] || continue
   # remove types the Core file set declares itself (name clash safety)
   strip_comments "$f" | sed -E 's/"[^"]*"//g' | grep -oE '\b[A-Z][A-Za-z0-9_]*\b' | sort -u |
   while IFS= read -r t; do
     if grep -qx "$t" "$NONCORE_TYPES"; then
-      owner="$(grep -rlE "(struct|enum|class|protocol|typealias|actor)[[:space:]]+$t\b" TakeLayer tools --include=*.swift | head -1)"
+      owner="$(grep -rlE --exclude-dir=.build "(struct|enum|class|protocol|typealias|actor)[[:space:]]+$t\b" TakeLayer tools --include=*.swift | head -1)"
       echo "FAIL: $f references non-Core type '$t' (declared in $owner)"
     fi
   done
@@ -92,7 +92,7 @@ while IFS= read -r g; do
       echo "FAIL: $g:$n redeclares TimelineMapper API: $l"
     fi
   done
-done < <(find TakeLayer tools -type f -name '*.swift' | sort) > /tmp/.core-auth.$$ 2>&1
+done < <(find TakeLayer tools -type f -name '*.swift' -not -path '*/.build/*' | sort) > /tmp/.core-auth.$$ 2>&1
 if [ -s /tmp/.core-auth.$$ ]; then cat /tmp/.core-auth.$$; FAIL=1; fi
 rm -f /tmp/.core-auth.$$
 

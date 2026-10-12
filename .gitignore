@@ -11,3 +11,6 @@ ResolverBenchmarks/Private/
 
 # macOS
 .DS_Store
+
+# SwiftPM build output (local only)
+.build/
